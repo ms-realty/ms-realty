@@ -56,7 +56,15 @@ export default async function InventoryPage({
   const mayCreate = await can(db, session.actor, "listing.edit");
   // ADR 0012 bulk carry-over: its own view, with one attestation for a selection.
   if (query.view === "ready")
-    return <ReadyToPublish locale={locale} actor={session.actor} language={scalar(raw.language)} />;
+    return (
+      <ReadyToPublish
+        locale={locale}
+        actor={session.actor}
+        language={scalar(raw.language)}
+        query={query.q}
+        cursor={query.cursor}
+      />
+    );
   const view = query.view === "needs" || query.view === "mine" ? query.view : "all";
   const purpose = listingPurposes.find((value) => value === query.purpose);
   const type = propertyTypes.find((value) => value === query.type);

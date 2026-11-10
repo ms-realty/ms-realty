@@ -160,9 +160,9 @@ describe("languages in one decision (ADR 0012)", () => {
         mayApprove: true,
       },
     ]);
-    expect((await readyLanguages(t.db, broker.actor)).get("en")?.map((r) => r.reference)).toContain(
-      f.reference,
-    );
+    expect(
+      (await readyLanguages(t.db, broker.actor)).byLanguage.get("en")?.map((r) => r.reference),
+    ).toContain(f.reference);
 
     expect(await approve(f.reference, ["en"])).toEqual([{ locale: "en", status: "published" }]);
     expect(await searchIn("en", f.reference)).toEqual([f.reference]);

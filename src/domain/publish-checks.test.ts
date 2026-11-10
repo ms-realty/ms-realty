@@ -80,7 +80,7 @@ describe("publish checks (ADR 0012)", () => {
     );
   });
 
-  it("warns when copy frames inland Sandanski as a sea or beach place", () => {
+  it("blocks when copy frames inland Sandanski as a sea or beach place", () => {
     expect(framesInlandAsCoast(["Сандански"], ["Апартамент близо до морето"])).toBe(true);
     expect(framesInlandAsCoast(["Sandanski"], ["A short walk to the beach"])).toBe(true);
     expect(framesInlandAsCoast(["Сандански"], ["Квартира у моря, пляж рядом"])).toBe(true);
@@ -88,8 +88,12 @@ describe("publish checks (ADR 0012)", () => {
     // Inland wording, and coast wording for a real coast place, are not flagged.
     expect(framesInlandAsCoast(["Сандански"], ["Минерални извори и планина"])).toBe(false);
     expect(framesInlandAsCoast(["Несебър"], ["На първа линия до плажа"])).toBe(false);
-    expect(publishChecks({ ...ready, texts: ["Sandanski flat with sea views"] }).warnings).toEqual([
-      "inland_framed_as_coast",
-    ]);
+    const framed = publishChecks({ ...ready, texts: ["Sandanski flat with sea views"] });
+    expect(framed.blockers).toEqual(["inland_framed_as_coast"]);
+    expect(framed.warnings).toEqual([]);
+  });
+
+  it("blocks a recorded owner refusal", () => {
+    expect(publishChecks({ ...ready, ownerRefused: true }).blockers).toEqual(["owner_refused"]);
   });
 });

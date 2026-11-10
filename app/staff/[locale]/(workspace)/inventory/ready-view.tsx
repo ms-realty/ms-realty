@@ -10,8 +10,11 @@ import { BulkLanguageForm, BulkPublishForm } from "@/features/inventory/publish-
 import { isPublicLocale, publicLocales } from "@/i18n/config";
 import { workflowCopy } from "@/i18n/workflow-copy";
 import { readyToPublish } from "@/server/publication/attested";
-import { readyLanguages } from "@/server/publication/languages";
+import { type ReadyLanguagePage, readyLanguages } from "@/server/publication/languages";
+import { buttonClass } from "@/ui/button-class";
 import { cx } from "@/ui/cx";
+import { controlClass } from "@/ui/field-class";
+import { SearchIcon } from "@/ui/icons";
 
 function money(locale: string, value: unknown) {
   const amount = value as { amountMinor?: unknown; currency?: unknown; period?: unknown } | null;
@@ -34,11 +37,17 @@ export async function ReadyToPublish({
   locale,
   actor,
   language,
+  query,
+  cursor,
 }: {
   locale: string;
   actor: Actor;
   /** A public language other than Bulgarian: the per-language decision for that language. */
   language?: string;
+  /** Typed search: listing numbers (several, separated by spaces or commas) or a title. */
+  query?: string;
+  /** Where the next page starts; a cursor is only a position, every request rechecks access. */
+  cursor?: string;
 }) {
   const inventory = inventoryCopy(locale);
   const o10 = inventory.o10;
@@ -46,22 +55,38 @@ export async function ReadyToPublish({
   const workspace = workflowCopy(locale, "listingWorkspace");
   const chosen = language && isPublicLocale(language) && language !== "bg" ? language : null;
   const db = getDb();
-  const [rows, languages] = await Promise.all([
-    chosen ? Promise.resolve([]) : readyToPublish(db, actor),
-    readyLanguages(db, actor),
-  ]);
+  const typed = (query ?? "").trim().slice(0, 200);
+  // One page of candidates per request: the cost never grows with the number of listings.
+  const page = chosen
+    ? null
+    : await readyToPublish(db, actor, { query: typed, ...(cursor ? { cursor } : {}) });
+  const languagePage = chosen
+    ? await readyLanguages(db, actor, { query: typed, ...(cursor ? { cursor } : {}) })
+    : null;
+  const rows = page?.rows ?? [];
+  const languages: ReadyLanguagePage["byLanguage"] = languagePage?.byLanguage ?? new Map();
   const operationId = randomUUID();
-  const picker: [string, string, string, number | null][] = [
-    ["bg", copy.ready.sourceView, `/${locale}/inventory?view=ready`, rows.length || null],
+  const withQuery = (base: string, extra = "") => {
+    const search = new URLSearchParams(base);
+    if (typed) search.set("q", typed);
+    for (const [key, value] of new URLSearchParams(extra)) search.set(key, value);
+    return `/${locale}/inventory?${search.toString()}`;
+  };
+  const picker: [string, string, string][] = [
+    ["bg", copy.ready.sourceView, withQuery("view=ready")],
     ...publicLocales
       .filter((code) => code !== "bg")
-      .map((code): [string, string, string, number | null] => [
+      .map((code): [string, string, string] => [
         code,
         languageName(locale, code),
-        `/${locale}/inventory?view=ready&language=${code}`,
-        languages.get(code)?.length ?? 0,
+        withQuery("view=ready", `language=${code}`),
       ]),
   ];
+  const nextCursor = page?.nextCursor ?? languagePage?.nextCursor ?? null;
+  const nextHref = nextCursor
+    ? withQuery("view=ready", `${chosen ? `language=${chosen}&` : ""}cursor=${nextCursor}`)
+    : null;
+  const sameView = withQuery("view=ready", chosen ? `language=${chosen}` : "");
   const current = chosen ?? "bg";
   const chosenName = chosen ? languageName(locale, chosen) : "";
   const languageRows = chosen ? (languages.get(chosen) ?? []) : [];
@@ -99,7 +124,7 @@ export async function ReadyToPublish({
       {/* Which language this decision is about: Bulgarian first, then each translation. */}
       <nav aria-label={copy.ready.languagesLabel}>
         <ul className="flex flex-wrap gap-2">
-          {picker.map(([code, label, href, count]) => (
+          {picker.map(([code, label, href]) => (
             <li key={code}>
               <a
                 href={href}
@@ -113,14 +138,37 @@ export async function ReadyToPublish({
                 )}
               >
                 {label}
-                {count !== null ? (
-                  <span className="font-normal text-text-muted tabular-nums">{count}</span>
-                ) : null}
               </a>
             </li>
           ))}
         </ul>
       </nav>
+      <form method="get" className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
+        <input type="hidden" name="view" value="ready" />
+        {chosen ? <input type="hidden" name="language" value={chosen} /> : null}
+        <div className="min-w-0">
+          <label htmlFor="ready-search" className="sr-only">
+            {copy.ready.search}
+          </label>
+          <input
+            id="ready-search"
+            name="q"
+            type="search"
+            maxLength={200}
+            defaultValue={typed}
+            placeholder={copy.ready.searchHint}
+            aria-describedby="ready-search-hint"
+            className={controlClass}
+          />
+          <p id="ready-search-hint" className="sr-only">
+            {copy.ready.searchHint}
+          </p>
+        </div>
+        <button type="submit" className={buttonClass("secondary", "min-h-input px-3")}>
+          <SearchIcon className="size-5" />
+          <span className="sr-only">{copy.ready.searchApply}</span>
+        </button>
+      </form>
       {chosen ? (
         <>
           <p className="max-w-reading">
@@ -128,23 +176,22 @@ export async function ReadyToPublish({
           </p>
           {languageRows.length === 0 ? (
             <p className="rounded-panel bg-subtle p-6">
-              {fillCopy(copy.ready.languageNone, { language: chosenName })}
+              {typed
+                ? copy.ready.noMatch
+                : fillCopy(copy.ready.languageNone, { language: chosenName })}
             </p>
           ) : (
             <BulkLanguageForm
               action={bulkLanguageAction.bind(null, locale, chosen)}
               initialState={{
-                values: { attested: "" },
+                values: { attested: "", selected: "" },
                 operationId,
                 expectedRevision: null,
                 responseId: randomUUID(),
                 outcome: { kind: "idle" },
               }}
-              permalink={`/${locale}/inventory?view=ready&language=${chosen}`}
-              reconciliation={{
-                href: `/${locale}/inventory?view=ready&language=${chosen}`,
-                label: copy.ready.view,
-              }}
+              permalink={sameView}
+              reconciliation={{ href: sameView, label: copy.ready.view }}
               formCopy={inventory.form}
               rows={languageRows.map((row) => ({
                 reference: row.reference,
@@ -171,19 +218,21 @@ export async function ReadyToPublish({
       ) : null}
       {chosen ? null : <p className="max-w-reading">{copy.ready.lead}</p>}
       {chosen ? null : rows.length === 0 ? (
-        <p className="rounded-panel bg-subtle p-6">{copy.ready.none}</p>
+        <p className="rounded-panel bg-subtle p-6">
+          {typed ? copy.ready.noMatch : nextHref || cursor ? copy.ready.noneHere : copy.ready.none}
+        </p>
       ) : (
         <BulkPublishForm
           action={bulkPublishAction.bind(null, locale)}
           initialState={{
-            values: { attested: "" },
+            values: { attested: "", selected: "" },
             operationId,
             expectedRevision: null,
             responseId: randomUUID(),
             outcome: { kind: "idle" },
           }}
-          permalink={`/${locale}/inventory?view=ready`}
-          reconciliation={{ href: `/${locale}/inventory?view=ready`, label: copy.ready.view }}
+          permalink={sameView}
+          reconciliation={{ href: sameView, label: copy.ready.view }}
           formCopy={inventory.form}
           rows={rows.map((row) => ({
             reference: row.reference,
@@ -195,6 +244,10 @@ export async function ReadyToPublish({
                 ? copy.priceOnRequest
                 : (money(locale, row.price.value) ?? copy.notKnown),
             area: area(locale, row.area.value) ?? copy.notKnown,
+            // The tick clears the photos the row names: the count is stated, never implied.
+            photos: row.photoCount
+              ? fillCopy(copy.photoCount, { n: row.photoCount })
+              : copy.noPhotos,
             ...(row.thumbnailId
               ? { thumbnail: `/api/files/private/media/${row.thumbnailId}?preview=1` }
               : {}),
@@ -219,6 +272,18 @@ export async function ReadyToPublish({
           }}
         />
       )}
+      {/* The count in words, and a link that carries the cursor to the next listings. */}
+      {chosen ? null : (
+        <p className="text-dense text-text-muted" data-ready-count>
+          {fillCopy(copy.ready.shown, { n: rows.length })}
+          {page && page.remaining > 0 ? ` ${fillCopy(copy.ready.more, { m: page.remaining })}` : ""}
+        </p>
+      )}
+      {nextHref ? (
+        <a href={nextHref} className={buttonClass("secondary", "justify-self-start")}>
+          {copy.ready.showMore}
+        </a>
+      ) : null}
     </div>
   );
 }

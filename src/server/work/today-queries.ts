@@ -294,7 +294,8 @@ export async function listingReviewQuery(db: Executor, context: Context, now: Da
       row.editorialState !== "changes_requested" &&
       ["available", "confirmation_required"].includes(row.commercialState),
   );
-  const status = await listingPublishStatus(
+  // At most a few dozen listings are read per request: the count is capped and said so.
+  const { status, capped, examinedIds } = await listingPublishStatus(
     db,
     context.live.actor,
     candidates.map((row) => row.id),
@@ -302,12 +303,18 @@ export async function listingReviewQuery(db: Executor, context: Context, now: Da
   type Row = Omit<(typeof rows)[number], "total"> & {
     /** The summary line: how many listings are ready to check and publish. */
     readyCount?: number;
+    /** More listings than the count were not read: "30 or more". */
+    readyOrMore?: boolean;
     /** What stops publishing this listing, for its own line. */
     fix?: string;
   };
   const ready = rows.filter((row) => status.get(row.id)?.ready);
+  // Candidates the cap left unread are covered by the "or more" line once any listing is ready.
+  const candidateIds = new Set(candidates.map((c) => c.id));
+  const unread = (row: (typeof rows)[number]) =>
+    capped && ready.length > 0 && candidateIds.has(row.id) && !examinedIds.has(row.id);
   const rest: Row[] = rows
-    .filter((row) => !status.get(row.id)?.ready)
+    .filter((row) => !status.get(row.id)?.ready && !unread(row))
     .map(({ total: _total, ...row }) => {
       const fix = status.get(row.id)?.blocker;
       return fix ? { ...row, fix } : row;
@@ -321,6 +328,7 @@ export async function listingReviewQuery(db: Executor, context: Context, now: Da
           id: "ready-to-publish",
           reference: "",
           readyCount: ready.length,
+          ...(capped ? { readyOrMore: true } : {}),
         },
       ].map(({ total: _total, ...row }) => row)
     : [];

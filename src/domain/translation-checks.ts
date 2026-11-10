@@ -59,6 +59,20 @@ const coastWords: Readonly<Record<PublicLocale, RegExp>> = {
   he: /(?<!\p{L})[הלבו]?(?:ים|חוף)(?!\p{L})/u,
 };
 
+/**
+ * Whether the texts present inland Sandanski as a sea, beach or coast place, using the coast
+ * words of each given language (a word only counts in its own language).
+ */
+export function framesInlandAsCoast(
+  locales: readonly PublicLocale[],
+  placeNames: readonly string[],
+  texts: readonly string[],
+): boolean {
+  const text = texts.join(" ");
+  const inland = inlandPlace.test(text) || placeNames.some((name) => inlandPlace.test(name));
+  return inland && locales.some((locale) => coastWords[locale].test(text));
+}
+
 const localeScripts: Partial<Record<PublicLocale, RegExp>> = {
   el: /\p{Script=Greek}/u,
   he: /\p{Script=Hebrew}/u,
@@ -82,10 +96,7 @@ export function translationChecks(input: TranslationCheckInput): TranslationChec
   const unexpected = [...numbersIn(`${title} ${description}`)].filter((n) => !known.has(n));
   if (unexpected.length) blockers.push("numbers_differ");
   const text = `${title} ${description}`;
-  if (
-    (inlandPlace.test(text) || input.placeNames.some((name) => inlandPlace.test(name))) &&
-    coastWords[input.locale].test(text)
-  )
+  if (framesInlandAsCoast([input.locale], input.placeNames, [text]))
     blockers.push("inland_framed_as_coast");
   const sourceLength = input.source.description.trim().length;
   if (sourceLength > 0 && description) {

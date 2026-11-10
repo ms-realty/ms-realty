@@ -827,7 +827,10 @@ function ListingReviewRow({
         href={`/${locale}/inventory?view=ready`}
         Icon={HomeIcon}
         data={{ "data-listing-ready": String(item.readyCount) }}
-        title={fillCopy(publish.today.readySummary, { n: item.readyCount })}
+        title={fillCopy(
+          item.readyOrMore ? publish.today.readySummaryMore : publish.today.readySummary,
+          { n: item.readyCount },
+        )}
         details={[next(locale, publish.today.readyNext)]}
       />
     );

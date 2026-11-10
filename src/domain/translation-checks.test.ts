@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { numbersIn, translationChecks, withoutLegacySuffix } from "./translation-checks";
+import {
+  framesInlandAsCoast,
+  numbersIn,
+  translationChecks,
+  withoutLegacySuffix,
+} from "./translation-checks";
 
 const source = {
   title: "Двустаен апартамент в Сандански",
@@ -99,5 +104,15 @@ describe("translation checks (ADR 0012)", () => {
     expect(withoutLegacySuffix("Flat - real estate in Sandanski", "en")).toBe("Flat");
     expect(withoutLegacySuffix("Двустаен апартамент в гр.Сандански", "bg")).toBeNull();
     expect(withoutLegacySuffix("Wohnung – Immobilien in Sandanski", "de")).toBe("Wohnung");
+  });
+});
+
+describe("framesInlandAsCoast per language", () => {
+  it("uses each language's own coast words", () => {
+    expect(framesInlandAsCoast(["de"], ["Sandanski"], ["Wohnung nahe am Strand"])).toBe(true);
+    expect(framesInlandAsCoast(["he"], ["סנדנסקי"], ["דירה ליד החוף"])).toBe(true);
+    // Dutch "meer" is "more", not a coast word.
+    expect(framesInlandAsCoast(["nl"], ["Sandanski"], ["Meer ruimte en rust"])).toBe(false);
+    expect(framesInlandAsCoast(["de"], ["Nessebar"], ["Wohnung nahe am Strand"])).toBe(false);
   });
 });

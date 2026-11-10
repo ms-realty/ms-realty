@@ -213,6 +213,15 @@ export function UnpublishForm({
   );
 }
 
+/** The references ticked in a bulk list, kept in the form's values so an error keeps them. */
+function pickedFrom(value: string | undefined): Set<string> {
+  return new Set((value ?? "").split(",").filter(Boolean));
+}
+
+function joinPicked(picked: ReadonlySet<string>): string {
+  return [...picked].join(",");
+}
+
 export type BulkRow = {
   reference: string;
   version: number;
@@ -220,6 +229,8 @@ export type BulkRow = {
   detail: string;
   price: string;
   area: string;
+  /** How many photos the decision shows, said on the row. */
+  photos: string;
   thumbnail?: string;
   warnings: readonly string[];
   href: string;
@@ -270,16 +281,28 @@ export function BulkPublishForm({
       nativeIdentity="inventory-bulk-publish"
       reconciliation={reconciliation}
       copy={formCopy}
-      labels={{ attested: labels.attested }}
+      labels={{ attested: labels.attested, selected: labels.list }}
       submitLabel={labels.submit}
       layout="full"
     >
       {(form) => {
         const attested = form.field("attested");
+        const selection = form.field("selected");
+        const picked = pickedFrom(form.values.selected);
         return (
           <>
-            <fieldset className="grid gap-3">
+            <fieldset
+              id={selection.id}
+              tabIndex={-1}
+              aria-describedby={selection.error ? `${selection.id}-error` : undefined}
+              className="grid gap-3"
+            >
               <legend className="sr-only">{labels.list}</legend>
+              {selection.error ? (
+                <p className={errorClass} id={`${selection.id}-error`}>
+                  {selection.error}
+                </p>
+              ) : null}
               {/* Select all needs a script; without one each listing keeps its own box. */}
               {hydrated ? (
                 <label className="flex min-h-control items-center gap-3 text-dense text-text-muted">
@@ -287,13 +310,15 @@ export function BulkPublishForm({
                     type="checkbox"
                     className="size-5 accent-action"
                     disabled={attested.readOnly}
-                    onChange={(event) => {
-                      const fieldset = event.currentTarget.closest("fieldset");
-                      for (const box of fieldset?.querySelectorAll<HTMLInputElement>(
-                        'input[name="reference"]',
-                      ) ?? [])
-                        box.checked = event.currentTarget.checked;
-                    }}
+                    checked={rows.length > 0 && picked.size === rows.length}
+                    onChange={(event) =>
+                      form.setValue(
+                        "selected",
+                        event.currentTarget.checked
+                          ? rows.map((row) => row.reference).join(",")
+                          : "",
+                      )
+                    }
                   />
                   {labels.selectAll}
                 </label>
@@ -324,6 +349,13 @@ export function BulkPublishForm({
                         value={row.reference}
                         aria-label={row.selectLabel}
                         disabled={attested.readOnly}
+                        checked={picked.has(row.reference)}
+                        onChange={(event) => {
+                          const next = new Set(picked);
+                          if (event.currentTarget.checked) next.add(row.reference);
+                          else next.delete(row.reference);
+                          form.setValue("selected", joinPicked(next));
+                        }}
                         className="size-5 accent-action"
                       />
                     </label>
@@ -336,6 +368,7 @@ export function BulkPublishForm({
                       <span className="flex flex-wrap gap-x-4 text-dense text-text-muted">
                         <bdi>{row.reference}</bdi>
                         {row.detail ? <span>{row.detail}</span> : null}
+                        <span>{row.photos}</span>
                       </span>
                       {/* Below lg the figures sit under the title, each with its own label. */}
                       <dl className="flex flex-wrap gap-x-4 text-dense lg:hidden">
@@ -475,16 +508,28 @@ export function BulkLanguageForm({
       nativeIdentity="inventory-bulk-language"
       reconciliation={reconciliation}
       copy={formCopy}
-      labels={{ attested: labels.attested }}
+      labels={{ attested: labels.attested, selected: labels.list }}
       submitLabel={labels.submit}
       layout="full"
     >
       {(form) => {
         const attested = form.field("attested");
+        const selection = form.field("selected");
+        const picked = pickedFrom(form.values.selected);
         return (
           <>
-            <fieldset className="grid gap-3">
+            <fieldset
+              id={selection.id}
+              tabIndex={-1}
+              aria-describedby={selection.error ? `${selection.id}-error` : undefined}
+              className="grid gap-3"
+            >
               <legend className="sr-only">{labels.list}</legend>
+              {selection.error ? (
+                <p className={errorClass} id={`${selection.id}-error`}>
+                  {selection.error}
+                </p>
+              ) : null}
               <ul className="divide-y divide-divider border-y border-divider">
                 {rows.map((row) => (
                   <li
@@ -498,6 +543,13 @@ export function BulkLanguageForm({
                         value={row.reference}
                         aria-label={row.selectLabel}
                         disabled={attested.readOnly}
+                        checked={picked.has(row.reference)}
+                        onChange={(event) => {
+                          const next = new Set(picked);
+                          if (event.currentTarget.checked) next.add(row.reference);
+                          else next.delete(row.reference);
+                          form.setValue("selected", joinPicked(next));
+                        }}
                         className="size-5 accent-action"
                       />
                     </label>

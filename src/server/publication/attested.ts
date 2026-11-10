@@ -11,10 +11,11 @@
 // public only when a person approved that translation for this exact version.
 import "server-only";
 import { randomUUID } from "node:crypto";
-import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gt, inArray, isNotNull, isNull, ne, or, sql } from "drizzle-orm";
 import { type PublicationPolicy, publicationPolicy, type StaffLocale } from "@/config/tenant";
 import {
   approvals,
+  auditEvents,
   currentPublications,
   listingRevisionMedia,
   listingRevisions,
@@ -26,9 +27,10 @@ import {
   propertyFactRevisions,
   propertyFacts,
   publicationManifests,
+  sellerInstructions,
 } from "@/db/schema";
 import { canonicalJson } from "@/domain/approval";
-import type { Actor } from "@/domain/capabilities";
+import type { Actor, Capability } from "@/domain/capabilities";
 import type { FactState } from "@/domain/facts";
 import { type PublicLocale, sourceLocale } from "@/domain/ids";
 import { type FactRecord, needsHumanReview, requiredFactKeys } from "@/domain/listing-readiness";
@@ -39,7 +41,7 @@ import {
   type PublishChecks,
   publishChecks,
 } from "@/domain/publish-checks";
-import { withoutLegacySuffix } from "@/domain/translation-checks";
+import { framesInlandAsCoast, withoutLegacySuffix } from "@/domain/translation-checks";
 import { publishCopy } from "@/features/inventory/publish-copy";
 import { recordActivity } from "../activity";
 import { recordAudit } from "../audit";
@@ -92,6 +94,15 @@ export type PublishBlockReason =
   | "facts_incomplete"
   | "other";
 
+/** Blockers a person fixes in the detailed review, not in the listing editor. */
+export const reviewBlockers: readonly PublishBlockReason[] = [
+  "not_available",
+  "owner_refused",
+  "seller_documents_required",
+  "professional_review_required",
+  "shared_facts_published",
+];
+
 export type AttestedPublishResult =
   | {
       readonly status: "published";
@@ -109,6 +120,8 @@ export type AttestedPublishResult =
       readonly reason: PublishBlockReason;
       /** The underlying code, for the technical details and the operation receipt. */
       readonly detail?: string;
+      /** This call took the previous version offline before the step that stopped it. */
+      readonly previousVersionOffline?: boolean;
     };
 
 // Photos.
@@ -131,7 +144,9 @@ export function photoReadiness(asset: AssetRow): PhotoReadiness {
     asset.derivativeKey &&
     asset.derivativeSha256 &&
     asset.derivativeContentType === "image/webp";
-  return processed && (asset.review !== "approved" || asset.detailsDraft)
+  // A photo whose details are being edited is left out until a person reviews those details
+  // (ADR 0012); the attestation never approves pending text.
+  return processed && asset.review !== "approved" && !asset.detailsDraft
     ? "clearable"
     : "not_ready";
 }
@@ -267,8 +282,10 @@ export function checkInput(
   content: PublishContent,
   photos: readonly PhotoReadiness[],
   rentPeriodConfirmed = false,
+  refused = false,
 ): PublishCheckInput {
   return {
+    ownerRefused: refused,
     rentAmountWithoutPeriod: content.rentAmount !== null,
     rentPeriodConfirmed,
     titleSiteSuffix: content.cleanedTitle !== null,
@@ -303,6 +320,8 @@ export interface PublishView {
   /** Translations a person approved for the approved version; they publish with it. */
   readonly approvedTranslations: readonly PublicLocale[];
   readonly mayPublish: boolean;
+  /** The latest agreed seller instruction says the owner does not permit publication. */
+  readonly ownerRefused: boolean;
   readonly policy: PublicationPolicy;
 }
 
@@ -379,12 +398,15 @@ export async function publishView(
       readiness: photoReadiness(asset),
     }),
   );
+  const refused = await ownerRefused(db, listing);
   const checks = publishChecks(
     checkInput(
       listing,
       property,
       content,
       photos.map((p) => p.readiness),
+      false,
+      refused,
     ),
   );
   const pointers = await db
@@ -421,6 +443,7 @@ export async function publishView(
     live: [...live].sort((a, b) => Number(b === sourceLocale) - Number(a === sourceLocale)),
     approvedTranslations: translations.map((t) => t.locale),
     mayPublish: await can(db, actor, "publication.release", resource),
+    ownerRefused: refused,
     policy,
   };
 }
@@ -441,6 +464,8 @@ export interface AttestedPublishInput {
   readonly rentPeriod?: "month";
   /** The person confirmed the title without the old site's brand ending. */
   readonly cleanTitle?: boolean;
+  /** The attestation text exactly as shown, when it is not the single-listing sentence (bulk). */
+  readonly attestationText?: string;
   readonly now?: Date;
 }
 
@@ -863,6 +888,7 @@ async function recordAttestation(
       if (listing.version !== input.expectedVersion)
         throw new AppError("version_conflict", { current: { version: listing.version } });
       const at = input.now ?? new Date();
+      const shown = await latestRevision(tx, listing.id);
       const payload = {
         basis: staffAttestationBasis,
         attestation: text,
@@ -870,6 +896,14 @@ async function recordAttestation(
         note,
         listingVersion: listing.version,
         attestedAt: at.toISOString(),
+        // What the person saw: every later call compares the listing with this (ADR 0012).
+        shown: {
+          revisionId: shown?.id ?? null,
+          revisionDigest: shown?.contentDigest ?? null,
+          draftDigest: sha256Hex(canonicalJson(listing.draft ?? null)),
+          disclosure: shown?.disclosure ?? null,
+          generation: listing.publicationGeneration,
+        },
       };
       await recordAudit(tx, {
         action: "listing.publication.attested",
@@ -1019,13 +1053,14 @@ export async function publishListingByAttestation(
           view.content,
           view.photos.map((p) => p.readiness),
           true,
+          view.ownerRefused,
         ),
       )
     : view.checks;
   const [blocker] = checks.blockers;
   if (blocker) return blocked(blocker);
   if (!view.revision && !view.content.pendingDraft) return blocked("title_missing", "no_revision");
-  const text = publishCopy(input.locale).attestation;
+  const text = input.attestationText?.trim() || publishCopy(input.locale).attestation;
   // Under a second-person policy, the author of the content may not publish it alone.
   const author = view.content.pendingDraft ? actor.id : view.revision?.createdById;
   if (policy.independentReview && author === actor.id) return blocked("another_person_required");
@@ -1045,6 +1080,23 @@ export async function publishListingByAttestation(
   const envelope = () => ({ actor, operationId: opId() });
   const storage = dependencies.storage ? { storage: dependencies.storage } : {};
   let unchanged = true;
+  // Set once this call has taken the previous version offline; a later stop must say so.
+  let tookOffline = false;
+  // A replayed or resumed decision publishes only what the person saw (ADR 0012).
+  if (await changedSince(db, listingId, actor, attestation)) return blocked("changed_since_opened");
+  // Every permission a later step needs is checked before any step changes anything, so a
+  // live version is never taken offline for a step this person cannot finish.
+  const needed: Capability[] = ["publication.release", "listing.review_facts"];
+  if (view.content.pendingDraft || view.listing.commercialState === "confirmation_required")
+    needed.push("listing.edit");
+  if (view.photos.some((p) => p.readiness === "clearable")) needed.push("media.manage");
+  const resource = {
+    type: "listing",
+    id: view.listing.id,
+    propertyId: view.listing.propertyId,
+  };
+  for (const capability of needed)
+    if (!(await can(db, actor, capability, resource))) return blocked("no_permission", capability);
 
   try {
     // 1. A saved draft the latest version does not hold becomes the version to publish.
@@ -1052,14 +1104,17 @@ export async function publishListingByAttestation(
       if (error instanceof Blocked && view.content.pendingDraft) return null;
       throw error;
     });
-    // Location precision the listing already has (a region-level import stays region-level).
-    const keptDisclosure = state?.revision.disclosure;
+    // Location precision the listing had when the person decided (a region-level import stays
+    // region-level), also when a publish resumes after its draft was already frozen.
+    const keptDisclosure = attestation.shown?.disclosure ?? state?.revision.disclosure ?? undefined;
     if (!state || hasPendingDraft(state.listing, state.revision, state.facts)) {
       const listing = state?.listing ?? view.listing;
       await freezeListingDraft(db, {
         ...envelope(),
-        expectedRevision: listing.version,
+        // The version the person saw: an edit since then is a conflict, never published.
+        expectedRevision: state ? input.expectedVersion : listing.version,
         reference,
+        ...(keptDisclosure ? { disclosure: keptDisclosure } : {}),
       });
       unchanged = false;
       state = await reload(db, listingId);
@@ -1076,6 +1131,7 @@ export async function publishListingByAttestation(
     const precisionOf = (value: unknown) => record(value).publicPrecision;
     const precisionChanged =
       keptDisclosure !== undefined &&
+      keptDisclosure !== null &&
       precisionOf(keptDisclosure) !== precisionOf(state.revision.disclosure);
     const rentOpen = rentPeriod && rentWithoutPeriod(state.listing.purpose, state.revision.terms);
     const currentTitle = record(record(state.revision.sourceCopy).text).title;
@@ -1130,17 +1186,20 @@ export async function publishListingByAttestation(
       // A new version of a live listing replaces its facts: take this listing's own old
       // version down first (it goes back up below). Another listing of the same property
       // stays a blocker the person resolves.
-      if (
-        state.property.approvedFactRevisionId !== state.revision.factRevisionId &&
-        (await activePointers(db, listingId)) > 0
-      ) {
-        await restrictPublication(db, {
-          ...envelope(),
-          expectedRevision: state.listing.publicationGeneration,
-          reference,
-          reason: scope,
-        });
-        state = await reload(db, listingId);
+      if (state.property.approvedFactRevisionId !== state.revision.factRevisionId) {
+        // A sibling listing live on the property's current facts would have to go offline
+        // first: stop before touching this listing, and say why.
+        if (await siblingLive(db, state.listing)) throw new Blocked("shared_facts_published");
+        if ((await activePointers(db, listingId)) > 0) {
+          await restrictPublication(db, {
+            ...envelope(),
+            expectedRevision: state.listing.publicationGeneration,
+            reference,
+            reason: scope,
+          });
+          tookOffline = true;
+          state = await reload(db, listingId);
+        }
       }
       await approveFactRevision(db, {
         ...envelope(),
@@ -1177,7 +1236,9 @@ export async function publishListingByAttestation(
       state = await reload(db, listingId);
     }
 
-    // 7. The owner's permission to advertise on these terms.
+    // 7. The owner's permission to advertise on these terms. A recorded refusal stays a
+    // refusal: only a new recorded agreement lifts it, never the attestation.
+    if (await ownerRefused(db, state.listing)) throw new Blocked("owner_refused");
     if (!(await eligibilityNow(state.listing)).input.sellerInstructionValid) {
       if (policy.sellerEvidence !== "staff_attestation")
         throw new Blocked("seller_documents_required");
@@ -1217,7 +1278,43 @@ export async function publishListingByAttestation(
       unchanged = false;
     }
 
-    // 9. Publish each locale that may go public, unless the same content is already live.
+    // 9. Every language that would go public is read for the inland-as-coast rule first: a
+    // text that frames Sandanski as a sea, beach or coast place stops the whole decision.
+    const approved = await db
+      .select({
+        locale: localizedRevisions.locale,
+        title: localizedRevisions.title,
+        body: localizedRevisions.body,
+      })
+      .from(localizedRevisions)
+      .where(
+        and(
+          eq(localizedRevisions.sourceRevisionId, state.revision.id),
+          eq(localizedRevisions.state, "approved_for_source"),
+        ),
+      );
+    for (const row of approved)
+      if (
+        framesInlandAsCoast(
+          [row.locale],
+          [state.property.settlement, state.property.region, state.property.neighborhood ?? ""],
+          [row.title ?? "", String(record(row.body).description ?? "")],
+        )
+      )
+        throw new Blocked("inland_framed_as_coast", row.locale);
+
+    // A live language still showing an older version goes offline with it; each language
+    // comes back only when it is approved for this version.
+    if (await staleLive(db, listingId, state.revision.id)) {
+      await restrictPublication(db, {
+        ...envelope(),
+        expectedRevision: (await reload(db, listingId)).listing.publicationGeneration,
+        reference,
+        reason: scope,
+      });
+      tookOffline = true;
+    }
+    // Publish each locale that may go public, unless the same content is already live.
     const translations = await db
       .select({ locale: localizedRevisions.locale })
       .from(localizedRevisions)
@@ -1248,9 +1345,131 @@ export async function publishListingByAttestation(
     };
   } catch (error) {
     const reason = blockedFrom(error);
-    if (reason) return blocked(reason.reason, reason.detail);
+    if (reason)
+      return {
+        ...(blocked(reason.reason, reason.detail) as Extract<
+          AttestedPublishResult,
+          { status: "blocked" }
+        >),
+        ...(tookOffline ? { previousVersionOffline: true } : {}),
+      };
     throw error;
   }
+}
+
+/** The latest recorded seller instruction for the listing says the owner does not permit it. */
+export async function ownerRefused(db: Executor, listing: ListingRow): Promise<boolean> {
+  const [latest] = await db
+    .select({
+      state: sellerInstructions.state,
+      permission: sellerInstructions.publicationPermission,
+      invalidatedAt: sellerInstructions.invalidatedAt,
+    })
+    .from(sellerInstructions)
+    .where(
+      and(
+        eq(sellerInstructions.propertyId, listing.propertyId),
+        isNotNull(sellerInstructions.agreedAt),
+        ne(sellerInstructions.state, "draft"),
+        or(
+          eq(sellerInstructions.listingId, listing.id),
+          and(
+            isNull(sellerInstructions.listingId),
+            inArray(sellerInstructions.representationScope, [
+              listing.purpose === "sale" ? "sale" : "letting",
+              "sale_and_letting",
+            ]),
+          ),
+        ),
+      ),
+    )
+    .orderBy(desc(sellerInstructions.revisionNumber))
+    .limit(1);
+  return latest?.state === "agreed" && latest.invalidatedAt === null && latest.permission === false;
+}
+
+/** Another listing of the same property is live: replacing the shared facts would hide it. */
+async function siblingLive(db: Executor, listing: ListingRow): Promise<boolean> {
+  const [row] = await db
+    .select({ id: currentPublications.id })
+    .from(currentPublications)
+    .innerJoin(listings, eq(listings.id, currentPublications.listingId))
+    .where(
+      and(
+        eq(listings.propertyId, listing.propertyId),
+        ne(listings.id, listing.id),
+        eq(currentPublications.state, "active"),
+      ),
+    )
+    .limit(1);
+  return Boolean(row);
+}
+
+/** A live language of this listing shows a version other than the one being published. */
+async function staleLive(db: Executor, listingId: string, revisionId: string): Promise<boolean> {
+  const [row] = await db
+    .select({ id: currentPublications.id })
+    .from(currentPublications)
+    .innerJoin(publicationManifests, eq(publicationManifests.id, currentPublications.manifestId))
+    .where(
+      and(
+        eq(currentPublications.listingId, listingId),
+        eq(currentPublications.state, "active"),
+        ne(publicationManifests.listingRevisionId, revisionId),
+      ),
+    )
+    .limit(1);
+  return Boolean(row);
+}
+
+/**
+ * Whether the listing changed since the person decided, beyond this decision's own steps: its
+ * saved draft, a version written by someone else, or an unpublish or restriction that was not
+ * part of this decision. Checked on every call, including a replay or a resume.
+ */
+async function changedSince(
+  db: Executor,
+  listingId: string,
+  actor: Actor,
+  attestation: {
+    attestationId: string;
+    attestedAt: string;
+    shown?: { draftDigest: string; revisionId: string | null } | null;
+  },
+): Promise<boolean> {
+  const shown = attestation.shown;
+  if (!shown) return false;
+  const [listing] = await db.select().from(listings).where(eq(listings.id, listingId));
+  if (!listing) return true;
+  if (sha256Hex(canonicalJson(listing.draft ?? null)) !== shown.draftDigest) return true;
+  const since = new Date(attestation.attestedAt);
+  const [foreign] = await db
+    .select({ id: listingRevisions.id })
+    .from(listingRevisions)
+    .where(
+      and(
+        eq(listingRevisions.listingId, listingId),
+        gt(listingRevisions.createdAt, since),
+        ne(listingRevisions.createdById, actor.id),
+      ),
+    )
+    .limit(1);
+  if (foreign) return true;
+  const removals = await db
+    .select({ action: auditEvents.action, payload: auditEvents.payload })
+    .from(auditEvents)
+    .where(
+      and(
+        eq(auditEvents.recordId, listingId),
+        inArray(auditEvents.action, ["publication.withdraw", "publication.restrict"]),
+        gt(auditEvents.occurredAt, since),
+      ),
+    );
+  return removals.some(
+    (row) =>
+      row.action === "publication.withdraw" ||
+      !String(record(row.payload).reason ?? "").includes(attestation.attestationId),
+  );
 }
 
 /**
@@ -1344,75 +1563,164 @@ export interface ReadyListing {
   readonly settlement: string;
   readonly price: PublishContent["price"];
   readonly area: PublishContent["area"];
+  /** Photos the decision will show or clear: every one is stated on the row. */
+  readonly photoCount: number;
   /** First placed photo with a safe preview, for recognising the listing at a glance. */
   readonly thumbnailId: string | null;
   readonly warnings: PublishChecks["warnings"];
 }
 
+/** A page of the "Ready to publish" view: a page of candidates is read per request. */
+export const readyPageSize = 20;
+/** Candidates read per request however few of them are ready (each costs one full view). */
+export const readyExamineCap = 60;
+
+export interface ReadyPage {
+  readonly rows: ReadyListing[];
+  /** Pass back to continue after the last listing read; null when nothing is left to read. */
+  readonly nextCursor: string | null;
+  /** Unpublished available listings after this page, ready or not: not looked at yet. */
+  readonly remaining: number;
+}
+
+const referencePattern = /^[A-Z]{2}-[0-9A-Z-]{1,40}$/;
+
+/** Several references separated by spaces or commas, or part of a title. */
+export function referenceTokens(query: string): string[] {
+  return [...new Set(query.split(/[\s,;]+/u).filter(Boolean))].slice(0, 100);
+}
+
 /**
- * Listings this person may publish that pass every blocker, are still on the market and are not
- * on the website yet: the legacy import's active listings (confirmation required) and any other
- * unpublished available listing. Archived imports are withdrawn and never qualify.
+ * Listings matching a typed search: any pasted reference (or part of one), or the typed text
+ * inside the latest title. A literal, case-insensitive substring search, never a pattern.
+ */
+export function listingSearchClause(query: string | undefined) {
+  const text = query?.trim() ?? "";
+  if (!text) return undefined;
+  const tokens = referenceTokens(text);
+  const references = tokens.map(
+    (token) => sql`strpos(lower(${listings.reference}), lower(${token})) > 0`,
+  );
+  const title = sql`strpos(lower(coalesce((select r.source_copy->'text'->>'title'
+      from ${listingRevisions} r where r.listing_id = ${listings.id}
+      order by r.revision_number desc limit 1), '')), lower(${text})) > 0`;
+  return or(...references, title);
+}
+
+const unpublished = sql`not exists (select 1 from ${currentPublications}
+  where ${currentPublications.listingId} = ${listings.id}
+    and ${currentPublications.state} = 'active'
+    and ${currentPublications.generation} = ${listings.publicationGeneration})`;
+
+/**
+ * One page of listings this person may publish that pass every blocker, are still on the market
+ * and are not on the website yet: the legacy import's active listings (confirmation required)
+ * and any other unpublished available listing. Archived imports are withdrawn and never
+ * qualify. At most `readyExamineCap` candidates are read per request, so the cost is bounded
+ * however many listings wait; `nextCursor` continues after the last one read.
  */
 export async function readyToPublish(
   db: Executor,
   actor: Actor,
-  policy: PublicationPolicy = publicationPolicy,
-): Promise<ReadyListing[]> {
+  options: {
+    readonly limit?: number;
+    readonly cursor?: string | null;
+    readonly query?: string;
+    readonly policy?: PublicationPolicy;
+  } = {},
+): Promise<ReadyPage> {
   if (actor.kind !== "staff") throw new AppError("forbidden");
-  const candidates = await db
-    .select({ reference: listings.reference, id: listings.id, propertyId: listings.propertyId })
-    .from(listings)
-    .where(
-      and(
-        inArray(listings.commercialState, ["available", "confirmation_required"]),
-        sql`not exists (select 1 from ${currentPublications}
-          where ${currentPublications.listingId} = ${listings.id}
-            and ${currentPublications.state} = 'active'
-            and ${currentPublications.generation} = ${listings.publicationGeneration})`,
-      ),
-    )
-    .orderBy(asc(listings.reference));
-  const ready: ReadyListing[] = [];
-  for (const candidate of candidates) {
-    const resource = { type: "listing", id: candidate.id, propertyId: candidate.propertyId };
-    if (!(await can(db, actor, "publication.release", resource))) continue;
-    const view = await publishView(db, actor, candidate.reference, policy);
-    if (view.checks.blockers.length) continue;
-    ready.push({
-      reference: view.listing.reference,
-      version: view.listing.version,
-      title: view.content.title,
-      cleanedTitle: view.content.cleanedTitle,
-      settlement: view.property.settlement,
-      price: view.content.price,
-      area: view.content.area,
-      thumbnailId:
-        view.photos.find((p) => p.readiness === "shown" || p.readiness === "clearable")?.asset.id ??
-        null,
-      warnings: view.checks.warnings,
-    });
+  const policy = options.policy ?? publicationPolicy;
+  const limit = Math.min(Math.max(options.limit ?? readyPageSize, 1), 50);
+  const after = options.cursor && referencePattern.test(options.cursor) ? options.cursor : null;
+  const match = and(
+    inArray(listings.commercialState, ["available", "confirmation_required"]),
+    unpublished,
+    listingSearchClause(options.query),
+  );
+  const rows: ReadyListing[] = [];
+  let last: string | null = after;
+  let examined = 0;
+  let exhausted = false;
+  // Keyset batches in reference order until a page of ready listings, the examine cap, or the end.
+  while (rows.length < limit && examined < readyExamineCap) {
+    const wanted = Math.min(limit, readyExamineCap - examined);
+    const batch = await db
+      .select({ reference: listings.reference, id: listings.id, propertyId: listings.propertyId })
+      .from(listings)
+      .where(and(match, last ? gt(listings.reference, last) : undefined))
+      .orderBy(asc(listings.reference))
+      .limit(wanted);
+    for (const candidate of batch) {
+      last = candidate.reference;
+      examined += 1;
+      const resource = { type: "listing", id: candidate.id, propertyId: candidate.propertyId };
+      if (!(await can(db, actor, "publication.release", resource))) continue;
+      const view = await publishView(db, actor, candidate.reference, policy);
+      if (view.checks.blockers.length) continue;
+      rows.push({
+        reference: view.listing.reference,
+        version: view.listing.version,
+        title: view.content.title,
+        cleanedTitle: view.content.cleanedTitle,
+        settlement: view.property.settlement,
+        price: view.content.price,
+        area: view.content.area,
+        photoCount: view.photos.filter(
+          (p) => p.readiness === "shown" || p.readiness === "clearable",
+        ).length,
+        thumbnailId:
+          view.photos.find((p) => p.readiness === "shown" || p.readiness === "clearable")?.asset
+            .id ?? null,
+        warnings: view.checks.warnings,
+      });
+      if (rows.length >= limit) break;
+    }
+    // A short batch is the end of the matches.
+    if (batch.length < wanted) {
+      exhausted = true;
+      break;
+    }
   }
-  return ready;
+  if (exhausted || last === null) return { rows, nextCursor: null, remaining: 0 };
+  const [left] = await db
+    .select({ count: sql<number>`count(*)::integer` })
+    .from(listings)
+    .where(and(match, gt(listings.reference, last)));
+  const remaining = left?.count ?? 0;
+  return { rows, nextCursor: remaining > 0 ? last : null, remaining };
 }
 
 /**
  * For each listing id this person may publish and that is not online yet: ready (nothing to fix)
- * or the first thing to fix. Listings outside that are left out.
+ * or the first thing to fix. Listings outside that are left out. At most `examine` ids are read,
+ * and reading stops once `readyCap` ready listings are found; `capped` says some were not read.
  */
 export async function listingPublishStatus(
   db: Executor,
   actor: Actor,
   ids: readonly string[],
   policy: PublicationPolicy = publicationPolicy,
-): Promise<Map<string, { ready: boolean; blocker?: PublishBlockReason }>> {
+  bound: { readonly examine: number; readonly readyCap: number } = { examine: 40, readyCap: 30 },
+): Promise<{
+  status: Map<string, { ready: boolean; blocker?: PublishBlockReason }>;
+  capped: boolean;
+  /** Ids that were read; the rest were not looked at. */
+  examinedIds: Set<string>;
+}> {
   const status = new Map<string, { ready: boolean; blocker?: PublishBlockReason }>();
-  if (ids.length === 0) return status;
+  const examinedIds = new Set<string>();
+  if (ids.length === 0) return { status, capped: false, examinedIds };
   const rows = await db
     .select({ id: listings.id, reference: listings.reference })
     .from(listings)
-    .where(inArray(listings.id, [...ids]));
+    .where(inArray(listings.id, [...ids]))
+    .orderBy(asc(listings.reference));
+  let ready = 0;
   for (const row of rows) {
+    if (examinedIds.size >= bound.examine || ready >= bound.readyCap)
+      return { status, capped: true, examinedIds };
+    examinedIds.add(row.id);
     const view = await publishView(db, actor, row.reference, policy).catch(() => null);
     if (
       !view?.mayPublish ||
@@ -1422,32 +1730,121 @@ export async function listingPublishStatus(
       continue;
     const [blocker] = view.checks.blockers;
     status.set(row.id, blocker ? { ready: false, blocker } : { ready: true });
+    if (!blocker) ready += 1;
   }
-  return status;
+  return { status, capped: false, examinedIds };
 }
 
-/** Of these listing ids, the ones a person could publish now without fixing anything first. */
-export async function readyListingIds(
+// A selection of listings on one attestation.
+
+export type BulkPublishItem = (
+  | {
+      readonly status: "published";
+      readonly warnings: PublishChecks["warnings"];
+      readonly locales: readonly PublicLocale[];
+    }
+  | {
+      readonly status: "blocked";
+      readonly reason: PublishBlockReason;
+      readonly previousVersionOffline: boolean;
+    }
+  | { readonly status: "not_attempted" }
+) & {
+  readonly reference: string;
+  /** The Bulgarian title as last saved, for naming the listing in the result. */
+  readonly title: string;
+};
+
+/**
+ * Publishes each selected listing as its own decision, one result per listing. One failure
+ * never hides the listings already published: it is that listing's result, and the run goes on.
+ * A session error (signed out, step-up needed) stops the run: that listing and every one after
+ * it are "not attempted", because nothing was done for them.
+ */
+export async function publishSelection(
   db: Executor,
-  actor: Actor,
-  ids: readonly string[],
-  policy: PublicationPolicy = publicationPolicy,
-): Promise<Set<string>> {
-  if (ids.length === 0) return new Set();
-  const rows = await db
-    .select({ id: listings.id, reference: listings.reference })
-    .from(listings)
-    .where(inArray(listings.id, [...ids]));
-  const ready = new Set<string>();
-  for (const row of rows) {
-    const view = await publishView(db, actor, row.reference, policy).catch(() => null);
-    if (
-      view?.mayPublish &&
-      view.checks.blockers.length === 0 &&
-      view.live.length === 0 &&
-      ["available", "confirmation_required"].includes(view.listing.commercialState)
-    )
-      ready.add(row.id);
+  session: Session,
+  input: {
+    readonly selection: readonly { readonly reference: string; readonly expectedVersion: number }[];
+    /** One per submission: each listing's decision key is derived from it, so a retry resumes. */
+    readonly operationId: string;
+    readonly locale: StaffLocale;
+    readonly cleanTitle: boolean;
+    /** The attestation text exactly as it was shown for the whole selection. */
+    readonly attestationText: string;
+  },
+  dependencies: { storage?: FileStorage; policy?: PublicationPolicy } = {},
+): Promise<BulkPublishItem[]> {
+  const references = input.selection.map((item) => item.reference.trim().toUpperCase());
+  const titles = new Map<string, string>();
+  if (references.length) {
+    const rows = await db
+      .select({ reference: listings.reference, id: listings.id })
+      .from(listings)
+      .where(inArray(listings.reference, references));
+    for (const row of rows) {
+      const revision = await latestRevision(db, row.id);
+      const title = record(record(revision?.sourceCopy).text).title;
+      titles.set(row.reference, typeof title === "string" ? title : "");
+    }
   }
-  return ready;
+  const out: BulkPublishItem[] = [];
+  let stopped = false;
+  for (const item of input.selection) {
+    const reference = item.reference.trim().toUpperCase();
+    const title = titles.get(reference) ?? "";
+    if (stopped) {
+      out.push({ status: "not_attempted", reference, title });
+      continue;
+    }
+    try {
+      const result = await publishListingByAttestation(
+        db,
+        session,
+        {
+          reference,
+          operationId: `${input.operationId}:${reference}`,
+          expectedVersion: item.expectedVersion,
+          attested: true,
+          locale: input.locale,
+          cleanTitle: input.cleanTitle,
+          attestationText: input.attestationText,
+        },
+        dependencies,
+      );
+      out.push(
+        result.status === "published"
+          ? {
+              status: "published",
+              reference,
+              title,
+              warnings: result.warnings,
+              locales: result.locales,
+            }
+          : {
+              status: "blocked",
+              reference,
+              title,
+              reason: result.reason,
+              previousVersionOffline: result.previousVersionOffline === true,
+            },
+      );
+    } catch (error) {
+      if (
+        isAppError(error) &&
+        (error.code === "unauthenticated" || error.code === "step_up_required")
+      ) {
+        stopped = true;
+        out.push({ status: "not_attempted", reference, title });
+      } else
+        out.push({
+          status: "blocked",
+          reference,
+          title,
+          reason: "other",
+          previousVersionOffline: false,
+        });
+    }
+  }
+  return out;
 }

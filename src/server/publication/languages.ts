@@ -5,7 +5,7 @@
 // approval for the published version and publishes that language. The source language must be
 // live first. The workbench stays reachable under the detailed review.
 import "server-only";
-import { and, desc, eq, ne } from "drizzle-orm";
+import { and, desc, eq, gt, ne } from "drizzle-orm";
 import { type PublicationPolicy, publicationPolicy, type StaffLocale } from "@/config/tenant";
 import {
   approvals,
@@ -34,7 +34,7 @@ import type { Executor } from "../db";
 import { AppError, isAppError } from "../errors";
 import type { FileStorage } from "../files/storage";
 import { runOperation } from "../operations";
-import { publishOneLocale } from "./attested";
+import { listingSearchClause, publishOneLocale } from "./attested";
 import { localizedRevisionDigest } from "./commands";
 import { termsFacts } from "./presentation";
 import { staffAttestationBasis } from "./seller-evidence";
@@ -479,16 +479,30 @@ async function recordLanguageApproval(
 
 export type ReadyLanguageRow = LanguageDraft & { reference: string; sourceTitle: string };
 
+/** Online listings read per request for the per-language lists (each costs one full view). */
+export const languageExamineCap = 40;
+
+export interface ReadyLanguagePage {
+  readonly byLanguage: Map<PublicLocale, ReadyLanguageRow[]>;
+  /** Pass back to read the next online listings; null when every online listing was read. */
+  readonly nextCursor: string | null;
+}
+
 /**
  * For each language, the listings whose source is live and whose draft passes every check and
- * is not published yet: the per-language bulk decision. Each listing is read once.
+ * is not published yet: the per-language bulk decision. At most `languageExamineCap` online
+ * listings are read per request, in reference order after the cursor, and the typed search
+ * narrows them by reference or title.
  */
 export async function readyLanguages(
   db: Executor,
   actor: Actor,
-): Promise<Map<PublicLocale, ReadyLanguageRow[]>> {
-  const ready = new Map<PublicLocale, ReadyLanguageRow[]>();
-  if (actor.kind !== "staff") return ready;
+  options: { readonly cursor?: string | null; readonly query?: string } = {},
+): Promise<ReadyLanguagePage> {
+  const byLanguage = new Map<PublicLocale, ReadyLanguageRow[]>();
+  if (actor.kind !== "staff") return { byLanguage, nextCursor: null };
+  const after =
+    options.cursor && /^[A-Z]{2}-[0-9A-Z-]{1,40}$/.test(options.cursor) ? options.cursor : null;
   const liveSource = await db
     .select({ reference: listings.reference })
     .from(currentPublications)
@@ -498,17 +512,24 @@ export async function readyLanguages(
         eq(currentPublications.locale, sourceLocale),
         eq(currentPublications.state, "active"),
         eq(currentPublications.generation, listings.publicationGeneration),
+        after ? gt(listings.reference, after) : undefined,
+        listingSearchClause(options.query),
       ),
     )
-    .orderBy(listings.reference);
-  for (const { reference } of liveSource) {
+    .orderBy(listings.reference)
+    .limit(languageExamineCap + 1);
+  const page = liveSource.slice(0, languageExamineCap);
+  for (const { reference } of page) {
     const view = await languageView(db, actor, reference).catch(() => null);
     for (const draft of view?.languages ?? []) {
       if (draft.live || !draft.mayApprove || draft.checks.blockers.length) continue;
-      const rows = ready.get(draft.locale) ?? [];
+      const rows = byLanguage.get(draft.locale) ?? [];
       rows.push({ ...draft, reference, sourceTitle: view?.source?.title ?? "" });
-      ready.set(draft.locale, rows);
+      byLanguage.set(draft.locale, rows);
     }
   }
-  return ready;
+  return {
+    byLanguage,
+    nextCursor: liveSource.length > languageExamineCap ? (page.at(-1)?.reference ?? null) : null,
+  };
 }

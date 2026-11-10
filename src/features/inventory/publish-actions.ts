@@ -11,9 +11,10 @@ import { requireFreshAuth, requireLiveSession } from "@/server/auth/sessions";
 import { AppError } from "@/server/errors";
 import { action } from "@/server/http/next";
 import {
-  type AttestedPublishResult,
+  type BulkPublishItem,
   type PublishBlockReason,
   publishListingByAttestation,
+  publishSelection,
 } from "@/server/publication/attested";
 import { withdrawPublication } from "@/server/publication/commands";
 import { approveListingLanguages, type LanguageResult } from "@/server/publication/languages";
@@ -30,7 +31,7 @@ import {
 
 export type PublishValues = { attested: string; note: string; rentPeriod: string };
 export type UnpublishValues = { confirmed: string };
-export type BulkPublishValues = { attested: string };
+export type BulkPublishValues = { attested: string; selected: string };
 export type LanguagesValues = { attested: string };
 
 /** The languages ticked on a form; only public locales other than the source. */
@@ -56,6 +57,20 @@ function languageLine(locale: string, result: LanguageResult) {
           copy.languages.reasons.other,
       })
     : fillCopy(copy.languages.result, { language: name, reason: copy.languages.live });
+}
+
+const referencePattern = /^[A-Z]{2}-[0-9A-Z-]{1,40}$/;
+
+/** The ticked listings on a bulk form: valid references only, once each, in form order. */
+function tickedReferences(form: FormData): string[] {
+  return [
+    ...new Set(
+      form
+        .getAll("reference")
+        .map(String)
+        .filter((value) => referencePattern.test(value)),
+    ),
+  ].slice(0, 200);
 }
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
@@ -85,6 +100,7 @@ function recovery(locale: string, reference: string, reason: PublishBlockReason)
       "price_undecided",
       "location_missing",
       "facts_incomplete",
+      "inland_framed_as_coast",
     ].includes(reason)
   )
     return { href: path, label: copy.editListing };
@@ -223,7 +239,13 @@ export async function publishListingAction(
       outcome: {
         kind: "rejected",
         code: "PUBLICATION_INELIGIBLE",
-        message: blockReason(locale, reason),
+        // When an earlier step already took the live version offline, the screen says so.
+        message: [
+          blockReason(locale, reason),
+          result.data.previousVersionOffline ? copy.previousOffline : "",
+        ]
+          .filter(Boolean)
+          .join(" "),
         retryable: false,
         recovery: recovery(locale, reference, reason),
       },
@@ -286,6 +308,48 @@ export async function unpublishListingAction(
   return { ...state, outcome: failure(locale, path, result.error, status) };
 }
 
+/** The listing a result row opens: where its next step is, by what happened to it. */
+function resultLine(locale: string, item: BulkPublishItem) {
+  const copy = publishCopy(locale);
+  const path = `/${locale}/inventory/${encodeURIComponent(item.reference)}`;
+  const base = {
+    reference: item.reference,
+    referenceLabel: item.reference,
+    name: item.title || item.reference,
+    nameLang: "bg",
+  };
+  const open = fillCopy(copy.ready.open, { reference: item.reference });
+  if (item.status === "published") {
+    // The old site's ending was removed on the person's tick: it is not a warning here.
+    const warnings = item.warnings
+      .filter((code) => code !== "title_site_suffix")
+      .map((code) => copy.warnings[code]);
+    return {
+      ...base,
+      status: warnings.length ? copy.ready.publishedWarning : copy.ready.published,
+      ...(warnings.length ? { warning: warnings.join(" ") } : {}),
+      link: { href: path, label: open },
+    };
+  }
+  if (item.status === "not_attempted")
+    return {
+      ...base,
+      warning: `${copy.ready.notAttempted}: ${copy.reasons.not_attempted}`,
+      link: { href: `${path}/publish`, label: open },
+    };
+  const next = recovery(locale, item.reference, item.reason);
+  return {
+    ...base,
+    warning: [
+      `${copy.ready.needsAttention}: ${blockReason(locale, item.reason)}`,
+      item.previousVersionOffline ? copy.previousOffline : "",
+    ]
+      .filter(Boolean)
+      .join(" "),
+    link: { href: next.href, label: open },
+  };
+}
+
 /** Ready to publish: one attestation for the selected listings, one result per listing. */
 export async function bulkPublishAction(
   locale: string,
@@ -295,7 +359,12 @@ export async function bulkPublishAction(
   if (!isStaffLocale(locale)) throw new AppError("not_found");
   const copy = publishCopy(locale);
   const path = `/${locale}/inventory?view=ready`;
-  const values: BulkPublishValues = { attested: form.get("attested") === "yes" ? "yes" : "" };
+  const selected = tickedReferences(form);
+  const values: BulkPublishValues = {
+    attested: form.get("attested") === "yes" ? "yes" : "",
+    // The ticks survive an error: the same listings are still selected on the next screen.
+    selected: selected.join(","),
+  };
   const { operationId } = envelope(form);
   const status = { href: path, label: copy.ready.view };
   const state: FormState<BulkPublishValues> = {
@@ -306,18 +375,12 @@ export async function bulkPublishAction(
     reconciliation: status,
     outcome: { kind: "idle" },
   };
-  const selected = [
-    ...new Set(
-      form
-        .getAll("reference")
-        .map(String)
-        .filter((value) => /^[A-Z]{2}-[0-9A-Z-]{1,40}$/.test(value)),
-    ),
-  ].slice(0, 200);
+  // "Select a listing" belongs to the list; the attestation box says only what is its own.
   const fieldErrors: Partial<Record<keyof BulkPublishValues, string[]>> = {};
   if (values.attested !== "yes") fieldErrors.attested = [copy.attestationRequired];
-  if (!uuid.test(operationId) || selected.length === 0)
-    fieldErrors.attested = [...(fieldErrors.attested ?? []), copy.ready.noneSelected];
+  if (selected.length === 0) fieldErrors.selected = [copy.ready.noneSelected];
+  if (!uuid.test(operationId))
+    fieldErrors.attested = [...(fieldErrors.attested ?? []), copy.reasons.other];
   if (Object.keys(fieldErrors).length)
     return {
       ...state,
@@ -329,25 +392,21 @@ export async function bulkPublishAction(
       },
     };
   const result = await action(
-    async ({ db }) => {
-      const session = await staffSession(db);
-      const results: AttestedPublishResult[] = [];
-      for (const reference of selected) {
-        const expectedVersion = Number(form.get(`version:${reference}`));
-        results.push(
-          await publishListingByAttestation(db, session, {
+    async ({ db }) =>
+      publishSelection(db, await staffSession(db), {
+        selection: selected.map((reference) => {
+          const expectedVersion = Number(form.get(`version:${reference}`));
+          return {
             reference,
-            // One stable key per listing in this submission: a retry resumes, never repeats.
-            operationId: `${operationId}:${reference}`,
             expectedVersion: Number.isSafeInteger(expectedVersion) ? expectedVersion : -1,
-            attested: true,
-            locale,
-            cleanTitle: form.get("cleanTitles") === "yes",
-          }),
-        );
-      }
-      return results;
-    },
+          };
+        }),
+        operationId,
+        locale,
+        cleanTitle: form.get("cleanTitles") === "yes",
+        // The sentence the person read for the whole selection is the one recorded.
+        attestationText: copy.ready.attestation,
+      }),
     { requireSession: true },
   );
   if (!result.ok) return { ...state, outcome: failure(locale, path, result.error, status) };
@@ -365,23 +424,12 @@ export async function bulkPublishAction(
           total: result.data.length - published,
         }),
         recordedAt: { dateTime: now, label: formatDateTime(locale as "bg", now) },
-        nextStep: copy.ready.lead,
+        nextStep: copy.ready.resultNext,
         destination: { href: path, label: copy.ready.view },
         listings: {
           heading: copy.ready.results,
-          note: copy.lead,
-          items: result.data.map((item) => ({
-            reference: item.reference,
-            referenceLabel: item.reference,
-            name: item.reference,
-            ...(item.status === "published"
-              ? { status: copy.ready.published }
-              : { warning: `${copy.ready.needsAttention}: ${blockReason(locale, item.reason)}` }),
-            link: {
-              href: `/${locale}/inventory/${encodeURIComponent(item.reference)}/publish`,
-              label: copy.publishTitle.replace("{reference}", item.reference),
-            },
-          })),
+          note: copy.ready.resultLead,
+          items: result.data.map((item) => resultLine(locale, item)),
         },
       },
     },
@@ -467,7 +515,11 @@ export async function bulkLanguageAction(
     throw new AppError("not_found");
   const copy = publishCopy(locale);
   const path = `/${locale}/inventory?view=ready&language=${language}`;
-  const values: BulkPublishValues = { attested: form.get("attested") === "yes" ? "yes" : "" };
+  const selected = tickedReferences(form);
+  const values: BulkPublishValues = {
+    attested: form.get("attested") === "yes" ? "yes" : "",
+    selected: selected.join(","),
+  };
   const { operationId } = envelope(form);
   const status = { href: path, label: copy.ready.view };
   const state: FormState<BulkPublishValues> = {
@@ -478,18 +530,11 @@ export async function bulkLanguageAction(
     reconciliation: status,
     outcome: { kind: "idle" },
   };
-  const selected = [
-    ...new Set(
-      form
-        .getAll("reference")
-        .map(String)
-        .filter((value) => /^[A-Z]{2}-[0-9A-Z-]{1,40}$/.test(value)),
-    ),
-  ].slice(0, 200);
   const fieldErrors: Partial<Record<keyof BulkPublishValues, string[]>> = {};
   if (values.attested !== "yes") fieldErrors.attested = [copy.attestationRequired];
-  if (!uuid.test(operationId) || selected.length === 0)
-    fieldErrors.attested = [...(fieldErrors.attested ?? []), copy.ready.noneSelected];
+  if (selected.length === 0) fieldErrors.selected = [copy.ready.noneSelected];
+  if (!uuid.test(operationId))
+    fieldErrors.attested = [...(fieldErrors.attested ?? []), copy.reasons.other];
   if (Object.keys(fieldErrors).length)
     return {
       ...state,

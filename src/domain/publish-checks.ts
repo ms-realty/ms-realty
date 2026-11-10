@@ -4,6 +4,7 @@
 // No model call: every rule is a plain reading of the recorded content.
 import type { FactState, PropertyType } from "./facts";
 import type { CommercialState } from "./listing";
+import { framesInlandAsCoast as framesInland } from "./translation-checks";
 
 export const publishBlockers = [
   "title_missing",
@@ -12,6 +13,8 @@ export const publishBlockers = [
   "rent_period_unconfirmed",
   "location_missing",
   "not_available",
+  "owner_refused",
+  "inland_framed_as_coast",
 ] as const;
 export type PublishBlocker = (typeof publishBlockers)[number];
 
@@ -20,7 +23,6 @@ export const publishWarnings = [
   "photos_not_ready",
   "short_description",
   "bedrooms_unknown",
-  "inland_framed_as_coast",
   "title_site_suffix",
 ] as const;
 export type PublishWarning = (typeof publishWarnings)[number];
@@ -50,6 +52,8 @@ export interface PublishCheckInput {
   readonly texts: readonly string[];
   /** The title ends with the old site's brand ending (offered without it on the screen). */
   readonly titleSiteSuffix?: boolean;
+  /** The latest agreed seller instruction says the owner does not permit publication. */
+  readonly ownerRefused?: boolean;
 }
 
 export interface PublishChecks {
@@ -71,13 +75,10 @@ export const shortDescriptionLength = 200;
 const dwellings: readonly PropertyType[] = ["apartment", "house"];
 
 // Sandanski is inland (AGENTS.md): copy must never present it as a sea, beach or coast place.
-const inlandPlace = /sandanski|сандански/iu;
-const coastWords =
-  /\b(?:sea|seaside|beach(?:es)?|coast(?:al|line)?)\b|(?:^|[^\p{L}])(?:мор[еяю]|морск|плаж|крайбрежи|пляж|побережь)/iu;
-
+// The source text is checked with the coast words of Bulgarian, Russian and English, the
+// languages an agency's source copy is written in; each translation is checked in its own.
 export function framesInlandAsCoast(placeNames: readonly string[], texts: readonly string[]) {
-  const inland = [...placeNames, ...texts].some((name) => inlandPlace.test(name));
-  return inland && texts.some((text) => coastWords.test(text));
+  return framesInland(["bg", "ru", "en"], placeNames, texts);
 }
 
 export function publishChecks(input: PublishCheckInput): PublishChecks {
@@ -92,6 +93,9 @@ export function publishChecks(input: PublishCheckInput): PublishChecks {
   }
   if (!input.locationKnown) blockers.push("location_missing");
   if (!advertisableStates.includes(input.commercialState)) blockers.push("not_available");
+  if (input.ownerRefused) blockers.push("owner_refused");
+  // Sandanski is inland (AGENTS.md): sea, beach or coast wording never goes public.
+  if (framesInlandAsCoast(input.placeNames, input.texts)) blockers.push("inland_framed_as_coast");
 
   // One photo line at most, and the one that is true: photos exist but are not ready yet, or
   // there are none at all.
@@ -102,7 +106,6 @@ export function publishChecks(input: PublishCheckInput): PublishChecks {
     warnings.push("short_description");
   if (dwellings.includes(input.propertyType) && input.bedroomsState !== "known")
     warnings.push("bedrooms_unknown");
-  if (framesInlandAsCoast(input.placeNames, input.texts)) warnings.push("inland_framed_as_coast");
   if (input.titleSiteSuffix) warnings.push("title_site_suffix");
   return { blockers, warnings };
 }

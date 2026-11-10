@@ -23,20 +23,21 @@
     "price_undecided": "There is no price. Enter the price, or choose “price on request”.",
     "location_missing": "The location is missing. Add the settlement in the listing facts.",
     "not_available": "The property is sold, let or off the market, so it cannot be advertised. If it is on offer again, record that in Detailed review first.",
-    "rent_period_unconfirmed": "The rent has no period. Choose “per month” in the Rent period field."
+    "rent_period_unconfirmed": "The rent has no period. Choose “per month” in the Rent period field.",
+    "owner_refused": "The owner has withdrawn permission to advertise this property. Record a new agreement with the owner in Detailed review first.",
+    "inland_framed_as_coast": "The text describes an inland town as being by the sea or a beach. Correct the wording in the listing text."
   },
   "warnings": {
     "no_photos": "There are no photos to show. The listing will go online without photos.",
     "photos_not_ready": "Some photos are still being prepared. They will appear once they are ready and you approve them.",
     "short_description": "The description is very short. Buyers usually need more detail.",
     "bedrooms_unknown": "The number of bedrooms is not known.",
-    "inland_framed_as_coast": "The text describes an inland town as being by the sea or a beach. Please check the wording.",
     "title_site_suffix": "The title ends with the old site's name. It is shown without it below."
   },
   "attestation": "I checked this listing. The facts are right, the owner asked us to advertise it on these terms, we may use these photos, and it is available.",
   "attestationRequired": "Tick the box to confirm that you checked the listing.",
   "note": "Note for the history (optional)",
-  "fixFirst": "Fix the items marked “Must be fixed” first, then come back here.",
+  "fixFirst": "Fix the items under “Fix before publishing” first, then come back here.",
   "editListing": "Edit the listing",
   "detailedReview": "Detailed review",
   "detailedReviewHint": "Every recorded check and decision, one by one.",
@@ -60,9 +61,10 @@
     "photos_required": "Some photos are not ready yet, and this agency publishes only with every photo ready.",
     "shared_facts_published": "Another listing of the same property is online. Unpublish it first, then publish both again.",
     "no_permission": "Your role cannot do one of the steps needed to publish this listing.",
-    "changed_since_opened": "The listing changed while you were checking it. Open it again and check the new version.",
+    "changed_since_opened": "This listing changed since you opened it. Check it again.",
     "facts_incomplete": "Some facts are still missing. Complete them in the listing.",
-    "other": "The listing could not be published. Open Detailed review to see what is missing."
+    "other": "The listing could not be published. Open Detailed review to see what is missing.",
+    "not_attempted": "Not attempted, because an earlier listing stopped the run. Select it again to continue."
   },
   "ready": {
     "view": "Ready to publish",
@@ -84,14 +86,28 @@
     "languageLead": "These listings are online in Bulgarian and their {language} text passed every check. Read each text, tick the box and publish them in {language}.",
     "languageNone": "No {language} texts are ready. A text appears here when the listing is online in Bulgarian and the text passes every check.",
     "publishLanguage": "Publish in {language}",
-    "languageAttest": "I read these texts in {language} and each says the same as the Bulgarian."
+    "languageAttest": "I read these texts in {language} and each says the same as the Bulgarian.",
+    "shown": "Listings shown: {n}.",
+    "more": "Not looked at yet: {m}. Some of them may be ready.",
+    "showMore": "Show more",
+    "search": "Find listings",
+    "searchHint": "Listing numbers or title. Paste several numbers separated by spaces or commas.",
+    "searchApply": "Search",
+    "noMatch": "No listing that is ready matches this search among the ones looked at.",
+    "resultLead": "Each listing below says what happened to it.",
+    "resultNext": "Open a listing marked “Needs attention” to see what to fix.",
+    "open": "Open {reference}",
+    "publishedWarning": "Published with a warning",
+    "notAttempted": "Not attempted",
+    "noneHere": "None of the listings looked at so far is ready to publish."
   },
   "today": {
     "title": "Check and publish {reference}",
     "next": "nothing to fix first",
     "readySummary": "Ready to check and publish: {n}",
     "readyNext": "open the list, check and publish",
-    "fixTitle": "Fix before publishing {reference}"
+    "fixTitle": "Fix before publishing {reference}",
+    "readySummaryMore": "Ready to check and publish: {n} or more"
   },
   "rentPeriod": "Rent period",
   "perMonth": "per month",
@@ -130,5 +146,8 @@
       "other": "This language could not be published. Open Detailed review."
     },
     "withPublish": "Languages you tick under Languages below go online with it."
-  }
+  },
+  "previousOffline": "The previous version is offline until you publish again.",
+  "liveOutdated": "The website still shows the previous version. Publish to update it.",
+  "photosAll": "All {n} photos"
 }

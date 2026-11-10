@@ -355,14 +355,20 @@ describe("one-decision publishing (ADR 0012)", () => {
     const ready = await imported();
     const archived = await imported({ commercialState: "withdrawn" });
     const blocked = await imported({ price: { state: "unknown" } });
-    const references = (await readyToPublish(t.db, broker.actor)).map((row) => row.reference);
+    // Pasted references, separated by spaces and commas, narrow the view.
+    const pasted = [ready, archived, blocked].map((row) => row.reference).join(", ");
+    const references = (await readyToPublish(t.db, broker.actor, { query: pasted })).rows.map(
+      (row) => row.reference,
+    );
     expect(references).toContain(ready.reference);
     expect(references).not.toContain(archived.reference);
     expect(references).not.toContain(blocked.reference);
     await publish(ready.reference);
-    expect((await readyToPublish(t.db, broker.actor)).map((row) => row.reference)).not.toContain(
-      ready.reference,
-    );
+    expect(
+      (await readyToPublish(t.db, broker.actor, { query: ready.reference })).rows.map(
+        (row) => row.reference,
+      ),
+    ).not.toContain(ready.reference);
   });
 
   it("keeps a listing public after the attesting broker leaves; a lapsing policy fails closed", async () => {
