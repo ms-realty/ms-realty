@@ -9,6 +9,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "butler:eval": "node --conditions=react-server --import tsx scripts/butler-eval.ts",
     "worker": "node --conditions=react-server --import tsx scripts/worker.ts",
     "lint": "biome check .",
     "format": "biome check --write .",
