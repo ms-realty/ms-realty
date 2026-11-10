@@ -138,7 +138,7 @@ export function ListingCard({
           className="transition-transform duration-300 motion-safe:group-hover:scale-[1.02]"
         />
         <div className="absolute end-3 top-3 z-10">
-          <SaveToggle reference={listing.reference} copy={copy} />
+          <SaveToggle reference={listing.reference} copy={copy} subject={title} />
         </div>
       </div>
       <div className="flex flex-1 flex-col gap-1.5 p-4">
@@ -160,6 +160,7 @@ export function ListingCard({
           <CompareToggle
             reference={listing.reference}
             copy={copy}
+            subject={title}
             className="relative z-10 ms-auto"
           />
         </div>

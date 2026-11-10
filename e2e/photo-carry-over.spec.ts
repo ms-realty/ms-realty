@@ -105,7 +105,7 @@ test("copies a carried-over listing's photos, publishes it and shows them in pub
 
   // Search card: the cover is the first photo of the old gallery.
   await page.goto(hostUrl("public", `/bg/properties?q=${f.reference}`));
-  const card = page.locator("article", { hasText: f.reference }).first();
+  const card = page.locator(`article[data-listing-reference="${f.reference}"]`);
   await expect(card.locator(`img[src^="/api/media/${f.photos[0]}/"]`)).toBeAttached();
   await expect
     .poll(() =>
@@ -115,4 +115,61 @@ test("copies a carried-over listing's photos, publishes it and shows them in pub
         .evaluate((img: HTMLImageElement) => img.naturalWidth),
     )
     .toBeGreaterThan(0);
+  // No record vocabulary on the public card or page: unknown facts are simply not shown.
+  const recordWords =
+    /Не се публикува|Неприложимо|Неизвестно|Не е предоставено|Not applicable|Not published|Unknown/;
+  await expect(card).not.toContainText(recordWords);
+
+  // With JavaScript: "All 3 photos" opens a viewer; arrows move, Escape closes, focus returns.
+  await page.goto(hostUrl("public", publicPath));
+  const all = page.getByRole("link", { name: "Всички снимки (3)" });
+  await all.click();
+  const viewer = page.getByRole("dialog", { name: "Снимки" });
+  await expect(viewer).toBeVisible();
+  await expect(viewer.getByText("Снимка 1 от 3")).toBeVisible();
+  await page.keyboard.press("ArrowRight");
+  await expect(viewer.getByText("Снимка 2 от 3")).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(viewer).toBeHidden();
+  await expect(all).toBeFocused();
+  await expect(page.locator("main")).not.toContainText(recordWords);
+});
+
+test("the whole photo set opens without JavaScript", async ({ browser, baseURL }) => {
+  const f = seed();
+  const context = await browser.newContext({ baseURL, javaScriptEnabled: false });
+  try {
+    // The carry-over and publication run through the staff screens with JavaScript on.
+    const staff = await browser.newPage();
+    await signIn(staff, f.token);
+    await staff.goto(hostUrl("staff", `/en/inventory/${f.reference}/publish`));
+    await staff.getByRole("button", { name: "Copy photos from the old website" }).click();
+    await expect(staff.locator("[data-carry-over]")).toHaveCount(0);
+    await staff
+      .getByRole("checkbox", { name: /I checked this listing\. The facts are right/ })
+      .check();
+    await staff.getByRole("button", { name: "Publish", exact: true }).click();
+    await expect(staff.getByRole("heading", { name: "Published", exact: true })).toBeVisible();
+    await staff.close();
+
+    const page = await context.newPage();
+    await page.goto(
+      hostUrl("public", `/bg/properties/${f.reference}/${f.reference.toLowerCase()}`),
+    );
+    const gallery = page.locator("section#photos");
+    await expect(gallery).toBeHidden();
+    await page.getByRole("link", { name: "Всички снимки (3)" }).click();
+    await expect(page).toHaveURL(/#photos$/);
+    await expect(gallery).toBeVisible();
+    await expect(gallery.locator("img")).toHaveCount(3);
+    for (const id of f.photos)
+      await expect(gallery.locator(`img[src^="/api/media/${id}/"]`)).toBeAttached();
+    await gallery.getByRole("link", { name: "Затвори снимките" }).click();
+    await expect(gallery).toBeHidden();
+    // The contact actions work as plain links: the inquiry form opens with the listing chosen.
+    const ask = page.getByRole("link", { name: "Задайте въпрос" }).first();
+    await expect(ask).toHaveAttribute("href", new RegExp(`reference=${f.reference}`));
+  } finally {
+    await context.close();
+  }
 });

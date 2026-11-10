@@ -151,10 +151,13 @@ function useToggle(kind: Kind, reference: string, copy: DiscoveryCopy) {
 export function SaveToggle({
   reference,
   copy,
+  subject,
   className,
 }: {
   reference: string;
   copy: DiscoveryCopy;
+  /** In a list of cards, the listing's title keeps each button's name distinct. */
+  subject?: string;
   className?: string;
 }) {
   const { hydrated, on, toggle, notice } = useToggle("saved", reference, copy);
@@ -164,7 +167,7 @@ export function SaveToggle({
       <button
         type="button"
         aria-pressed={on}
-        aria-label={copy.saveProperty}
+        aria-label={subject ? `${copy.saveProperty}: ${subject}` : copy.saveProperty}
         title={copy.saveProperty}
         onClick={toggle}
         className={cx(
@@ -175,11 +178,9 @@ export function SaveToggle({
       >
         <SaveIcon className={cx("size-5", on && "fill-current")} />
       </button>
-      {notice ? (
-        <span role="status" className="sr-only">
-          {notice}
-        </span>
-      ) : null}
+      <span role="status" className="sr-only">
+        {notice}
+      </span>
     </>
   );
 }
@@ -188,10 +189,13 @@ export function SaveToggle({
 export function CompareToggle({
   reference,
   copy,
+  subject,
   className,
 }: {
   reference: string;
   copy: DiscoveryCopy;
+  /** In a list of cards, the listing's title keeps each button's name distinct. */
+  subject?: string;
   className?: string;
 }) {
   const { hydrated, on, toggle, notice } = useToggle("compare", reference, copy);
@@ -206,12 +210,11 @@ export function CompareToggle({
       >
         <CompareIcon className="size-4" />
         {copy.compare}
+        {subject ? <span className="sr-only">: {subject}</span> : null}
       </button>
-      {notice ? (
-        <span role="status" className="text-caption text-text-muted">
-          {notice}
-        </span>
-      ) : null}
+      <span role="status" className={notice ? "text-caption text-text-muted" : "sr-only"}>
+        {notice}
+      </span>
     </span>
   );
 }
