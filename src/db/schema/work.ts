@@ -374,7 +374,9 @@ export const sellerInstructions = pgTable(
     index("seller_instructions_text_id_idx").on(sql`(${t.id}::text)`),
     check(
       "seller_instructions_agreed_evidence",
-      sql`${t.state} <> 'agreed' or (${t.agreedAt} is not null and ${t.recordedById} is not null and ${t.commissionTerms} is not null and jsonb_array_length(${t.evidenceDocumentIds}) > 0)`,
+      // An agreed instruction names its evidence: reviewed documents, or (ADR 0012) the
+      // recorded staff attestation stored as commercial_terms.basis with its attestation id.
+      sql`${t.state} <> 'agreed' or (${t.agreedAt} is not null and ${t.recordedById} is not null and ${t.commissionTerms} is not null and (jsonb_array_length(${t.evidenceDocumentIds}) > 0 or (${t.commercialTerms}->>'basis' = 'staff_attestation' and ${t.commercialTerms}->>'attestationOperationId' is not null)))`,
     ),
   ],
 );

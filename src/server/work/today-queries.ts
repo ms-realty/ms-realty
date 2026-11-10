@@ -21,6 +21,7 @@ import { caseGrantVisibility } from "../cases/grant-visibility";
 import { hashRequest } from "../crypto";
 import type { Executor } from "../db";
 import { AppError, isAppError } from "../errors";
+import { readyListingIds } from "../publication/attested";
 import { appointmentCoverageAt, ownerNeedsCoverage } from "./coverage-policy";
 import { openAppointmentStates, visibleWhere } from "./shared";
 
@@ -282,7 +283,28 @@ export async function listingReviewQuery(db: Executor, context: Context, now: Da
     )
     .orderBy(asc(listings.reviewDueAt), asc(listings.updatedAt), asc(listings.id))
     .limit(limit + 1);
-  return firstPage(rows);
+  const page = firstPage(rows);
+  // ADR 0012: a listing with nothing to fix is not "facts needed" for someone who may publish
+  // it; it is ready to check and publish on one decision.
+  const candidates = page.rows.filter(
+    (row) =>
+      row.canRelease &&
+      row.editorialState !== "in_review" &&
+      row.editorialState !== "changes_requested" &&
+      ["available", "confirmation_required"].includes(row.commercialState),
+  );
+  const ready = await readyListingIds(
+    db,
+    context.live.actor,
+    candidates.map((row) => row.id),
+  );
+  return {
+    ...page,
+    rows: page.rows.map((row): (typeof page.rows)[number] & { readyToPublish?: boolean } => ({
+      ...row,
+      readyToPublish: ready.has(row.id),
+    })),
+  };
 }
 
 /** A cursor never grants access: every request rechecks live listing and locale review grants. */

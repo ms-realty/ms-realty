@@ -1,11 +1,31 @@
 // The same live consent predicate gates activation, public search/counts and detail reads.
+// Two bases are accepted (ADR 0012): reviewed documents (a sealed, scanned, reviewed seller
+// authority and agreement), and, when the tenant policy allows it, a staff attestation: the
+// recorded decision of an active staff member that the owner asked the agency to advertise.
 import "server-only";
-import { and, eq, isNull, or, type SQLWrapper, sql } from "drizzle-orm";
+import { and, eq, isNull, or, type SQL, type SQLWrapper, sql } from "drizzle-orm";
+import { type PublicationPolicy, publicationPolicy } from "@/config/tenant";
 import { sellerInstructions } from "@/db/schema";
+
+/** The `commercial_terms.basis` of a seller instruction recorded by staff attestation. */
+export const staffAttestationBasis = "staff_attestation";
+
+/** An attested instruction counts only while its author is an active staff member. */
+function attestedEvidence(): SQL {
+  return sql`(${sellerInstructions.commercialTerms}->>'basis' = ${staffAttestationBasis}
+    and exists (
+      select 1 from principals attester
+      join staff_memberships attester_membership on attester_membership.principal_id = attester.id
+      where attester.id = ${sellerInstructions.recordedById}
+        and attester.kind = 'staff' and attester.status = 'active'
+        and attester_membership.state = 'active'
+    ))`;
+}
 
 export function currentSellerEvidence(
   now: Date = new Date(),
   listingId: string | SQLWrapper = sellerInstructions.listingId,
+  policy: PublicationPolicy = publicationPolicy,
 ) {
   const at = now.toISOString();
   return and(
@@ -41,8 +61,16 @@ export function currentSellerEvidence(
                 or (consent_listing.purpose = 'long_term_rent' and newer.representation_scope = 'letting'))))
         )
     )`,
-    // Compare UUIDs as text: malformed imported evidence must fail closed, not abort a read.
-    sql`exists (
+    or(
+      policy.sellerEvidence === "staff_attestation" ? attestedEvidence() : undefined,
+      documentEvidence(at),
+    ),
+  );
+}
+
+function documentEvidence(at: string): SQL {
+  // Compare UUIDs as text: malformed imported evidence must fail closed, not abort a read.
+  return sql`exists (
       select 1 from property_relationships authority
       join parties seller on seller.id = authority.party_id
       join document_versions authority_file on authority_file.id::text = authority.scope->>'documentVersionId'
@@ -77,6 +105,5 @@ export function currentSellerEvidence(
         and agreement_file.scanned_sha256 = agreement_file.sha256
         and agreement_file.sha256 = ${sellerInstructions.commercialTerms}->'agreement'->>'digest'
         and agreement_file.superseded_by_version_id is null
-    )`,
-  );
+    )`;
 }

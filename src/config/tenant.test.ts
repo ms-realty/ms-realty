@@ -17,11 +17,13 @@ import {
   jurisdictionTimeZones,
   legacyCurrency,
   legacyDomains,
+  publicationPolicy,
   publicLocales,
   referencePrefixes,
   rtlLocales,
   sourceLocale,
   staffLocales,
+  strictPublicationPolicy,
 } from "./tenant";
 
 // The profile holds the values the agency shipped with. Each pin below is also a database
@@ -97,5 +99,18 @@ describe("tenant profile", () => {
     expect(agency.phone.e164).toBe("+359879696870");
     expect(agency.phone.display.replaceAll(" ", "")).toBe(agency.phone.e164);
     expect(assistantLabel).toBe("MS Realty Butler");
+  });
+
+  it("publishes by one recorded staff decision, with the strict path still defined", () => {
+    expect(publicationPolicy).toEqual({
+      sellerEvidence: "staff_attestation",
+      independentReview: false,
+      photosRequired: false,
+    });
+    expect(strictPublicationPolicy).toEqual({
+      sellerEvidence: "reviewed_documents",
+      independentReview: true,
+      photosRequired: true,
+    });
   });
 });

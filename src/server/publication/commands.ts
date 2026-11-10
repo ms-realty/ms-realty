@@ -12,6 +12,7 @@
 // a manifest prepared or a job queued before them can never bring the old presentation back.
 import "server-only";
 import { and, asc, desc, eq, inArray, isNull, or } from "drizzle-orm";
+import { type PublicationPolicy, publicationPolicy } from "@/config/tenant";
 import {
   approvals,
   currentPublications,
@@ -573,7 +574,7 @@ export function approveListingRevision(
 
 // Eligibility and manifests.
 
-interface ManifestContent {
+export interface ManifestContent {
   readonly listingId: string;
   readonly locale: PublicLocale;
   readonly destination: typeof publicDestination;
@@ -595,7 +596,7 @@ interface ManifestContent {
   readonly decisions: Readonly<Record<string, string | null>>;
 }
 
-interface Eligibility {
+export interface Eligibility {
   readonly input: ActivationInput;
   /** Null when there is no approved revision to bind. */
   readonly content: ManifestContent | null;
@@ -618,6 +619,7 @@ export async function currentEligibility(
   generation: number,
   now: Date,
   lockMedia = false,
+  policy: PublicationPolicy = publicationPolicy,
 ): Promise<Eligibility> {
   const base = {
     locale,
@@ -698,7 +700,10 @@ export async function currentEligibility(
         .select({ id: sellerInstructions.id })
         .from(sellerInstructions)
         .where(
-          and(eq(sellerInstructions.id, instruction.id), currentSellerEvidence(now, listing.id)),
+          and(
+            eq(sellerInstructions.id, instruction.id),
+            currentSellerEvidence(now, listing.id, policy),
+          ),
         )
     : [];
   const instructionValid =
@@ -752,17 +757,20 @@ export async function currentEligibility(
         .orderBy(asc(mediaAssets.id))
         .for("update");
   }
-  const placed = await tx
+  const allPlaced = await tx
     .select({ placement: listingRevisionMedia, asset: mediaAssets })
     .from(listingRevisionMedia)
     .innerJoin(mediaAssets, eq(mediaAssets.id, listingRevisionMedia.mediaAssetId))
     .where(eq(listingRevisionMedia.listingRevisionId, revision.id))
     .orderBy(asc(listingRevisionMedia.position));
+  const showable = ({ asset }: (typeof allPlaced)[number]) =>
+    mediaAssetEligible(asset) && !asset.detailsDraft;
   // Pending editorial photo text must be reviewed before preparing a new publication.
   // Existing public manifests keep their approved snapshot and serving eligibility.
-  const mediaEligible =
-    placed.length > 0 &&
-    placed.every(({ asset }) => mediaAssetEligible(asset) && !asset.detailsDraft);
+  // Under a policy that does not require photos (ADR 0012), only cleared photos are shown and
+  // the rest wait: a listing may go public without photos, never with an uncleared one.
+  const placed = policy.photosRequired ? allPlaced : allPlaced.filter(showable);
+  const mediaEligible = policy.photosRequired ? placed.length > 0 && placed.every(showable) : true;
   const media: ManifestMedia[] = placed.map(({ placement, asset }) => ({
     relationId: placement.mediaRelationId,
     assetId: asset.id,
@@ -852,7 +860,7 @@ export async function currentEligibility(
   };
 }
 
-function manifestDigest(content: ManifestContent): string {
+export function manifestDigest(content: ManifestContent): string {
   return sha256Hex(canonicalJson(content));
 }
 

@@ -18,6 +18,7 @@ import { aiCopy } from "@/features/ai/copy";
 import { caseCopy } from "@/features/cases/copy";
 import { caseEmailCopy } from "@/features/cases/email-copy";
 import { inventoryCopy } from "@/features/inventory/copy";
+import { publishCopy } from "@/features/inventory/publish-copy";
 import { custodyCopy } from "@/features/key-custody/copy";
 import { readAssistanceSource } from "@/server/ai/assistance";
 import { assistanceAvailability } from "@/server/ai/config";
@@ -817,6 +818,28 @@ function ListingReviewRow({
   now: Date;
 }) {
   const t = todayCopy(locale);
+  const path = listingPath(locale, item.reference);
+  // ADR 0012: nothing to fix, and this person may publish it: one decision away.
+  if (item.readyToPublish) {
+    const publish = publishCopy(locale).today;
+    return (
+      <Row
+        href={`${path}/publish`}
+        Icon={HomeIcon}
+        data={{ "data-listing-review": item.id }}
+        title={
+          <>
+            {publish.title} · <bdi>{item.reference}</bdi>
+          </>
+        }
+        details={[
+          owner(locale, item.ownerName, item.needsCoverage),
+          ...(item.dueAt ? [["time", due(locale, item.dueAt, now)] satisfies Detail] : []),
+          next(locale, publish.next),
+        ]}
+      />
+    );
+  }
   // The same precedence as the O10 row action; a passed review date is an availability check.
   const kind =
     item.editorialState === "changes_requested"
@@ -826,7 +849,6 @@ function ListingReviewRow({
         : item.editorialState === "needs_facts"
           ? "facts"
           : "availability";
-  const path = listingPath(locale, item.reference);
   return (
     <Row
       href={

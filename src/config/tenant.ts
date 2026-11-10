@@ -111,6 +111,33 @@ export const legacyCurrency = {
 
 export const availabilityReviewIntervalDays = { sale: 14, long_term_rent: 7 } as const;
 
+// Publication policy (ADR 0012). How a listing earns its place on the public site: one recorded
+// human decision ("staff_attestation") or the strict evidence path ("reviewed_documents": an
+// uploaded, scanned and reviewed seller authority and brokerage agreement). A person publishes
+// under either; a non-source translation still needs its own human approval.
+
+export interface PublicationPolicy {
+  /** What counts as the seller's permission to advertise. */
+  readonly sellerEvidence: "staff_attestation" | "reviewed_documents";
+  /** The person who wrote the listing may not be the one who publishes it. */
+  readonly independentReview: boolean;
+  /** Publishing waits until every placed photo is processed and cleared. */
+  readonly photosRequired: boolean;
+}
+
+/** The strict policy another brand may adopt; kept tested alongside the agency's own. */
+export const strictPublicationPolicy: PublicationPolicy = {
+  sellerEvidence: "reviewed_documents",
+  independentReview: true,
+  photosRequired: true,
+};
+
+export const publicationPolicy: PublicationPolicy = {
+  sellerEvidence: "staff_attestation",
+  independentReview: false,
+  photosRequired: false,
+};
+
 // Human references. Listings keep the legacy lot-number format (MS-00100) so every reference
 // already in circulation stays valid; other records get a yearly sequence.
 
