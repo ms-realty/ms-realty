@@ -49,11 +49,12 @@ export async function dealNoticeBlocker(
     if (found.reason) return `deal_notice_${found.reason}`;
     if (
       found.principal.id !== p.recipient.principalId ||
-      found.eligible.subscriptionId !== p.recipient.subscriptionId ||
-      found.eligible.subscriptionVersion !== p.recipient.subscriptionVersion ||
-      found.eligible.contactId !== p.recipient.contactId ||
-      found.eligible.contactVersion !== p.recipient.contactVersion ||
-      found.eligible.address !== parsed.data.recipient
+      found.basis !== p.recipient.basis ||
+      found.choice?.subscriptionId !== p.recipient.subscriptionId ||
+      found.choice?.subscriptionVersion !== p.recipient.subscriptionVersion ||
+      found.contactId !== p.recipient.contactId ||
+      found.contactVersion !== p.recipient.contactVersion ||
+      found.address !== parsed.data.recipient
     )
       return "deal_notice_recipient_changed";
   } else {

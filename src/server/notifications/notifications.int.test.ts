@@ -2,16 +2,20 @@
 // the recipient's language, once; ineligible recipients are skipped with a recorded reason; the
 // send-time recheck cancels stale or revoked notices; and no restricted detail reaches a notice.
 import { randomUUID } from "node:crypto";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { serviceNotifications } from "@/config/tenant";
 import {
+  appointmentParticipants,
   appointments,
+  auditEvents,
   caseParticipants,
   cases,
   contactMethods,
   externalActions,
+  grants,
   parties,
+  principals,
   subscriptions,
 } from "@/db/schema";
 import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
@@ -21,11 +25,14 @@ import {
   readAppointment,
   respondToAppointment,
 } from "../appointments/service";
+import { consumeEmailLink, issueEmailLink } from "../auth/email-link";
+import { issueClientInvitation, respondToClientInvitation } from "../auth/invitations";
 import { postCaseMessage } from "../cases/commands";
 import { getEnv } from "../config/env";
 import { documentRequestFixture } from "../documents/request-testing";
 import { dispatchMessage } from "../jobs/outbox";
 import { type OutboundMessage, TestMessageProvider } from "../jobs/provider";
+import { saveContactPreferences } from "../privacy/preferences";
 import { recordProposalDecision, transitionProposal } from "../proposals/service";
 import { proposalFixture, publishProposalForTest } from "../proposals/testing";
 import { notifyViewingChange } from "./appointments";
@@ -269,24 +276,21 @@ describe("viewing notices", () => {
     expect(noEmail).toMatchObject({ state: "cancelled", lastErrorCode: "no_verified_email" });
     expect((noEmail?.payload as { recipient: unknown } | undefined)?.recipient).toBeNull();
 
-    const unchosen = await viewingFixture(t.db, { subscribed: false });
+    // A verified address that is not the client's sign-in address is not a basis on its own.
+    const other = await viewingFixture(t.db, { subscribed: false });
     const value = `verified-${randomUUID()}@example.test`;
     await t.db.insert(contactMethods).values({
-      partyId: unchosen.client.partyId,
+      partyId: other.client.partyId,
       kind: "email",
       value,
       normalizedValue: value,
       verification: "verified",
       verifiedAt: new Date(),
     });
-    await arrangeAppointment(
-      t.db,
-      unchosen.staff.session,
-      arrange(unchosen.request.id, 1, "propose"),
-    );
-    expect((await notices(unchosen.record.id))[0]).toMatchObject({
+    await arrangeAppointment(t.db, other.staff.session, arrange(other.request.id, 1, "propose"));
+    expect((await notices(other.record.id))[0]).toMatchObject({
       state: "cancelled",
-      lastErrorCode: "no_service_email_choice",
+      lastErrorCode: "no_verified_email",
     });
 
     const revoked = await viewingFixture(t.db);
@@ -319,7 +323,7 @@ describe("viewing notices", () => {
     await dispatchDealNotices(t.db, provider);
     expect((await notices(withdrawn.record.id))[0]).toMatchObject({
       state: "cancelled",
-      lastErrorCode: "deal_notice_no_service_email_choice",
+      lastErrorCode: "deal_notice_notices_switched_off",
     });
     expect(provider.sent).toHaveLength(0);
   });
@@ -345,6 +349,121 @@ describe("viewing notices", () => {
     }
     expect(provider.sent).toHaveLength(0);
     expect((await notices(g.record.id))[0]?.lastErrorCode).toBe("deal_notice_disabled");
+  });
+});
+
+describe("service notices are on by default for a Deal participant", () => {
+  async function signIn(address: string) {
+    await issueEmailLink(t.db, { email: address, returnTo: null, locale: "en" });
+    const [link] = await t.db
+      .select()
+      .from(externalActions)
+      .where(
+        and(
+          eq(externalActions.state, "queued"),
+          sql`${externalActions.payload}->>'template' = 'auth.email_link'`,
+          sql`lower(${externalActions.payload}->>'recipient') = ${address.toLowerCase()}`,
+        ),
+      );
+    const provider = new TestMessageProvider();
+    await dispatchMessage(t.db, provider, link?.id ?? "");
+    const url = new URL(String(provider.sent[0]?.secretParams?.url));
+    return consumeEmailLink(t.db, url.searchParams.get("token") ?? "");
+  }
+
+  it("an invited client who signs in and accepts gets the viewing notice; switching notices off stops them with a recorded reason", async () => {
+    const f = await viewingFixture(t.db, { subscribed: false });
+    await t.db
+      .insert(grants)
+      .values({ principalId: f.staff.id, capability: "access.grant", reason: "Synthetic test" });
+    const address = `invited-${randomUUID()}@example.test`;
+    const invitation = await issueClientInvitation(t.db, {
+      session: f.staff.session,
+      email: address,
+      displayName: "Invited co-buyer",
+      caseId: f.record.id,
+      role: "co_buyer",
+    });
+    const signedIn = await signIn(address);
+    await respondToClientInvitation(t.db, invitation.invitationId, signedIn.session, "accept", {
+      clientIp: randomUUID(),
+    });
+    const [invited] = await t.db.select().from(principals).where(eq(principals.email, address));
+    if (!invited) throw new Error("No invited principal");
+    // The basis is recorded as Deal participation; no consent or subscription is created.
+    expect(
+      await t.db.select().from(subscriptions).where(eq(subscriptions.partyId, invited.partyId)),
+    ).toHaveLength(0);
+    const basis = await t.db
+      .select()
+      .from(auditEvents)
+      .where(
+        and(
+          eq(auditEvents.action, "deal_notices.basis_recorded"),
+          eq(auditEvents.recordId, f.record.id),
+        ),
+      );
+    expect(basis).toHaveLength(1);
+    await t.db
+      .insert(appointmentParticipants)
+      .values({ appointmentId: f.request.id, partyId: invited.partyId, role: "co_buyer" });
+
+    const proposed = await arrangeAppointment(
+      t.db,
+      f.staff.session,
+      arrange(f.request.id, 1, "propose"),
+    );
+    const sent = (await notices(f.record.id)).filter(
+      (row) => (row.payload as { recipient: string | null }).recipient === address,
+    );
+    expect(sent).toHaveLength(1);
+    expect(sent[0]).toMatchObject({ state: "queued" });
+    expect(params(sent[0] as (typeof sent)[number])).toMatchObject({
+      event: "viewing.proposed",
+      recipient: { kind: "client", basis: "deal_participation" },
+    });
+    // The worker sends it: the recheck accepts the same basis at send time.
+    const provider = new TestMessageProvider();
+    await dispatchDealNotices(t.db, provider);
+    expect(provider.sent.map((m) => m.recipient)).toContain(address);
+
+    const [party] = await t.db.select().from(parties).where(eq(parties.id, invited.partyId));
+    await saveContactPreferences(t.db, signedIn.session, {
+      operationId: randomUUID(),
+      expectedVersion: party?.version ?? 1,
+      locale: "en",
+      timezone: "Europe/Sofia",
+      channel: "email",
+      contactWindow: "",
+      dealNotices: false,
+    });
+    expect(
+      await t.db
+        .select()
+        .from(auditEvents)
+        .where(
+          and(
+            eq(auditEvents.action, "preferences.deal_notices.off"),
+            eq(auditEvents.recordId, invited.partyId),
+          ),
+        ),
+    ).toHaveLength(1);
+    await arrangeAppointment(
+      t.db,
+      f.staff.session,
+      arrange(f.request.id, proposed.outcome.version, "confirm"),
+    );
+    const confirmed = (await notices(f.record.id)).filter(
+      (row) => event(row) === "viewing.confirmed",
+    );
+    const mine = confirmed.find(
+      (row) =>
+        (params(row).recipient as { kind: string; id?: string }).kind === "client" &&
+        (row.payload as { params: { recipient: { id?: string; partyId?: string } } }).params
+          .recipient.id === invited.partyId,
+    );
+    expect(mine).toMatchObject({ state: "cancelled", lastErrorCode: "notices_switched_off" });
+    expect((mine?.payload as { recipient: unknown } | undefined)?.recipient).toBeNull();
   });
 });
 

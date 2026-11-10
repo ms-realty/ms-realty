@@ -47,13 +47,20 @@ export const clientNoticeRecipient = z
     kind: z.literal("client"),
     partyId: z.uuid(),
     principalId: z.uuid(),
-    subscriptionId: z.uuid(),
-    subscriptionVersion: z.int().positive(),
+    /** service_choice: an explicit, current e-mail choice; deal_participation: the default. */
+    basis: z.enum(["service_choice", "deal_participation"]),
     contactId: z.uuid(),
     contactVersion: z.int().positive(),
-    policyVersion: z.string().min(1).max(300),
+    subscriptionId: z.uuid().optional(),
+    subscriptionVersion: z.int().positive().optional(),
+    policyVersion: z.string().min(1).max(300).optional(),
   })
-  .strict();
+  .strict()
+  .refine(
+    (r) =>
+      (r.basis === "service_choice") ===
+      Boolean(r.subscriptionId && r.subscriptionVersion && r.policyVersion),
+  );
 export const staffNoticeRecipient = z
   .object({ kind: z.literal("staff"), principalId: z.uuid() })
   .strict();

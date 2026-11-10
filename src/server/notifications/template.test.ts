@@ -32,6 +32,7 @@ const reference = "AP-2027-000042";
 const time = { startsAt: "2027-01-15T08:00:00.000Z", endsAt: "2027-01-15T09:00:00.000Z" };
 const clientRecipient = {
   kind: "client" as const,
+  basis: "service_choice" as const,
   partyId: "33333333-3333-4333-8333-333333333333",
   principalId: "44444444-4444-4444-8444-444444444444",
   subscriptionId: "55555555-5555-4555-8555-555555555555",

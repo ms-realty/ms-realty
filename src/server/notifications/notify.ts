@@ -6,6 +6,7 @@
 import "server-only";
 import { createHash } from "node:crypto";
 import { and, asc, eq } from "drizzle-orm";
+import { z } from "zod";
 import {
   type PublicLocale,
   publicLocales,
@@ -32,6 +33,7 @@ import { getEnv } from "../config/env";
 import type { HostOrigins } from "../config/hosts";
 import type { Executor } from "../db";
 import { enqueueMessage } from "../jobs/outbox";
+import { privacyProcessingRestricted } from "../privacy/restrictions";
 import {
   type ClientNoticeEvent,
   dealNoticeSubject,
@@ -52,7 +54,7 @@ import {
 /** Why a notice was not queued; stored as the ledger entry's `last_error_code`. */
 export const noticeSkipReasons = [
   "no_verified_email",
-  "no_service_email_choice",
+  "notices_switched_off",
   "access_revoked",
   "staff_inactive",
 ] as const;
@@ -235,7 +237,22 @@ async function queue(
   return { actionId: action.id, recipient, state: "queued", created: action.created };
 }
 
-/** The verified service-email recipient for a client party, or why there is none. */
+/** The bases on which a client receives deal notices (ADR 0014). */
+export const clientNoticeBases = ["service_choice", "deal_participation"] as const;
+export type ClientNoticeBasis = (typeof clientNoticeBases)[number];
+
+/** True when the client switched deal notices off, by preference or by withdrawing the choice. */
+export function dealNoticesSwitchedOff(contactPreferences: unknown) {
+  return (contactPreferences as { dealNotices?: unknown } | null)?.dealNotices === false;
+}
+
+/**
+ * The address a client party receives deal notices at, and on what basis, or why there is none.
+ * Service notices about the client's own Deal are on once their e-mail is verified and they take
+ * part in the Deal: an explicit, current "emails about my deals" choice decides the address;
+ * otherwise the verified sign-in address is used. Switching notices off in preferences, or
+ * withdrawing that choice without an active one, stops them.
+ */
 export async function resolveClientRecipient(
   db: Executor,
   caseId: string,
@@ -258,41 +275,72 @@ export async function resolveClientRecipient(
       ),
     );
   if (principal?.status !== "active" || !live.length) return { reason: "access_revoked" as const };
+  const pq = db
+    .select({ locale: parties.preferredLocale, preferences: parties.contactPreferences })
+    .from(parties)
+    .where(eq(parties.id, partyId));
+  const [party] = await (lock ? pq.for("share") : pq);
+  if (
+    dealNoticesSwitchedOff(party?.preferences) ||
+    (await privacyProcessingRestricted(db, partyId, "service_updates"))
+  )
+    return { reason: "notices_switched_off" as const };
   const choices = await db
-    .select({ id: subscriptions.id })
+    .select({ id: subscriptions.id, state: subscriptions.state })
     .from(subscriptions)
     .where(and(eq(subscriptions.partyId, partyId), eq(subscriptions.purpose, "service_updates")))
     .orderBy(asc(subscriptions.createdAt), asc(subscriptions.id));
   for (const choice of choices) {
+    if (choice.state !== "active") continue;
     const eligible = await eligibleCaseRecipient(db, caseId, choice.id, lock);
-    if (eligible) {
-      const [party] = await db
-        .select({ locale: parties.preferredLocale })
-        .from(parties)
-        .where(eq(parties.id, partyId));
+    if (eligible)
       return {
         principal,
-        eligible,
+        basis: "service_choice" as const,
+        address: eligible.address,
+        contactId: eligible.contactId,
+        contactVersion: eligible.contactVersion,
+        choice: {
+          subscriptionId: eligible.subscriptionId,
+          subscriptionVersion: eligible.subscriptionVersion,
+          policyVersion: eligible.policyVersion,
+        },
         locale: localeOf(
           party?.locale,
           principal.preferredLocale,
           eligible.policyVersion.split(":").at(-1),
         ),
       };
-    }
   }
-  const verified = await db
-    .select({ id: contactMethods.id })
+  // A withdrawn or paused choice, with no active one, is the client saying no.
+  if (choices.length && !choices.some((choice) => choice.state === "active"))
+    return { reason: "notices_switched_off" as const };
+  const cq = db
+    .select()
     .from(contactMethods)
     .where(
       and(
         eq(contactMethods.partyId, partyId),
         eq(contactMethods.kind, "email"),
-        eq(contactMethods.verification, "verified"),
+        eq(contactMethods.normalizedValue, principal.email.toLowerCase()),
       ),
     );
+  const [contact] = await (lock ? cq.for("share") : cq);
+  if (
+    contact?.verification !== "verified" ||
+    !contact.verifiedAt ||
+    contact.lastFailureAt ||
+    !z.email().safeParse(contact.value).success
+  )
+    return { reason: "no_verified_email" as const };
   return {
-    reason: verified.length ? ("no_service_email_choice" as const) : ("no_verified_email" as const),
+    principal,
+    basis: "deal_participation" as const,
+    address: contact.value,
+    contactId: contact.id,
+    contactVersion: contact.version,
+    choice: null,
+    locale: localeOf(party?.locale, principal.preferredLocale),
   };
 }
 
@@ -411,7 +459,7 @@ export async function notifyDealUpdate(
       await queue(
         db,
         key,
-        found.eligible.address,
+        found.address,
         {
           ...baseParams(update, hosts, found.locale, "client"),
           ...(step ? { step } : {}),
@@ -419,11 +467,10 @@ export async function notifyDealUpdate(
             kind: "client",
             partyId,
             principalId: found.principal.id,
-            subscriptionId: found.eligible.subscriptionId,
-            subscriptionVersion: found.eligible.subscriptionVersion,
-            contactId: found.eligible.contactId,
-            contactVersion: found.eligible.contactVersion,
-            policyVersion: found.eligible.policyVersion,
+            basis: found.basis,
+            contactId: found.contactId,
+            contactVersion: found.contactVersion,
+            ...(found.choice ?? {}),
           },
         },
         hosts,
