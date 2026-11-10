@@ -14,15 +14,15 @@
   "notKnown": "Not known",
   "pendingDraft": "Your saved changes are included: publishing uses the text and facts you saved last.",
   "checks": "Checked for you",
-  "allClear": "Nothing stops this listing from being published.",
-  "mustFix": "Must be fixed",
-  "worthALook": "Worth a look",
+  "allClear": "Nothing to fix.",
+  "mustFix": "Fix before publishing",
+  "worthALook": "Worth checking",
   "blockers": {
-    "title_missing": "There is no title in Bulgarian.",
-    "description_missing": "There is no description in Bulgarian.",
+    "title_missing": "There is no Bulgarian title. Add one in the listing text.",
+    "description_missing": "There is no Bulgarian description. Add one in the listing text.",
     "price_undecided": "There is no price. Enter the price, or choose “price on request”.",
-    "location_missing": "The location is missing.",
-    "not_available": "The listing is sold, let or taken off the market."
+    "location_missing": "The location is missing. Add the settlement in the listing facts.",
+    "not_available": "The property is sold, let or off the market, so it cannot be advertised. If it is on offer again, record that in Detailed review first."
   },
   "warnings": {
     "no_photos": "There are no photos to show. The listing will go online without photos.",
@@ -46,9 +46,9 @@
   "basis": "Published by {names} on their own check.",
   "unpublish": "Unpublish",
   "unpublishLead": "Unpublishing removes the listing from the website at once. You can publish it again later.",
-  "unpublishConfirm": "Remove this listing from the website.",
+  "unpublishConfirm": "Take this listing off the website",
   "unpublishReason": "Unpublished from the listing page.",
-  "unpublished": "{reference} is no longer on the website.",
+  "unpublished": "Unpublished. {reference} is no longer on the website.",
   "result": "Publishing result",
   "reasons": {
     "not_attested": "Tick the box to confirm that you checked the listing.",
@@ -65,7 +65,7 @@
   "ready": {
     "view": "Ready to publish",
     "lead": "These listings pass every check and are still on the market. Select the ones you checked, tick the box and publish them.",
-    "none": "No listings are ready to publish right now.",
+    "none": "No listings are ready to publish. A listing appears here when nothing needs fixing and it is not on the website yet.",
     "select": "Select {reference}",
     "selectAll": "Select all listings on this page",
     "attestation": "I checked each selected listing. The facts are right, the owners asked us to advertise them on these terms, we may use these photos, and they are available.",
@@ -77,7 +77,7 @@
     "summary": "Published: {n}. Needs attention: {total}."
   },
   "today": {
-    "title": "Ready to check and publish",
-    "next": "check and publish"
+    "title": "Check and publish {reference}",
+    "next": "nothing to fix first"
   }
 }

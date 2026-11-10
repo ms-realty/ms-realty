@@ -1,6 +1,7 @@
 "use client";
 // ADR 0012 forms: one attestation and Publish, Unpublish, and the bulk selection. Native forms
 // through ActionForm, so each works without JavaScript; the server rechecks everything.
+import { useSyncExternalStore } from "react";
 import { errorClass } from "@/ui/field-class";
 import type { FormAction, FormCopy, FormState } from "@/ui/form/contract";
 import { ActionForm } from "@/ui/form/form";
@@ -26,7 +27,7 @@ function Confirm({
 }) {
   return (
     <div data-invalid={error ? "true" : undefined}>
-      <label className="flex items-start gap-3 text-body" htmlFor={id}>
+      <label className="flex min-h-control items-start gap-3 py-2 text-body" htmlFor={id}>
         <input
           id={id}
           type="checkbox"
@@ -125,6 +126,7 @@ export function UnpublishForm({
       copy={formCopy}
       labels={{ confirmed: labels.confirmed }}
       submitLabel={labels.submit}
+      disclosure={labels.submit}
     >
       {(form) => {
         const confirmed = form.field("confirmed");
@@ -154,6 +156,8 @@ export type BulkRow = {
   selectLabel: string;
 };
 
+const noSubscription = () => () => {};
+
 export function BulkPublishForm({
   action,
   initialState,
@@ -171,6 +175,11 @@ export function BulkPublishForm({
   rows: readonly BulkRow[];
   labels: { attested: string; submit: string; list: string; selectAll: string };
 }) {
+  const hydrated = useSyncExternalStore(
+    noSubscription,
+    () => true,
+    () => false,
+  );
   return (
     <ActionForm
       action={action}
@@ -188,40 +197,49 @@ export function BulkPublishForm({
         return (
           <>
             <fieldset className="grid gap-3">
-              <legend className="mb-2 text-dense font-semibold">{labels.list}</legend>
-              <label className="flex min-h-control items-center gap-3 text-dense text-text-muted">
-                <input
-                  type="checkbox"
-                  className="size-5 accent-action"
-                  disabled={attested.readOnly}
-                  onChange={(event) => {
-                    const fieldset = event.currentTarget.closest("fieldset");
-                    for (const box of fieldset?.querySelectorAll<HTMLInputElement>(
-                      'input[name="reference"]',
-                    ) ?? [])
-                      box.checked = event.currentTarget.checked;
-                  }}
-                />
-                {labels.selectAll}
-              </label>
+              <legend className="sr-only">{labels.list}</legend>
+              {/* Select all needs a script; without one each listing keeps its own box. */}
+              {hydrated ? (
+                <label className="flex min-h-control items-center gap-3 text-dense text-text-muted">
+                  <input
+                    type="checkbox"
+                    className="size-5 accent-action"
+                    disabled={attested.readOnly}
+                    onChange={(event) => {
+                      const fieldset = event.currentTarget.closest("fieldset");
+                      for (const box of fieldset?.querySelectorAll<HTMLInputElement>(
+                        'input[name="reference"]',
+                      ) ?? [])
+                        box.checked = event.currentTarget.checked;
+                    }}
+                  />
+                  {labels.selectAll}
+                </label>
+              ) : null}
               <ul className="divide-y divide-divider border-y border-divider">
                 {rows.map((row) => (
-                  <li key={row.reference} className="flex items-start gap-3 py-3">
-                    <input
-                      id={`ready-${row.reference}`}
-                      type="checkbox"
-                      name="reference"
-                      value={row.reference}
-                      aria-label={row.selectLabel}
-                      disabled={attested.readOnly}
-                      className="mt-1 size-5 shrink-0 accent-action"
-                    />
+                  <li key={row.reference} className="flex items-start gap-2 py-2">
+                    {/* 44 px target around the 20 px box (WCAG 2.5.8 and the UI kit minimum). */}
+                    <label className="flex size-11 shrink-0 items-center justify-center rounded-control hover:bg-subtle">
+                      <input
+                        id={`ready-${row.reference}`}
+                        type="checkbox"
+                        name="reference"
+                        value={row.reference}
+                        aria-label={row.selectLabel}
+                        disabled={attested.readOnly}
+                        className="size-5 accent-action"
+                      />
+                    </label>
                     <input type="hidden" name={`version:${row.reference}`} value={row.version} />
-                    <span className="grid min-w-0 gap-1">
+                    <span className="grid min-w-0 gap-1 py-2">
                       <a href={row.href} lang="bg" className="font-semibold text-action underline">
                         {row.title}
                       </a>
-                      <span className="text-dense text-text-muted">{row.detail}</span>
+                      <span className="flex flex-wrap gap-x-4 text-dense text-text-muted">
+                        <bdi>{row.reference}</bdi>
+                        {row.detail ? <span>{row.detail}</span> : null}
+                      </span>
                       {row.warnings.map((warning) => (
                         <span key={warning} className="text-caption text-warning">
                           {warning}

@@ -18,8 +18,10 @@ const unreviewed = { reviewed: false, sourceClass: "legacy_import" as const };
 try {
   const broker = await staffFixture(db);
   // Same lock and unique reference rewrite as the other listing fixtures.
-  const listing = (title: string) =>
+  const listing = (name: string) =>
     db.transaction(async (tx) => {
+      // A distinct title per run: other seeded listings may share the base name on the site.
+      const title = `${name} ${randomBytes(3).toString("hex")}`;
       await tx.execute(
         sql`select pg_advisory_xact_lock(hashtextextended('discovery-synthetic-fixtures', 0))`,
       );
@@ -55,7 +57,7 @@ try {
         .update(schema.properties)
         .set({ reference: `PR-2026-${number}` })
         .where(eq(schema.properties.id, item.propertyId));
-      return { reference, listingId: item.listingId };
+      return { reference, listingId: item.listingId, title };
     });
   const single = await listing("Синтетичен апартамент за публикуване");
   const first = await listing("Синтетична къща за масово публикуване");

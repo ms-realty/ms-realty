@@ -16,7 +16,7 @@ test.afterAll(async () => connection.end());
 
 type Seed = {
   token: string;
-  single: { reference: string; listingId: string };
+  single: { reference: string; listingId: string; title: string };
   bulk: { reference: string; listingId: string }[];
 };
 function seed(): Seed {
@@ -36,17 +36,15 @@ function seed(): Seed {
   );
 }
 async function signIn(page: Page, token: string) {
-  await page
-    .context()
-    .addCookies([
-      {
-        name: "msr_staff_session",
-        value: token,
-        url: origins.staff,
-        httpOnly: true,
-        sameSite: "Lax",
-      },
-    ]);
+  await page.context().addCookies([
+    {
+      name: "msr_staff_session",
+      value: token,
+      url: origins.staff,
+      httpOnly: true,
+      sameSite: "Lax",
+    },
+  ]);
 }
 const live = async (listingId: string) =>
   (
@@ -69,7 +67,7 @@ test.describe("without JavaScript", () => {
     await page.getByRole("link", { name: "Publish", exact: true }).first().click();
     await expect(page).toHaveURL(new RegExp(`/en/inventory/${f.single.reference}/publish$`));
     await expect(page.getByRole("heading", { name: "What the public will see" })).toBeVisible();
-    await expect(page.getByText("Синтетичен апартамент за публикуване").first()).toBeVisible();
+    await expect(page.getByText(f.single.title).first()).toBeVisible();
     await expect(page.getByRole("heading", { name: "Checked for you" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Detailed review" }).last()).toHaveAttribute(
       "href",
@@ -101,14 +99,17 @@ test.describe("without JavaScript", () => {
     );
     const detail = await request.get(hostUrl("public", publicPath));
     expect(detail.status()).toBe(200);
-    expect(await detail.text()).toContain("Синтетичен апартамент за публикуване");
+    expect(await detail.text()).toContain(f.single.title);
     const [attested] = await connection`select actor_kind, payload from audit_events
         where action = 'listing.publication.attested' and record_id = ${f.single.listingId}`;
     expect(attested?.actor_kind).toBe("staff");
     expect(attested?.payload).toMatchObject({ basis: "staff_attestation" });
 
-    await page.getByRole("checkbox", { name: "Remove this listing from the website." }).check();
-    await page.getByRole("button", { name: "Unpublish", exact: true }).click();
+    // Publish is the screen's one filled action; Unpublish waits behind a deliberate disclosure.
+    await expect(page.locator('button[type="submit"]', { hasText: "Unpublish" })).toBeHidden();
+    await page.locator("summary", { hasText: "Unpublish" }).click();
+    await page.getByRole("checkbox", { name: "Take this listing off the website" }).check();
+    await page.locator('button[type="submit"]', { hasText: "Unpublish" }).click();
     await expect(
       page.getByText(`${f.single.reference} is no longer on the website.`),
     ).toBeVisible();
@@ -116,7 +117,7 @@ test.describe("without JavaScript", () => {
     // The detail URL keeps answering with the safe "not available here" identity, never the copy.
     const gone = await (await request.get(hostUrl("public", publicPath))).text();
     expect(gone).toContain("Този имот не е достъпен тук.");
-    expect(gone).not.toContain("Синтетичен апартамент за публикуване");
+    expect(gone).not.toContain(f.single.title);
   });
 });
 

@@ -69,7 +69,7 @@ export async function ReadyToPublish({ locale, actor }: { locale: string; actor:
             reference: row.reference,
             version: row.version,
             title: row.title,
-            detail: [row.reference, row.settlement].filter(Boolean).join(" · "),
+            detail: row.settlement,
             warnings: row.warnings.map((code) => copy.warnings[code]),
             href: `/${locale}/inventory/${encodeURIComponent(row.reference)}/publish`,
             selectLabel: fillCopy(copy.ready.select, { reference: row.reference }),

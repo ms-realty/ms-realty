@@ -89,13 +89,7 @@ export default async function PublishPage({
 
   return (
     <div className="flex flex-col gap-6 px-gutter py-5 sm:px-gutter-wide sm:py-6">
-      <ListingIdentity
-        locale={locale}
-        reference={ref}
-        title={content.title}
-        heading
-        meta={live ? copy.live : null}
-      />
+      <ListingIdentity locale={locale} reference={ref} title={content.title} heading />
       <ListingNavigation locale={locale} reference={ref} current="publish" />
 
       {query.unpublished && !live ? (
@@ -118,7 +112,7 @@ export default async function PublishPage({
           <p role={query.done ? "status" : undefined}>
             {fillCopy(copy.liveLead, { reference: ref })}
           </p>
-          <a href={publicUrl} className={buttonClass("secondary", "self-start")}>
+          <a href={publicUrl} className={buttonClass("secondary", "justify-self-start")}>
             {copy.liveAt}
           </a>
           {view.live.length > 1 ? (
@@ -133,7 +127,6 @@ export default async function PublishPage({
           ) : null}
           {view.mayPublish ? (
             <div className="grid gap-3 border-t border-divider pt-4">
-              <h3 className="font-semibold">{copy.unpublish}</h3>
               <p className="text-dense text-text-muted">{copy.unpublishLead}</p>
               <UnpublishForm
                 action={unpublishListingAction.bind(null, locale, ref)}
@@ -156,7 +149,6 @@ export default async function PublishPage({
 
       {!live || newerVersion ? (
         <>
-          <p className="max-w-reading">{copy.lead}</p>
           <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
             <section aria-labelledby="publish-preview" className="grid min-w-0 gap-4">
               <h2 id="publish-preview" className="text-section font-semibold">
@@ -193,9 +185,11 @@ export default async function PublishPage({
                           </li>
                         ))}
                       </ul>
-                      <p className="text-dense">
-                        {fillCopy(copy.photoCount, { n: shownPhotos.length })}
-                      </p>
+                      {shownPhotos.length > 8 ? (
+                        <p className="text-dense">
+                          {fillCopy(copy.photoCount, { n: shownPhotos.length })}
+                        </p>
+                      ) : null}
                     </>
                   ) : (
                     <p className="text-dense">{copy.noPhotos}</p>
@@ -216,7 +210,7 @@ export default async function PublishPage({
                 {copy.checks}
               </h2>
               {checks.blockers.length === 0 && checks.warnings.length === 0 ? (
-                <Notice tone="success" title={copy.allClear} />
+                <p className="text-dense text-text-muted">{copy.allClear}</p>
               ) : null}
               {checks.blockers.length ? (
                 <Notice tone="error" title={copy.mustFix}>

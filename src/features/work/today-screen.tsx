@@ -827,11 +827,11 @@ function ListingReviewRow({
         href={`${path}/publish`}
         Icon={HomeIcon}
         data={{ "data-listing-review": item.id }}
-        title={
-          <>
-            {publish.title} · <bdi>{item.reference}</bdi>
-          </>
-        }
+        title={publish.title
+          .split("{reference}")
+          .flatMap((part, index) =>
+            index === 0 ? [part] : [<bdi key={item.reference}>{item.reference}</bdi>, part],
+          )}
         details={[
           owner(locale, item.ownerName, item.needsCoverage),
           ...(item.dueAt ? [["time", due(locale, item.dueAt, now)] satisfies Detail] : []),
