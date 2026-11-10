@@ -1,5 +1,6 @@
 // P05/P21: retain safe identity when a publication is restricted or withdrawn.
 import { notFound } from "next/navigation";
+import { ButlerAnswers } from "@/features/butler-answers/block";
 import { ApprovedGallery } from "@/features/discovery/approved-media";
 import { discoveryCopy } from "@/features/discovery/copy";
 import { Availability, ListingFacts, ListingGrid } from "@/features/discovery/listing-card";
@@ -28,8 +29,10 @@ export async function generateMetadata({
 }
 export default async function PropertyPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string; reference: string; slug: string }>;
+  searchParams?: Promise<{ butler?: string | string[] }>;
 }) {
   const { locale, reference, slug } = normalizePublicListingRoute(await params);
   const copy = discoveryCopy(locale);
@@ -143,6 +146,11 @@ export default async function PropertyPage({
               {listing.description}
             </p>
           ) : null}
+          <ButlerAnswers
+            reference={listing.reference}
+            locale={locale}
+            butler={(await searchParams)?.butler}
+          />
           <SearchMap
             locale={locale}
             copy={mapCopy(locale, "listing")}

@@ -5,6 +5,7 @@ import {
   appointmentsConfiguredIn,
   assistantLabel,
   availabilityReviewIntervalDays,
+  butlerLevels,
   currencyCodes,
   dealPathActors,
   dealPathTemplates,
@@ -207,5 +208,9 @@ describe("tenant profile", () => {
       expect(serviceNotifications.events[event]).toBe(true);
       expect(serviceNotificationEnabled(event)).toBe(true);
     }
+  });
+
+  it("lets Butler answer visitors on listing pages for this brand (ADR 0011 §5, ADR 0017)", () => {
+    expect(butlerLevels).toEqual({ publicAnswers: "act" });
   });
 });

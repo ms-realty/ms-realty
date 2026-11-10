@@ -150,6 +150,8 @@ export async function registerWorkers(queue: JobQueue, deps: WorkerDependencies)
   await queue.work("rate_limit.prune", async () => {
     await pruneRateLimits(deps.db);
     await pruneReauthDrafts(deps.db);
+    const { pruneAnswerText } = await import("../ai/public-answer");
+    await pruneAnswerText(deps.db);
   });
   await queue.work("files.process", async ({ kind, id }) => {
     const { processFileWorker } = await import("../files/process");
