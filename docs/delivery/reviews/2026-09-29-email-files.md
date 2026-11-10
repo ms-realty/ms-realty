@@ -20,6 +20,7 @@ selections through validation. This is requested-document correspondence, not un
 sharing of any document a broker can read. Inbound file ingestion remains open.
 
 Evidence in `/Users/ivan/Code/.artifacts/ms-realty/recovery/20260929/`:
+
 - `email-files-tests.log`: 34 integration checks including cross-party isolation, replacement,
   changed scan, internal audience, revoked grant, expired request, missing/corrupt bytes,
   exact rendered attachment and no pre-approval send.

@@ -32,6 +32,7 @@ Owner pick: the staff noun is «Сделка / Сделки». Clients see the s
 | 7   | Owner preview                     | какво сте възложили на агенцията по тази сделка                          | what you've authorised the agency to do for this deal                                | что Вы поручили агентству по этой сделке                                         | wozu Sie die Agentur für dieses Immobiliengeschäft beauftragt haben                                         | waarvoor u het kantoor voor deze vastgoedzaak hebt ingeschakeld                                 | τι έχετε αναθέσει στο γραφείο για αυτή τη συναλλαγή                                          | מה הסמכתם את הסוכנות לעשות בעסקה הזו                         |
 
 Notes:
+
 - A client screen that knows the kind uses the kind title from the first table in titles, buttons and emails («Отворете покупката», «Обратно към продажбата»); the generic strings above are the fallback.
 - Item 7 keeps the meaning of the mandate («пълномощие») in plain words; the legal document itself keeps its own name where it is shown as a document.
 - Staff strings: «Сделка / Сделки», en "Deal / Deals", ru «Сделка / Сделки».
