@@ -8,7 +8,10 @@ import { formatDateTime } from "@/i18n/format";
 import { currentStaffAccess } from "@/server/auth/pages";
 import { requireFreshAuth, requireLiveSession } from "@/server/auth/sessions";
 import { AppError } from "@/server/errors";
+import { fileServices } from "@/server/files/config";
 import { action } from "@/server/http/next";
+import { carryOverForListing } from "@/server/media/carry-over";
+import { legacyMediaSource } from "@/server/media/legacy-source";
 import {
   type AttestedPublishResult,
   type PublishBlockReason,
@@ -322,4 +325,23 @@ export async function bulkPublishAction(
       },
     },
   };
+}
+
+/**
+ * ADR 0016: copy this listing's photos from the old website now. A native form; the page reads
+ * what happened from the photos themselves, so the only signal passed back is "try again".
+ */
+export async function copyLegacyPhotosAction(locale: string, reference: string) {
+  if (!isStaffLocale(locale)) throw new AppError("not_found");
+  const path = `/${locale}/inventory/${encodeURIComponent(reference)}/publish`;
+  const source = legacyMediaSource();
+  if (!source) redirect(path);
+  const result = await action(
+    async ({ db }) => {
+      const session = await staffSession(db);
+      return carryOverForListing(db, fileServices(), source, session, reference);
+    },
+    { requireSession: true },
+  );
+  redirect(result.ok && !result.data.outcomes.unavailable ? path : `${path}?photos=retry`);
 }

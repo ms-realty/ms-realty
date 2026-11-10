@@ -32,6 +32,11 @@ import type { Actor } from "@/domain/capabilities";
 import type { FactState } from "@/domain/facts";
 import { type PublicLocale, sourceLocale } from "@/domain/ids";
 import { type FactRecord, needsHumanReview, requiredFactKeys } from "@/domain/listing-readiness";
+import {
+  admissionAccepted,
+  isLegacyPhotoAwaitingCarryOver,
+  isLegacyPhotoLeftOut,
+} from "@/domain/media";
 import { parseMediaRenditions } from "@/domain/media-rendition";
 import {
   type PublishBlocker,
@@ -112,15 +117,28 @@ export type AttestedPublishResult =
 
 // Photos.
 
-/** shown: cleared now · clearable: processed, waiting for a person · not_ready · rejected. */
-export type PhotoReadiness = "shown" | "clearable" | "not_ready" | "rejected";
+/**
+ * shown: cleared now · clearable: processed, waiting for a person · not_copied: a photo from the
+ * old website whose bytes the carry-over has not brought into storage yet (ADR 0016) ·
+ * not_ready · rejected.
+ */
+export type PhotoReadiness =
+  | "shown"
+  | "clearable"
+  | "not_copied"
+  | "left_out"
+  | "not_ready"
+  | "rejected";
 
 export function photoReadiness(asset: AssetRow): PhotoReadiness {
   if (asset.review === "rejected" || asset.rights === "rejected") return "rejected";
   if (mediaAssetEligible(asset) && !asset.detailsDraft) return "shown";
+  if (isLegacyPhotoAwaitingCarryOver(asset)) return "not_copied";
+  if (isLegacyPhotoLeftOut(asset)) return "left_out";
   const processed =
     asset.sealedKey &&
     asset.sha256 &&
+    admissionAccepted(asset) &&
     asset.scan === "clean" &&
     asset.scannedSha256 === asset.sha256 &&
     asset.scannedAt &&
@@ -249,6 +267,7 @@ export function checkInput(
     photos: {
       ready: photos.filter((p) => p === "shown" || p === "clearable").length,
       notReady: photos.filter((p) => p === "not_ready").length,
+      notCopied: photos.filter((p) => p === "not_copied").length,
     },
     placeNames: [property.settlement, property.region, property.neighborhood ?? ""],
     texts: [content.title, content.description],
@@ -874,7 +893,10 @@ export async function publishListingByAttestation(
   // Under a second-person policy, the author of the content may not publish it alone.
   const author = view.content.pendingDraft ? actor.id : view.revision?.createdById;
   if (policy.independentReview && author === actor.id) return blocked("another_person_required");
-  if (policy.photosRequired && view.photos.some((p) => p.readiness === "not_ready"))
+  if (
+    policy.photosRequired &&
+    view.photos.some((p) => p.readiness === "not_ready" || p.readiness === "not_copied")
+  )
     return blocked("photos_required");
 
   let attestation: Awaited<ReturnType<typeof recordAttestation>>["outcome"];

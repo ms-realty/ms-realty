@@ -5,7 +5,11 @@ import { randomUUID } from "node:crypto";
 import { sourceLocale } from "@/config/tenant";
 import { getDb } from "@/db/client";
 import { bedroomCount, inventoryCopy } from "@/features/inventory/copy";
-import { publishListingAction, unpublishListingAction } from "@/features/inventory/publish-actions";
+import {
+  copyLegacyPhotosAction,
+  publishListingAction,
+  unpublishListingAction,
+} from "@/features/inventory/publish-actions";
 import { fillCopy, publishCopy } from "@/features/inventory/publish-copy";
 import { PublishForm, UnpublishForm } from "@/features/inventory/publish-forms";
 import { PrivateMediaPreview } from "@/features/inventory/thumbnail";
@@ -13,9 +17,12 @@ import { ListingIdentity, ListingNavigation } from "@/features/inventory/workspa
 import { privateRead } from "@/features/work/screens";
 import { localeEndonyms } from "@/i18n/config";
 import { requireStaffPage } from "@/server/auth/pages";
+import { can } from "@/server/authz";
 import { getEnv } from "@/server/config/env";
+import { legacyMediaSource } from "@/server/media/legacy-source";
 import { publishView } from "@/server/publication/attested";
 import { buttonClass } from "@/ui/button-class";
+import { SubmitButton } from "@/ui/form/submit-button";
 import { Notice } from "@/ui/notice";
 
 function money(locale: string, value: unknown) {
@@ -40,7 +47,7 @@ export default async function PublishPage({
   searchParams,
 }: {
   params: Promise<{ locale: string; reference: string }>;
-  searchParams: Promise<{ done?: string; unpublished?: string }>;
+  searchParams: Promise<{ done?: string; unpublished?: string; photos?: string }>;
 }) {
   const { locale, reference } = await params;
   const query = await searchParams;
@@ -54,13 +61,33 @@ export default async function PublishPage({
   const { content, checks } = view;
   const live = view.live.length > 0;
   const publicUrl = `${getEnv().hosts.public}/${sourceLocale}/properties/${ref}/${ref.toLowerCase()}`;
+  // Photos copied after the listing went live are new content too: they show once republished.
   const newerVersion =
-    content.pendingDraft || view.listing.approvedRevisionId !== (view.revision?.id ?? null);
+    content.pendingDraft ||
+    view.listing.approvedRevisionId !== (view.revision?.id ?? null) ||
+    view.photos.some((photo) => photo.readiness === "clearable");
   const showForm = view.mayPublish && checks.blockers.length === 0 && (!live || newerVersion);
   const notKnown = copy.notKnown;
   const shownPhotos = view.photos.filter(
     (photo) => photo.readiness === "shown" || photo.readiness === "clearable",
   );
+  // ADR 0016: photos from the old website that were never copied, and those left out.
+  const notCopied = view.photos.filter((photo) => photo.readiness === "not_copied").length;
+  const leftOut = view.photos.filter((photo) => photo.readiness === "left_out").length;
+  const copyConfigured = (() => {
+    try {
+      return legacyMediaSource() !== null;
+    } catch {
+      return false;
+    }
+  })();
+  const mayCopy =
+    notCopied > 0 &&
+    (await can(getDb(), session.actor, "media.manage", {
+      type: "listing",
+      id: view.listing.id,
+      propertyId: view.listing.propertyId,
+    }));
   const preview: [string, string][] = [
     [
       copy.price,
@@ -171,6 +198,38 @@ export default async function PublishPage({
                 </dl>
                 <div className="grid gap-2">
                   <h4 className="text-dense text-text-muted">{copy.photos}</h4>
+                  {notCopied ? (
+                    <div data-carry-over>
+                      <Notice
+                        tone="warning"
+                        title={copy.carryOver.title}
+                        action={
+                          copyConfigured && mayCopy ? (
+                            <form action={copyLegacyPhotosAction.bind(null, locale, ref)}>
+                              <SubmitButton className={buttonClass("secondary")}>
+                                {copy.carryOver.action}
+                              </SubmitButton>
+                            </form>
+                          ) : null
+                        }
+                      >
+                        <p>{fillCopy(copy.carryOver.lead, { n: notCopied })}</p>
+                        {query.photos === "retry" ? (
+                          <p role="status" className="mt-2">
+                            {copy.carryOver.retry}
+                          </p>
+                        ) : null}
+                        {copyConfigured && mayCopy ? null : (
+                          <p className="mt-2">{copy.carryOver.unconfigured}</p>
+                        )}
+                      </Notice>
+                    </div>
+                  ) : null}
+                  {leftOut ? (
+                    <p className="text-dense text-text-muted" data-carry-over-left-out>
+                      {fillCopy(copy.carryOver.leftOut, { n: leftOut })}
+                    </p>
+                  ) : null}
                   {shownPhotos.length ? (
                     <>
                       <ul className="grid grid-cols-2 gap-2 sm:grid-cols-4">

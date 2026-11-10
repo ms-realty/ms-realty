@@ -6,7 +6,12 @@ import { randomUUID } from "node:crypto";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import { getDb } from "@/db/client";
-import { mediaModifications, moveRelation } from "@/domain/media";
+import {
+  isLegacyPhotoAwaitingCarryOver,
+  isLegacyPhotoLeftOut,
+  mediaModifications,
+  moveRelation,
+} from "@/domain/media";
 import { fileError, fileLabel, filesCopy, fillCopy } from "@/features/files/copy";
 import { FileButton, FileEnvelope } from "@/features/files/forms";
 import { inventoryCopy } from "@/features/inventory/copy";
@@ -27,6 +32,7 @@ import {
   MediaGallery,
   MediaReviewGuard,
 } from "@/features/inventory/media-workbench";
+import { publishCopy } from "@/features/inventory/publish-copy";
 import { PrivateMediaPreview } from "@/features/inventory/thumbnail";
 import { ListingIdentity, ListingNavigation } from "@/features/inventory/workspace";
 import { workflowCopy } from "@/i18n/workflow-copy";
@@ -61,6 +67,23 @@ function Preview({ row, label, className }: { row: MediaRow; label: string; clas
       unavailable={label}
       className={className}
     />
+  );
+}
+
+/** ADR 0016: where a photo from the old website came from, or why it cannot be used. */
+function LegacyOrigin({ asset, locale }: { asset: MediaRow["asset"]; locale: string }) {
+  if (!asset.legacyReference) return null;
+  const copy = publishCopy(locale).carryOver;
+  if (isLegacyPhotoLeftOut(asset))
+    return (
+      <div data-legacy-origin="left_out">
+        <Notice tone="warning">{copy.unusable}</Notice>
+      </div>
+    );
+  return (
+    <p data-legacy-origin className="text-dense text-text-muted">
+      {isLegacyPhotoAwaitingCarryOver(asset) ? copy.notCopied : copy.fromOldSite}
+    </p>
   );
 }
 
@@ -99,6 +122,7 @@ export default async function MediaPage({
     },
   );
   const copy = filesCopy(locale);
+  const carryOverCopy = publishCopy(locale).carryOver;
   const workspace = workflowCopy(locale, "listingWorkspace");
   const query = await searchParams;
   // Readback: a receipt counts only for this listing, and it names its own target photo.
@@ -574,6 +598,8 @@ export default async function MediaPage({
                 {workspace.detailsPending}
               </p>
             ) : null}
+            <LegacyOrigin asset={selected.asset} locale={locale} />
+
             <MediaRequestKeeper
               storageKey={requestStorageKey(selected.relation.id)}
               acknowledgedKey={receipt?.requestKey}
@@ -665,15 +691,17 @@ export default async function MediaPage({
               </summary>
               <dl className="mt-2 grid gap-2 text-dense">
                 {[
-                  [copy.scan, selected.asset.scan],
-                  [copy.processing, selected.asset.processing],
-                  [copy.review, selected.asset.review],
-                  [copy.rights, selected.asset.rights],
-                  [copy.audience, selected.asset.audience],
-                ].map(([label, state]) => (
+                  selected.asset.admission === "reencode" && selected.asset.scan === "clean"
+                    ? [carryOverCopy.imageCheck, carryOverCopy.imageCheckPassed]
+                    : [copy.scan, fileLabel(copy, selected.asset.scan)],
+                  [copy.processing, fileLabel(copy, selected.asset.processing)],
+                  [copy.review, fileLabel(copy, selected.asset.review)],
+                  [copy.rights, fileLabel(copy, selected.asset.rights)],
+                  [copy.audience, fileLabel(copy, selected.asset.audience)],
+                ].map(([label, value]) => (
                   <div key={label} className="flex flex-wrap justify-between gap-x-4 gap-y-1">
                     <dt className="text-text-muted">{label}</dt>
-                    <dd>{fileLabel(copy, state ?? "unknown")}</dd>
+                    <dd>{value}</dd>
                   </div>
                 ))}
               </dl>

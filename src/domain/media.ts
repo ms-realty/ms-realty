@@ -2,6 +2,8 @@
 // Bytes are sealed under a server-only key before scanning; rights, scan, processing and human
 // review are separate facts, and none of them alone makes an asset publishable.
 
+import { type MediaPolicy, mediaPolicy } from "../config/tenant";
+
 export const mediaKinds = ["photo", "floor_plan", "video", "render", "virtual_tour"] as const;
 export type MediaKind = (typeof mediaKinds)[number];
 
@@ -42,6 +44,57 @@ export type MediaReviewState = (typeof mediaReviewStates)[number];
 export const scanStates = ["pending", "clean", "infected", "failed"] as const;
 export type ScanState = (typeof scanStates)[number];
 
+/**
+ * Which check admitted the sealed bytes (ADR 0016). `scan` and its evidence columns record the
+ * outcome of that check for the exact digest: the malware scanner, or a full decode and fresh
+ * re-encode of an image into renditions (only pixels survive; the original is never served).
+ */
+export const mediaAdmissions = ["virus_scan", "reencode"] as const;
+export type MediaAdmission = (typeof mediaAdmissions)[number];
+
+/** Raster types a decode-and-re-encode admission can vouch for. */
+export const reencodableContentTypes = ["image/jpeg", "image/png", "image/webp"] as const;
+
+/**
+ * Whether the recorded admission still counts under the brand's media policy. A scanner result
+ * always counts; a re-encode counts only for a raster image while the policy admits images by
+ * re-encoding, so a brand that moves to scanner-first stops serving re-encoded media at once.
+ */
+export function admissionAccepted(
+  asset: { readonly admission: MediaAdmission; readonly contentType: string },
+  policy: MediaPolicy = mediaPolicy,
+): boolean {
+  if (asset.admission === "virus_scan") return true;
+  return (
+    policy.imageAdmission === "reencode" &&
+    (reencodableContentTypes as readonly string[]).includes(asset.contentType)
+  );
+}
+
+/**
+ * A photo imported from the old website whose bytes were never brought into the system's own
+ * storage: the legacy import recorded only its key (ADR 0016). The carry-over job ends this.
+ */
+export function isLegacyPhotoAwaitingCarryOver(asset: {
+  readonly legacyReference: string | null;
+  readonly sealedKey: string | null;
+  readonly processing: ProcessingState;
+}): boolean {
+  return Boolean(asset.legacyReference) && !asset.sealedKey && asset.processing !== "failed";
+}
+
+/**
+ * A photo from the old website the carry-over left out: missing at the source, too large, not
+ * an image or not decodable. It is never shown and never blocks its listing.
+ */
+export function isLegacyPhotoLeftOut(asset: {
+  readonly legacyReference: string | null;
+  readonly sealedKey: string | null;
+  readonly processing: ProcessingState;
+}): boolean {
+  return Boolean(asset.legacyReference) && !asset.sealedKey && asset.processing === "failed";
+}
+
 /** Safe processing: metadata stripping and content-addressed derivatives. */
 export const processingStates = ["pending", "processing", "ready", "failed"] as const;
 export type ProcessingState = (typeof processingStates)[number];
@@ -76,12 +129,25 @@ export interface MediaEligibilityInput {
   readonly modification: MediaModification;
   /** Disclosure text shown next to modified media. */
   readonly modificationDisclosure?: string | null;
+  /** Which check produced `scan`; absent means the malware scanner. */
+  readonly admission?: MediaAdmission;
+  readonly contentType?: string;
 }
 
 /** Publication-eligible only when every separate fact allows it (AT28, AT42). */
-export function isMediaPublishable(asset: MediaEligibilityInput): boolean {
+export function isMediaPublishable(
+  asset: MediaEligibilityInput,
+  policy: MediaPolicy = mediaPolicy,
+): boolean {
   if (asset.audience !== "public_candidate" || !asset.sealedSha256) return false;
   if (asset.scan !== "clean" || asset.processing !== "ready") return false;
+  if (
+    !admissionAccepted(
+      { admission: asset.admission ?? "virus_scan", contentType: asset.contentType ?? "" },
+      policy,
+    )
+  )
+    return false;
   if (asset.rights !== "cleared" || asset.review !== "approved") return false;
   return asset.modification === "none" || Boolean(asset.modificationDisclosure?.trim());
 }

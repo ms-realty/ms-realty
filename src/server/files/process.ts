@@ -1,16 +1,17 @@
 import "server-only";
 import { eq } from "drizzle-orm";
+import { scanFirstMediaPolicy } from "@/config/tenant";
 import { documents, documentVersions, mediaAssets } from "@/db/schema";
 import type { Actor } from "@/domain/capabilities";
-import type { MediaRendition } from "@/domain/media-rendition";
+import { admissionAccepted } from "@/domain/media";
 import { recordAudit } from "../audit";
 import type { Session } from "../auth/sessions";
 import { assertCan } from "../authz";
 import type { Executor } from "../db";
 import { AppError } from "../errors";
+import { admissionRuleFor, reencodeAdmissionVersion, storeRenditions } from "../media/admission";
 import { type FileKind, targetAccess } from "./access";
 import type { FileServices } from "./config";
-import { derivatives } from "./inspect";
 import { digestOf } from "./storage";
 
 async function process(
@@ -45,7 +46,12 @@ async function process(
         throw new AppError("not_found");
     }
     if (!file.sealedKey || !file.sha256) throw new AppError("transition_denied");
+    // The brand's rule for this file (ADR 0016): an image may be admitted by re-encoding it,
+    // a document always by the scanner. Without a policy the services scan first.
+    const policy = services.mediaPolicy ?? scanFirstMediaPolicy;
+    const rule = kind === "media" ? admissionRuleFor(file.contentType, policy) : "virus_scan";
     if (
+      (kind === "document" || ("admission" in file && admissionAccepted(file, policy))) &&
       file.scan === "clean" &&
       file.scannedSha256 === file.sha256 &&
       file.scannerVersion &&
@@ -53,6 +59,8 @@ async function process(
       (kind === "document" || ("processing" in file && file.processing === "ready"))
     )
       return { state: "clean" as const, id };
+    if (kind === "media" && "admission" in file && rule === "reencode")
+      return admitByReencode(tx, services, actor, file);
     if (!services.scanner) {
       // Seal/receipt is not scan evidence. Keep quarantine and all download/review
       // gates intact, and acknowledge the staging job without repeated offline scans.
@@ -69,16 +77,7 @@ async function process(
     let scannerVersion: string | null = null;
     let scannedAt: Date | null = null;
     let scannedSha256: string | null = null;
-    let output:
-      | {
-          derivativeKey: string;
-          derivativeSha256: string;
-          derivativeContentType: string;
-          derivativeRenditions: readonly MediaRendition[];
-          width: number;
-          height: number;
-        }
-      | undefined;
+    let output: Awaited<ReturnType<typeof storeRenditions>> | undefined;
     try {
       const bytes = await services.storage.read(file.sealedKey);
       if (digestOf(bytes) !== file.sha256 || bytes.length !== file.byteSize)
@@ -95,36 +94,8 @@ async function process(
       scannerVersion = scan.scannerVersion;
       scannedAt = scan.scannedAt;
       scannedSha256 = scan.sha256;
-      if (kind === "media" && scanState === "clean") {
-        const variants = await derivatives(bytes);
-        const sealed: MediaRendition[] = [];
-        for (const variant of variants) {
-          const digest = digestOf(variant.bytes);
-          const key = `derivatives/${id}/${digest}.webp`;
-          await services.storage.writeImmutable(key, variant.bytes, "image/webp");
-          const readback = await services.storage.read(key);
-          if (readback.length !== variant.bytes.length || digestOf(readback) !== digest)
-            throw new AppError("unavailable");
-          sealed.push({
-            key,
-            sha256: digest,
-            contentType: "image/webp",
-            width: variant.width,
-            height: variant.height,
-            byteSize: variant.bytes.length,
-          });
-        }
-        const safe = sealed.at(-1);
-        if (!safe) throw new AppError("unavailable");
-        output = {
-          derivativeKey: safe.key,
-          derivativeSha256: safe.sha256,
-          derivativeContentType: "image/webp",
-          derivativeRenditions: sealed,
-          width: safe.width,
-          height: safe.height,
-        };
-      }
+      if (kind === "media" && scanState === "clean")
+        output = await storeRenditions(services.storage, id, bytes);
     } catch {
       scanState = "failed";
     }
@@ -141,6 +112,7 @@ async function process(
         .set({
           ...evidence,
           ...(output ?? {}),
+          admission: "virus_scan",
           processing: scanState === "clean" && output ? "ready" : "failed",
           review: "pending",
           reviewedById: null,
@@ -172,6 +144,54 @@ async function process(
     });
     return { state: scanState, id };
   });
+}
+
+/**
+ * Admits an image by decoding it and writing fresh renditions (ADR 0016). The outcome is recorded
+ * in the scan evidence for the exact sealed digest, named as a re-encode by `admission`; a file
+ * that does not decode fails and stays quarantined. No scanner is consulted or claimed.
+ */
+async function admitByReencode(
+  tx: Executor,
+  services: FileServices,
+  actor: Actor,
+  file: typeof mediaAssets.$inferSelect,
+) {
+  let output: Awaited<ReturnType<typeof storeRenditions>> | undefined;
+  try {
+    if (!file.sealedKey) throw new AppError("transition_denied");
+    const bytes = await services.storage.read(file.sealedKey);
+    if (digestOf(bytes) !== file.sha256 || bytes.length !== file.byteSize)
+      throw new AppError("unavailable");
+    output = await storeRenditions(services.storage, file.id, bytes);
+  } catch {
+    output = undefined;
+  }
+  const state = output ? ("clean" as const) : ("failed" as const);
+  const scannerVersion = reencodeAdmissionVersion();
+  await tx
+    .update(mediaAssets)
+    .set({
+      admission: "reencode",
+      scan: state,
+      scannerVersion,
+      scannedAt: new Date(),
+      scannedSha256: file.sha256,
+      ...(output ?? {}),
+      processing: output ? "ready" : "failed",
+      review: "pending",
+      reviewedById: null,
+      version: file.version + 1,
+    })
+    .where(eq(mediaAssets.id, file.id));
+  await recordAudit(tx, {
+    actor,
+    action: "file.scan.completed",
+    recordType: "media",
+    recordId: file.id,
+    payload: { state, sha256: file.sha256, scannerVersion, admission: "reencode" },
+  });
+  return { state, id: file.id };
 }
 
 export async function processFile(

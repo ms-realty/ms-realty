@@ -17,6 +17,7 @@ export type PublishBlocker = (typeof publishBlockers)[number];
 export const publishWarnings = [
   "no_photos",
   "photos_not_ready",
+  "photos_not_copied",
   "short_description",
   "bedrooms_unknown",
   "inland_framed_as_coast",
@@ -34,8 +35,15 @@ export interface PublishCheckInput {
   readonly locationKnown: boolean;
   /** Null when no bedroom count is recorded. */
   readonly bedroomsState: FactState | null;
-  /** Photos that can be shown now, and placed photos that are not processed yet. */
-  readonly photos: { readonly ready: number; readonly notReady: number };
+  /**
+   * Photos that can be shown now, placed photos that are not processed yet, and photos from the
+   * old website the carry-over has not copied into storage yet (absent: none).
+   */
+  readonly photos: {
+    readonly ready: number;
+    readonly notReady: number;
+    readonly notCopied?: number;
+  };
   /** Place names of the property (settlement, municipality, region), in any script. */
   readonly placeNames: readonly string[];
   /** Every public text that would be shown: the source copy and approved translations. */
@@ -83,6 +91,7 @@ export function publishChecks(input: PublishCheckInput): PublishChecks {
 
   if (input.photos.ready === 0) warnings.push("no_photos");
   if (input.photos.notReady > 0) warnings.push("photos_not_ready");
+  if ((input.photos.notCopied ?? 0) > 0) warnings.push("photos_not_copied");
   const description = input.description.trim();
   if (description && description.length < shortDescriptionLength)
     warnings.push("short_description");

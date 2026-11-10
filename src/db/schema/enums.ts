@@ -38,6 +38,7 @@ import { interestStates } from "../../domain/interest";
 import { commercialStates, editorialStates, freshnessStates } from "../../domain/listing";
 import { localeStates } from "../../domain/localized-revision";
 import {
+  mediaAdmissions,
   mediaAudiences,
   mediaKinds,
   mediaModifications,
@@ -159,6 +160,7 @@ export const mediaModificationEnum = pgEnum("media_modification", mediaModificat
 export const mediaReviewEnum = pgEnum("media_review_state", mediaReviewStates);
 export const mediaAudienceEnum = pgEnum("media_audience", mediaAudiences);
 export const scanStateEnum = pgEnum("scan_state", scanStates);
+export const mediaAdmissionEnum = pgEnum("media_admission", mediaAdmissions);
 export const processingStateEnum = pgEnum("processing_state", processingStates);
 export const documentStateEnum = pgEnum("document_state", documentStates);
 export const documentReviewTypeEnum = pgEnum("document_review_type", documentReviewTypes);

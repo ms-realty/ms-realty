@@ -281,6 +281,13 @@
       "when": 1794311882427,
       "tag": "0039_deal_path",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1794316061741,
+      "tag": "0040_media_admission",
+      "breakpoints": true
     }
   ]
 }
