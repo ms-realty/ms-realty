@@ -13,10 +13,14 @@ comes from, says when the listing does not say, and hands anything else to a bro
 Two tiers and a fixed set of refusals, all behind one brand switch.
 
 1. **Facts tier, no model.** A deterministic answerer over the listing's published facts. It
-   recognises ten question types in all seven public locales (and the visitor may type another
+   recognises eleven question types in all seven public locales (and the visitor may type another
    language than the page's) and states the recorded value as the page shows it. Unknown,
    withheld or conflicting values are never guessed: the answer says the listing does not give
-   them and offers a broker.
+   them and offers a broker. The price answer states the amount, and the basis only when it is
+   not a plain asking price, in the words the listing page shows under the price. A question
+   about what is included is answered only from a recorded inclusions fact; with none recorded it
+   goes on to the text tier, or reads "The listing does not say." It is never answered with the
+   price.
 2. **Text tier, model, optional.** Runs only when the existing Butler configuration is enabled
    and qualified (`assistanceConfig().enabled`). One call through the existing provider path
    with a strict JSON schema: answer, citations (a source key and an exact quote each), unknown,
@@ -33,7 +37,10 @@ Two tiers and a fixed set of refusals, all behind one brand switch.
    questions, opinions on value or return, questions about other people, and anything that asks
    Butler to act (book, reserve, hold) get a fixed, kind refusal with the hand-off. An
    instruction aimed at Butler inside a question gets a fixed reply and nothing runs. Listing
-   text and visitor text are data, never instructions.
+   text and visitor text are data, never instructions. A question that holds an e-mail address
+   or a phone number gets a fixed note that contact details belong in the inquiry form, with the
+   hand-off. The question is not sent to a model, and the receipt keeps it with the details
+   replaced; the hand-off does not carry it into the form.
 4. **Hand-off.** "Ask a broker" opens the existing inquiry form for this listing with the
    question as a draft message (`question` query parameter, 300 characters, carried through
    `/inquire/start`). The visitor edits and sends it; the chat itself never becomes an inquiry
@@ -79,6 +86,12 @@ states a basis (asking, negotiable) so the answer never reads firmer than the li
   `tenant.test.ts`. `"off"` removes the block; the page is the inquiry form alone.
 - Deployment kill switch: `BUTLER_PUBLIC_ANSWERS=0` (legacy `HERMES_PUBLIC_ANSWERS=0` is read
   when the Butler name is absent). Removes the block and the route's answers at once.
+- The switched-off case is covered by unit and integration tests, not by a browser run: the
+  browser server's environment is fixed for the whole run and a second server for one case is
+  not cheap. `block.test.ts` shows the block renders nothing and reads nothing,
+  `public-answer.int.test.ts` shows the answers write nothing, and the reserved region on the
+  listing page stays in place and empty (`e2e/property-decision-ui.spec.ts`), so the page is the
+  inquiry form alone.
 - Text tier: the existing `BUTLER_*` configuration. Variable names a deployment needs, never
   values: `BUTLER_ENABLED=1`, `BUTLER_PROCESSING_APPROVED=1`, `BUTLER_ROUTING_QUALIFIED=1`,
   `BUTLER_ROUTING_POLICY` (JSON), `OPENROUTER_API_KEY`, `BUTLER_INPUT_USD_MICROS_PER_TOKEN`,

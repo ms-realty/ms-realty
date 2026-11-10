@@ -13,6 +13,7 @@ export const factKinds = [
   "reference",
   "viewing",
   "contact",
+  "inclusions",
 ] as const;
 export type FactKind = (typeof factKinds)[number];
 
@@ -48,6 +49,7 @@ export type QuestionKind =
   | FactKind
   | `refusal.${RefusalClass}`
   | "injection"
+  | "contact_details"
   | "other"
   | "multiple";
 

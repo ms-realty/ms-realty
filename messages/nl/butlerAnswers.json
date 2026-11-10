@@ -14,13 +14,13 @@
     "place": "Waar ligt het?",
     "viewing": "Hoe plan ik een bezichtiging?"
   },
-  "answerLabel": "Antwoord van Butler",
+  "answerLabel": "Butler",
   "asked": "Uw vraag",
   "sources": {
-    "listing": "Uit advertentie {reference}",
-    "description": "Uit de beschrijving in de advertentie",
-    "area": "Uit de gebiedsgids {title}",
-    "agency": "Uit de gegevens van het kantoor"
+    "listing": "Butler, uit advertentie {reference}",
+    "description": "Butler, uit de beschrijving in de advertentie",
+    "area": "Butler, uit de gebiedsgids {title}",
+    "agency": "Butler, uit de gegevens van het kantoor"
   },
   "handoff": "Vraag het een makelaar",
   "handoffNote": "Het aanvraagformulier opent met uw vraag. U verstuurt het zelf.",
@@ -34,12 +34,6 @@
   "answers": {
     "priceSale": "De prijs is {price}.",
     "priceRent": "De huur is {price} per maand.",
-    "basis": {
-      "asking": "Dit is de vraagprijs.",
-      "negotiable": "De advertentie noemt de prijs bespreekbaar.",
-      "fixed": "De advertentie noemt een vaste prijs.",
-      "indicative": "De advertentie noemt dit een indicatieve prijs."
-    },
     "includes": "Volgens de advertentie is inbegrepen: {items}.",
     "area": "De {basis} is {area}.",
     "areaBasis": {
@@ -88,7 +82,8 @@
       "area": "De advertentie noemt geen grootte.",
       "bedrooms": "De advertentie noemt het aantal slaapkamers niet.",
       "floor": "De advertentie zegt niet op welke verdieping het ligt.",
-      "place": "De advertentie noemt geen ligging."
+      "place": "De advertentie noemt geen ligging.",
+      "inclusions": "De advertentie zegt niet wat inbegrepen is."
     }
   },
   "refusals": {
@@ -100,5 +95,6 @@
     "people": "Butler deelt niets over andere mensen. Een makelaar helpt u met wat u wilt weten.",
     "action": "Butler kan niets boeken, reserveren of vasthouden. Een makelaar wel.",
     "injection": "Butler beantwoordt alleen vragen over deze woning. Met al het andere helpt een makelaar."
-  }
+  },
+  "contactDetails": "Typ hier geen telefoonnummer of e-mailadres. Butler gebruikt en bewaart ze niet. Vul ze in het aanvraagformulier in, waar een makelaar kan antwoorden."
 }

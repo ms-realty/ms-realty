@@ -3,6 +3,7 @@
 import { describe, expect, it } from "vitest";
 import { agency } from "@/config/tenant";
 import { factKinds, refusalClasses } from "@/domain/public-answer";
+import { discoveryCopy } from "@/features/discovery/copy";
 import {
   evalLocales,
   factQuestions,
@@ -23,7 +24,11 @@ import {
   suggestedQuestions,
 } from "./public-answer-facts";
 import { answerSourceTexts, validatePublicAnswer } from "./public-answer-model";
-import { routeQuestion } from "./public-answer-router";
+import {
+  containsContactDetails,
+  redactContactDetails,
+  routeQuestion,
+} from "./public-answer-router";
 
 const labels = { viewing: "Request a viewing", ask: "Ask a question" };
 
@@ -56,6 +61,76 @@ describe.each(evalLocales)("router (%s)", (locale) => {
       refusal: null,
       injection: false,
     });
+  });
+});
+
+describe.each(evalLocales)("router, inclusion questions (%s)", (locale) => {
+  it("does not answer an inclusion question with the price", () => {
+    const routed = routeQuestion(factQuestions.inclusions[locale]);
+    expect(routed.facts).toContain("inclusions");
+  });
+});
+
+describe("router, inclusion wording", () => {
+  it.each([
+    "Does it include parking?",
+    "Is parking included?",
+    "Включен ли е паркингът?",
+    "Паркинг включен?",
+    "Ist ein Parkplatz inklusive?",
+    "Is parkeren inbegrepen?",
+    "Περιλαμβάνεται πάρκινγκ;",
+    "החניה כלולה?",
+  ])("reads %j as an inclusion question, not a price question", (question) => {
+    const routed = routeQuestion(question);
+    expect(routed.facts).toContain("inclusions");
+    expect(routed.facts).not.toContain("price");
+  });
+
+  it("still reads a price question that also asks about inclusions as both", () => {
+    expect(routeQuestion("How much is it and is parking included?").facts).toEqual([
+      "price",
+      "inclusions",
+    ]);
+  });
+});
+
+describe("router, contact details", () => {
+  it.each([
+    "Write to me at buyer@example.test please",
+    "My number is +359 88 123 4567",
+    "Call 0888 123 456 about it",
+    "ring me on 00 31 20 123 4567",
+    "Mein Mail: a.b+c@sub.example.test",
+    "Мой телефон 088-812-3456",
+    "(02) 123 45 67",
+  ])("routes %j to the fixed note and nothing else", (question) => {
+    expect(containsContactDetails(question)).toBe(true);
+    expect(routeQuestion(question)).toMatchObject({
+      kind: "contact_details",
+      contactDetails: true,
+      facts: [],
+      refusal: null,
+      injection: false,
+    });
+  });
+
+  it.each([
+    "How much is it?",
+    "Is MS-2026123 still available?",
+    "It is 72.5 m2 and costs 95 000 EUR, right?",
+    "Is it on floor 2 of 5, built in 1998?",
+    "Can I see it at 10:30 on 12.05?",
+  ])("does not take %j for a contact detail", (question) => {
+    expect(containsContactDetails(question)).toBe(false);
+  });
+
+  it("replaces the contact details and keeps the rest of the question", () => {
+    const redacted = redactContactDetails(
+      "Is it free? Mail me a@b.example or call +359 88 123 4567",
+    );
+    expect(redacted).toBe("Is it free? Mail me […] or call […]");
+    expect(containsContactDetails(redacted)).toBe(false);
   });
 });
 
@@ -133,6 +208,53 @@ describe.each(evalLocales)("facts answerer (%s)", (locale) => {
   });
 });
 
+describe("facts answerer, price basis and inclusions", () => {
+  const priced = (basis: "asking" | "negotiable" | "fixed" | "indicative") =>
+    fixtureSource("en", {
+      price: {
+        state: "known",
+        value: { amountMinor: 9_500_000, currency: "EUR", period: "total", basis },
+        provenance: { sourceClass: "agency_observed" },
+      },
+    });
+
+  it("says nothing of the basis for a plain asking price, and the page's own label otherwise", () => {
+    const copy = discoveryCopy("en");
+    expect(answerFromFacts(["price"], priced("asking"), labels).text).toBe("The price is €95,000.");
+    for (const basis of ["negotiable", "fixed", "indicative"] as const)
+      expect(answerFromFacts(["price"], priced(basis), labels).text).toBe(
+        `The price is €95,000. ${copy[basis]}.`,
+      );
+    expect(answerFromFacts(["price"], priced("asking"), labels).text).not.toMatch(/asking/i);
+  });
+
+  it("answers an inclusion question only from a recorded inclusions fact", () => {
+    const recorded = fixtureSource("en", {
+      price: {
+        state: "known",
+        value: {
+          amountMinor: 9_500_000,
+          currency: "EUR",
+          period: "total",
+          basis: "asking",
+          inclusions: ["parking space", "furniture"],
+        },
+        provenance: { sourceClass: "agency_observed" },
+      },
+    });
+    expect(answerFromFacts(["inclusions"], recorded, labels)).toMatchObject({
+      outcome: "answered",
+      text: "The listing says it includes: parking space, furniture.",
+    });
+    // The price answer does not borrow the inclusions, and none is invented without a record.
+    expect(answerFromFacts(["price"], recorded, labels).text).not.toContain("parking");
+    expect(answerFromFacts(["inclusions"], fixtureSource("en"), labels)).toMatchObject({
+      outcome: "unknown",
+      text: expect.stringContaining("does not say what is included"),
+    });
+  });
+});
+
 describe("facts answerer, details", () => {
   it("says rent per month and keeps the recorded basis", () => {
     const rent = fixtureSource("en", {
@@ -146,7 +268,7 @@ describe("facts answerer, details", () => {
     const text = answerFromFacts(["price"], rent, labels).text;
     expect(text).toContain("€450");
     expect(text).toContain("a month");
-    expect(text).toContain("negotiable");
+    expect(text).toContain(discoveryCopy("en").negotiable);
   });
 
   it("explains the viewing path the page offers", () => {

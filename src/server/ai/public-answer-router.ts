@@ -13,6 +13,31 @@ export interface RoutedQuestion {
   readonly refusal: RefusalClass | null;
   /** The question tries to instruct Butler; nothing runs and no model is called. */
   readonly injection: boolean;
+  /** The question holds an e-mail address or a phone number; nothing is stored or sent on. */
+  readonly contactDetails?: boolean;
+}
+
+const emailRe = /[^\s@<>()[\],;:]+@[^\s@<>()[\],;:]+\.[^\s@<>()[\],;:]{2,}/gu;
+// A run of digits with the separators people put in phone numbers. A run glued to letters or a
+// hyphen (a listing reference such as MS-2026123) is not a phone number.
+const phoneRe = /(?<![\p{L}\p{N}-])(?:\+|00)?\(?\d[\d\s().\u2010-\u2015-]{5,}\d(?![\p{L}\p{N}-])/gu;
+
+function isPhone(run: string): boolean {
+  const digits = run.replace(/\D/g, "").length;
+  const international = /^(?:\+|00)/u.test(run) || run.includes("(");
+  return digits >= (international ? 7 : 8) && digits <= 16;
+}
+
+/** An e-mail address or a phone number anywhere in the question. */
+export function containsContactDetails(question: string): boolean {
+  emailRe.lastIndex = 0;
+  if (emailRe.test(question)) return true;
+  return (question.match(phoneRe) ?? []).some(isPhone);
+}
+
+/** The question with every e-mail address and phone number replaced; what may be stored. */
+export function redactContactDetails(question: string): string {
+  return question.replace(emailRe, "[…]").replace(phoneRe, (run) => (isPhone(run) ? "[…]" : run));
 }
 
 const hebrewPrefix = "[ובלהמשכ]{0,2}";
@@ -103,7 +128,13 @@ const factRes: readonly (readonly [FactKind, RegExp])[] = [
   [
     "price",
     phrases(
-      "price*|cost*|how much|expensive|rent is|the rent|monthly rent|include*|included|цена*|цената|струва|колко струва|наемът|наема|включва*|включен*|стоимост*|стоит|сколько стоит|аренд* плата|арендн*|включ*|preis*|kostet|kosten|wie viel kostet|miete|inklusive|enthalten|prijs*|kost|huur|huurprijs|inbegrepen|inclusief|τιμη*|κοστιζ*|ποσο κανει|ενοικιο|περιλαμβαν*|מחיר|עולה|כמה עולה|שכר דירה|שכירות|כולל",
+      "price*|cost*|how much|expensive|rent is|the rent|monthly rent|цена*|цената|струва|колко струва|наемът|наема|стоимост*|стоит|сколько стоит|аренд* плата|арендн*|preis*|kostet|kosten|wie viel kostet|miete|prijs*|kost|huur|huurprijs|τιμη*|κοστιζ*|ποσο κανει|ενοικιο|מחיר|עולה|כמה עולה|שכר דירה|שכירות",
+    ),
+  ],
+  [
+    "inclusions",
+    phrases(
+      "include*|included|including|what is included|what's included|comes with|come with|включва*|включен*|включени|входи в цената|входит*|входят|включ*|inklusive|enthalten|inbegriffen|inbegrepen|inclusief|bevat*|περιλαμβαν*|περιλαμβανετ*|כולל*|כלול*",
     ),
   ],
   [
@@ -164,6 +195,14 @@ function firstIndex(re: RegExp, text: string): number {
 }
 
 export function routeQuestion(question: string): RoutedQuestion {
+  if (containsContactDetails(question))
+    return {
+      kind: "contact_details",
+      facts: [],
+      refusal: null,
+      injection: false,
+      contactDetails: true,
+    };
   const text = fold(question).replace(/\s+/g, " ").trim();
   if (injectionRe.test(text))
     return { kind: "injection", facts: [], refusal: null, injection: true };

@@ -15,6 +15,7 @@ export interface AnswerPanel {
   /** The answer, or the note that explains why there is none. */
   readonly text: string;
   readonly kind: "answer" | "note";
+  /** One line: who answered and from what ("Butler, from the listing MS-…"); null for a note. */
   readonly sourceLine: string | null;
   /** The existing inquiry form for this listing, with the question prefilled. */
   readonly handoffHref: string;
@@ -41,8 +42,9 @@ async function sourceLine(
   reference: string,
   cited: readonly SourceKey[],
 ): Promise<string | null> {
-  if (cited.length === 0) return null;
-  const copy = butlerAnswersCopy(locale).sources;
+  const butler = butlerAnswersCopy(locale);
+  if (cited.length === 0) return butler.answerLabel;
+  const copy = butler.sources;
   const guide = cited.find((key) => key.startsWith("area:"));
   if (guide) {
     const content = await readApprovedContent(db, "area", guide.slice(5), locale).catch(() => null);
@@ -106,11 +108,19 @@ export async function panelForQuery(
     question: receipt.question,
     text: receipt.answer,
     kind: "answer",
-    sourceLine:
-      receipt.outcome === "answered"
-        ? await sourceLine(db, locale, listing.reference, receipt.citedSources)
-        : null,
-    handoffHref: handoffHref(locale, listing, receipt.question),
+    // Who answered is always said; what from only when the answer rests on a source.
+    sourceLine: await sourceLine(
+      db,
+      locale,
+      listing.reference,
+      receipt.outcome === "answered" ? receipt.citedSources : [],
+    ),
+    // A question that held contact details is not carried into the form.
+    handoffHref: handoffHref(
+      locale,
+      listing,
+      receipt.kind === "contact_details" ? null : receipt.question,
+    ),
   };
 }
 

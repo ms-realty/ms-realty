@@ -7,6 +7,7 @@ import type { PublicLocale } from "@/domain/ids";
 import type { CommercialState } from "@/domain/listing";
 import type { FactKind, RefusalClass, SourceKey } from "@/domain/public-answer";
 import type { PrimaryAction } from "@/domain/publication";
+import { discoveryCopy } from "@/features/discovery/copy";
 import { formatDate, formatExactArea, formatMoney, formatNumber } from "@/i18n/format";
 import { butlerAnswersCopy, butlerAnswerText } from "./public-answer-copy";
 
@@ -67,6 +68,14 @@ interface Part {
   readonly source: SourceKey | null;
 }
 
+/** The inclusions recorded with a known price, if any. */
+export function recordedInclusions(source: PublicAnswerSource): readonly string[] | null {
+  const price = source.price;
+  if (price.state !== "known") return null;
+  const items = price.value.inclusions?.filter((item) => item.trim());
+  return items?.length ? items : null;
+}
+
 const knownNumber = (fact: Fact<number>): number | null =>
   fact.state === "known" && typeof fact.value === "number" && Number.isFinite(fact.value)
     ? fact.value
@@ -89,14 +98,25 @@ function part(
     case "price": {
       const price = source.price;
       if (price.state !== "known") return unknown("price");
-      const { amountMinor, currency, period, basis, inclusions } = price.value;
+      const { amountMinor, currency, period, basis } = price.value;
       const amount = formatMoney(locale, amountMinor, currency);
+      // The basis is said only when it is not a plain asking price, in the words the listing
+      // page shows under the price.
       const sentences = [
         say(period === "month" ? "priceRent" : "priceSale", { price: amount }),
-        say(`basis.${basis}`),
-        ...(inclusions?.length ? [say("includes", { items: inclusions.join(", ") })] : []),
+        ...(basis !== "asking" ? [`${discoveryCopy(locale)[basis]}.`] : []),
       ];
       return { known: true, text: sentences.join(" "), source: "fact.price" };
+    }
+    case "inclusions": {
+      // Only a recorded inclusions fact answers; the price sentence never stands in for it.
+      const items = recordedInclusions(source);
+      if (!items) return unknown("inclusions");
+      return {
+        known: true,
+        text: say("includes", { items: items.join(", ") }),
+        source: "fact.price",
+      };
     }
     case "area": {
       const area = source.area;

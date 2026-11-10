@@ -14,13 +14,13 @@
     "place": "Wo liegt sie?",
     "viewing": "Wie vereinbare ich eine Besichtigung?"
   },
-  "answerLabel": "Antwort von Butler",
+  "answerLabel": "Butler",
   "asked": "Ihre Frage",
   "sources": {
-    "listing": "Aus dem Inserat {reference}",
-    "description": "Aus der Beschreibung im Inserat",
-    "area": "Aus dem Gebietsführer {title}",
-    "agency": "Aus den Angaben der Agentur"
+    "listing": "Butler, aus dem Inserat {reference}",
+    "description": "Butler, aus der Beschreibung im Inserat",
+    "area": "Butler, aus dem Gebietsführer {title}",
+    "agency": "Butler, aus den Angaben der Agentur"
   },
   "handoff": "Makler fragen",
   "handoffNote": "Das Anfrageformular öffnet sich mit Ihrer Frage. Sie senden es selbst ab.",
@@ -34,12 +34,6 @@
   "answers": {
     "priceSale": "Der Preis beträgt {price}.",
     "priceRent": "Die Miete beträgt {price} im Monat.",
-    "basis": {
-      "asking": "Das ist der Angebotspreis.",
-      "negotiable": "Das Inserat bezeichnet den Preis als verhandelbar.",
-      "fixed": "Das Inserat nennt einen Festpreis.",
-      "indicative": "Das Inserat nennt diesen Preis als Richtwert."
-    },
     "includes": "Laut Inserat ist enthalten: {items}.",
     "area": "Die {basis} beträgt {area}.",
     "areaBasis": {
@@ -88,7 +82,8 @@
       "area": "Das Inserat nennt keine Größe.",
       "bedrooms": "Das Inserat nennt keine Zahl der Schlafzimmer.",
       "floor": "Das Inserat sagt nicht, in welcher Etage sie liegt.",
-      "place": "Das Inserat nennt keine Lage."
+      "place": "Das Inserat nennt keine Lage.",
+      "inclusions": "Das Inserat sagt nicht, was enthalten ist."
     }
   },
   "refusals": {
@@ -100,5 +95,6 @@
     "people": "Butler gibt nichts über andere Personen weiter. Ein Makler hilft Ihnen mit dem, was Sie wissen müssen.",
     "action": "Butler kann nichts buchen, reservieren oder zurückhalten. Ein Makler kann das.",
     "injection": "Butler beantwortet nur Fragen zu dieser Immobilie. Bei allem anderen hilft ein Makler."
-  }
+  },
+  "contactDetails": "Bitte geben Sie hier keine Telefonnummer oder E-Mail-Adresse ein. Butler verwendet und speichert sie nicht. Tragen Sie sie in das Anfrageformular ein, wo ein Makler antworten kann."
 }

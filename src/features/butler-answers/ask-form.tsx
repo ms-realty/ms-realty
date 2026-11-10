@@ -148,20 +148,21 @@ export function AskForm({
           <section
             ref={answer}
             tabIndex={-1}
-            aria-labelledby="ask-butler-answer-label"
-            className="flex flex-col gap-3 rounded-panel border border-assist-line bg-assist-soft p-4 outline-offset-4"
+            {...(panel.sourceLine
+              ? { "aria-labelledby": "ask-butler-answer-label" }
+              : { "aria-label": copy.answerLabel })}
+            className="flex flex-col gap-3 rounded-control bg-brand-tint p-4 outline-offset-4"
           >
             {panel.question ? (
               <p className="text-caption text-text-muted">
                 {copy.asked}: <bdi dir="auto">{panel.question}</bdi>
               </p>
             ) : null}
-            <p id="ask-butler-answer-label" className="text-dense font-semibold text-assist">
-              {copy.answerLabel}
-            </p>
-            <p className="max-w-reading text-body">{panel.text}</p>
+            <p className="max-w-[65ch] text-body">{panel.text}</p>
             {panel.sourceLine ? (
-              <p className="text-caption text-text-muted">{panel.sourceLine}</p>
+              <p id="ask-butler-answer-label" className="text-caption text-text-muted">
+                {panel.sourceLine}
+              </p>
             ) : null}
             <div className="flex flex-col gap-2 pt-1 sm:flex-row sm:items-center sm:gap-4">
               <a href={panel.handoffHref} className={buttonClass("secondary", "self-start")}>

@@ -111,6 +111,15 @@ export const factQuestions: Readonly<Record<FactKind, Question>> = {
     "Τι τύπου ακίνητο είναι;",
     "איזה סוג נכס זה?",
   ),
+  inclusions: q(
+    "Какво е включено в цената?",
+    "What is included?",
+    "Что входит в цену?",
+    "Was ist enthalten?",
+    "Wat is er inbegrepen?",
+    "Τι περιλαμβάνεται;",
+    "מה כלול?",
+  ),
   reference: q(
     "Какъв е референтният номер?",
     "What is the reference number?",

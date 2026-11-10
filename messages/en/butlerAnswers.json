@@ -14,13 +14,13 @@
     "place": "Where is it?",
     "viewing": "How do I arrange a viewing?"
   },
-  "answerLabel": "Butler's answer",
+  "answerLabel": "Butler",
   "asked": "You asked",
   "sources": {
-    "listing": "From the listing {reference}",
-    "description": "From the listing description",
-    "area": "From the area guide {title}",
-    "agency": "From the agency's details"
+    "listing": "Butler, from the listing {reference}",
+    "description": "Butler, from the listing description",
+    "area": "Butler, from the area guide {title}",
+    "agency": "Butler, from the agency's details"
   },
   "handoff": "Ask a broker",
   "handoffNote": "The inquiry form opens with your question. You send it yourself.",
@@ -34,12 +34,6 @@
   "answers": {
     "priceSale": "The price is {price}.",
     "priceRent": "The rent is {price} a month.",
-    "basis": {
-      "asking": "This is the asking price.",
-      "negotiable": "The listing gives the price as negotiable.",
-      "fixed": "The listing gives the price as fixed.",
-      "indicative": "The listing gives this as an indicative price."
-    },
     "includes": "The listing says it includes: {items}.",
     "area": "The {basis} is {area}.",
     "areaBasis": {
@@ -88,7 +82,8 @@
       "area": "The listing does not give the size.",
       "bedrooms": "The listing does not give the number of bedrooms.",
       "floor": "The listing does not say which floor it is on.",
-      "place": "The listing does not give the location."
+      "place": "The listing does not give the location.",
+      "inclusions": "The listing does not say what is included."
     }
   },
   "refusals": {
@@ -100,5 +95,6 @@
     "people": "Butler can't share anything about other people. A broker can help with what you need to know.",
     "action": "Butler can't book, reserve or hold anything. A broker can.",
     "injection": "Butler answers questions about this home only. A broker can help with anything else."
-  }
+  },
+  "contactDetails": "Please don't type a phone number or e-mail address here. Butler doesn't use or keep them. Put them in the inquiry form, where a broker can reply."
 }

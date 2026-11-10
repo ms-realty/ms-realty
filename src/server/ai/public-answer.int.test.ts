@@ -242,6 +242,68 @@ describe("answers and receipts", () => {
     expect(row?.answer).toBe("The listing does not say. A broker can tell you.");
   });
 
+  it("keeps contact details out of the receipt and the model, and points to the inquiry form", async () => {
+    const generate = vi.fn();
+    const before = await t.db.select({ id: butlerAnswers.id }).from(butlerAnswers);
+    for (const question of [
+      "Is there a balcony? Write to me at buyer.person@example.test",
+      "Is there a balcony? Call me on +359 88 123 4567",
+    ]) {
+      const result = await ask(question, { env: {}, config: modelConfig(), generate });
+      expect(result).toMatchObject({ kind: "answered", outcome: "refused" });
+      if (result.kind !== "answered") return;
+      const [row] = await t.db
+        .select()
+        .from(butlerAnswers)
+        .where(eq(butlerAnswers.id, result.receiptId));
+      expect(row).toMatchObject({
+        tier: "none",
+        outcome: "refused",
+        questionKind: "contact_details",
+        reason: "contact_details",
+      });
+      expect(row?.answer).toContain("inquiry form");
+      // What is stored keeps the question but not the address or the number.
+      expect(row?.question).toContain("Is there a balcony?");
+      expect(row?.question).not.toMatch(/@|example\.test|\+359|4567/u);
+      const view = await readAnswerReceipt(t.db, {
+        id: result.receiptId,
+        listingId: live.listingId,
+      });
+      expect(view).toMatchObject({ kind: "contact_details" });
+    }
+    expect(generate).not.toHaveBeenCalled();
+    // Nothing anywhere in the receipts holds either detail.
+    const stored = JSON.stringify(await t.db.select().from(butlerAnswers));
+    expect(stored).not.toContain("buyer.person");
+    expect(stored).not.toContain("123 4567");
+    expect((await t.db.select({ id: butlerAnswers.id }).from(butlerAnswers)).length).toBe(
+      before.length + 2,
+    );
+  });
+
+  it("answers an inclusion question from a recorded fact only, never with the price", async () => {
+    const generate = vi.fn(async () =>
+      generation({ answer: "", citations: [], unknown: true, refusal: null }),
+    );
+    const result = await ask("Does it include parking?", {
+      env: {},
+      config: modelConfig(),
+      generate,
+    });
+    // The fixture records no inclusions: the question goes on to the text tier, which finds
+    // nothing, and the visitor reads that the listing does not say.
+    expect(generate).toHaveBeenCalledTimes(1);
+    expect(result).toMatchObject({ kind: "answered", outcome: "unknown" });
+    if (result.kind !== "answered") return;
+    const [row] = await t.db
+      .select()
+      .from(butlerAnswers)
+      .where(eq(butlerAnswers.id, result.receiptId));
+    expect(row?.answer).toBe("The listing does not say. A broker can tell you.");
+    expect(row?.answer).not.toMatch(/price|€/iu);
+  });
+
   it("shows a validated model answer and records routing, tokens and cost", async () => {
     const generate = vi.fn(async () =>
       generation({

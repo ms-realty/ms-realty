@@ -30,6 +30,7 @@ import {
   answerFromFacts,
   injectionText,
   type PublicAnswerSource,
+  recordedInclusions,
   refusalText,
 } from "./public-answer-facts";
 import {
@@ -42,7 +43,7 @@ import {
   publicAnswerSchemaName,
   validatePublicAnswer,
 } from "./public-answer-model";
-import { routeQuestion } from "./public-answer-router";
+import { redactContactDetails, routeQuestion } from "./public-answer-router";
 import { loadPublicAnswerSource } from "./public-answer-source";
 
 async function withinLimit(
@@ -291,11 +292,26 @@ export async function askAboutListing(
   if (!source) return { kind: "not_found" };
   const copy = butlerAnswersCopy(source.locale);
   const routed = routeQuestion(question);
-  const done = async (receipt: Receipt): Promise<AskResult> => ({
+  const done = async (receipt: Receipt, stored = question): Promise<AskResult> => ({
     kind: "answered",
-    receiptId: await writeReceipt(db, source, question, receipt, now),
+    receiptId: await writeReceipt(db, source, stored, receipt, now),
     outcome: receipt.outcome,
   });
+
+  // Contact details belong in the inquiry form: they are not read, stored or sent to a model.
+  // The receipt keeps the question with them replaced, so the visitor still sees what they asked.
+  if (routed.contactDetails)
+    return done(
+      {
+        tier: "none",
+        outcome: "refused",
+        kind: "contact_details",
+        answer: copy.contactDetails,
+        cited: [],
+        reason: "contact_details",
+      },
+      redactContactDetails(question),
+    );
 
   if (routed.injection)
     return done({
@@ -314,8 +330,14 @@ export async function askAboutListing(
       answer: refusalText(source.locale, routed.refusal),
       cited: [],
     });
-  if (routed.facts.length > 0) {
-    const answer = answerFromFacts(routed.facts, source, input.labels);
+  // An inclusion question is answered from a recorded inclusions fact only; asked alone with
+  // none recorded, it goes on to the text tier (or "the listing does not say").
+  const facts =
+    routed.facts.length === 1 && routed.facts[0] === "inclusions" && !recordedInclusions(source)
+      ? []
+      : routed.facts;
+  if (facts.length > 0) {
+    const answer = answerFromFacts(facts, source, input.labels);
     return done({
       tier: "facts",
       outcome: answer.outcome,
@@ -346,6 +368,7 @@ export interface AnswerReceiptView {
   readonly outcome: AnswerOutcome;
   readonly question: string;
   readonly answer: string;
+  readonly kind: QuestionKind;
   readonly citedSources: readonly SourceKey[];
 }
 
@@ -375,6 +398,7 @@ export async function readAnswerReceipt(
     outcome: row.outcome,
     question: row.question,
     answer: row.answer,
+    kind: row.questionKind,
     citedSources: row.citedSources,
   };
 }
