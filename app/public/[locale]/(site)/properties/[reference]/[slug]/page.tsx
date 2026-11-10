@@ -251,24 +251,22 @@ export default async function PropertyPage({
               <PinIcon className="size-4 shrink-0 text-text-muted" />
               {locality(listing)}
             </p>
-            <SearchMap
-              locale={locale}
-              copy={mapCopy(locale, "listing")}
-              release={publicMapRelease()}
-              listHref={`/${locale}/properties`}
-              items={
-                listing.place.mapPoint
-                  ? [
-                      {
-                        reference: listing.reference,
-                        href: listingHref(listing, locale),
-                        label: `${listing.reference}, ${locality(listing)}`,
-                        point: listing.place.mapPoint,
-                      },
-                    ]
-                  : []
-              }
-            />
+            {listing.place.mapPoint ? (
+              <SearchMap
+                locale={locale}
+                copy={mapCopy(locale, "listing")}
+                release={publicMapRelease()}
+                listHref={`/${locale}/properties`}
+                items={[
+                  {
+                    reference: listing.reference,
+                    href: listingHref(listing, locale),
+                    label: `${listing.reference}, ${locality(listing)}`,
+                    point: listing.place.mapPoint,
+                  },
+                ]}
+              />
+            ) : null}
           </section>
           <p className="text-caption text-text-muted" data-reference-line>
             {fillParts(confirmed ? copy.referenceLine : copy.referenceOnly, {
