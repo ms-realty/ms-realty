@@ -167,7 +167,11 @@ test("the whole photo set opens without JavaScript", async ({ browser, baseURL }
     await gallery.getByRole("link", { name: "Затвори снимките" }).click();
     await expect(gallery).toBeHidden();
     // The contact actions work as plain links: the inquiry form opens with the listing chosen.
-    const ask = page.getByRole("link", { name: "Задайте въпрос" }).first();
+    // On a phone, with Butler's answers on, the bar's link scrolls to Butler's block; the contact
+    // card's link (shown beside the page on wide screens) opens the form directly.
+    const ask = page
+      .locator("aside")
+      .getByRole("link", { name: "Задайте въпрос", includeHidden: true });
     await expect(ask).toHaveAttribute("href", new RegExp(`reference=${f.reference}`));
   } finally {
     await context.close();

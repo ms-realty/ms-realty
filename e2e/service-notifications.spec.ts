@@ -2,6 +2,7 @@
 // the confirmed viewing carries its calendar file, and the client's confirmation reaches the
 // broker. Synthetic fixture and the loopback-only test outbox; no real provider is involved.
 import { execFileSync } from "node:child_process";
+import { randomInt } from "node:crypto";
 import { type APIRequestContext, expect, type Page, test } from "@playwright/test";
 import { hostUrl, origins } from "./hosts";
 
@@ -100,13 +101,19 @@ test("staff propose and confirm a viewing, the client gets each notice and the c
     const staff = await staffContext.newPage();
     const client = await clientContext.newPage();
     const year = new Date().getUTCFullYear() + 1;
+    // A working day of its own: other specs confirm viewings on the same shared database, and
+    // two confirmed viewings at one time compete for the same resources.
+    let slot = new Date(Date.UTC(year, 0, 18 + randomInt(0, 40)));
+    while ([0, 6].includes(slot.getUTCDay()))
+      slot = new Date(Date.UTC(year, 0, slot.getUTCDate() + 1));
+    const day = slot.toISOString().slice(0, 10);
     const viewingDay = new Intl.DateTimeFormat("en-GB", {
       timeZone: "Europe/Sofia",
       weekday: "long",
       day: "numeric",
       month: "long",
       year: "numeric",
-    }).format(new Date(`${year}-01-15T08:00:00Z`));
+    }).format(new Date(`${day}T08:00:00Z`));
     const arrange = async (action: "propose" | "confirm") => {
       await staff.goto(hostUrl("staff", `/en/calendar/${f.appointmentId}`));
       // Before hydration the form posts natively and lands on the record without a receipt;
@@ -116,8 +123,8 @@ test("staff propose and confirm a viewing, the client gets each notice and the c
         .locator("section")
         .filter({ has: staff.getByRole("heading", { name: "Arrange appointment", exact: true }) });
       await form.getByLabel("Action", { exact: true }).selectOption(action);
-      await form.getByLabel("Start", { exact: true }).fill(`${year}-01-15T10:00`);
-      await form.getByLabel("End", { exact: true }).fill(`${year}-01-15T11:00`);
+      await form.getByLabel("Start", { exact: true }).fill(`${day}T10:00`);
+      await form.getByLabel("End", { exact: true }).fill(`${day}T11:00`);
       await form
         .getByLabel("I confirmed property access for this appointment", { exact: true })
         .check();
@@ -149,7 +156,7 @@ test("staff propose and confirm a viewing, the client gets each notice and the c
     const ics = Buffer.from(file?.content ?? "", "base64").toString("utf8");
     expect(ics).toContain("METHOD:REQUEST");
     expect(ics).toContain("SEQUENCE:1");
-    expect(ics).toContain(`DTSTART:${year}0115T080000Z`);
+    expect(ics).toContain(`DTSTART:${day.replaceAll("-", "")}T080000Z`);
     for (const message of [proposed, confirmed]) {
       const all = JSON.stringify(message);
       expect(all).not.toContain("Private synthetic key collection instructions");
