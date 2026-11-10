@@ -113,7 +113,10 @@ test.describe("without JavaScript", () => {
       page.getByText(`${f.single.reference} is no longer on the website.`),
     ).toBeVisible();
     expect(await live(f.single.listingId)).toEqual([]);
-    expect((await request.get(hostUrl("public", publicPath))).status()).not.toBe(200);
+    // The detail URL keeps answering with the safe "not available here" identity, never the copy.
+    const gone = await (await request.get(hostUrl("public", publicPath))).text();
+    expect(gone).toContain("Този имот не е достъпен тук.");
+    expect(gone).not.toContain("Синтетичен апартамент за публикуване");
   });
 });
 
