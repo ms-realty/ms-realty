@@ -142,6 +142,15 @@ for (const width of [320, 390, 1440]) {
       const action = contact.getByRole("link", { name, exact: true });
       await expect(action).toBeVisible();
       const target = new URL((await action.getAttribute("href")) ?? "", page.url());
+      // On phones, with Butler's answers on, "Ask a question" scrolls to the block; the form
+      // is one step further (the block's own hand-off). The desktop aside opens the form.
+      if (purpose === "question" && width < 1024) {
+        expect(target.hash).toBe("#ask-butler");
+        expect(target.pathname).toBe(new URL(page.url()).pathname);
+        await expect(main.locator("#ask-butler")).toHaveCount(1);
+        expect((await bounds(action)).height).toBeGreaterThanOrEqual(44);
+        continue;
+      }
       expect(target.pathname).toBe("/en/inquire");
       expect(Object.fromEntries(target.searchParams)).toEqual({
         purpose,
@@ -180,13 +189,43 @@ for (const width of [320, 390, 1440]) {
     });
     expect(inOrder).toBe(true);
     if (width < 1024) {
-      // The bar is fixed to the bottom of the viewport and spans it.
+      // The bar sits at the bottom of the viewport and spans it.
       expect(contactBox.y + contactBox.height).toBeGreaterThanOrEqual(
         page.viewportSize()?.height ?? 0 - 1,
       );
       expect(contactBox.x).toBeGreaterThanOrEqual(0);
       expect(contactBox.x + contactBox.width).toBeLessThanOrEqual(width);
+      // A long description is held to about ten lines behind a native disclosure, and opens
+      // in full (the whole text stays in the page either way).
+      const body = main.locator("[data-description]");
+      const toggle = main.locator("[data-description-toggle] summary");
+      const label = toggle.locator("span:visible");
+      await expect(label).toHaveText("Read the whole description");
+      expect((await bounds(toggle)).height).toBeGreaterThanOrEqual(44);
+      const closedHeight = (await bounds(body)).height;
+      const lineHeight = await body.evaluate((node) =>
+        Number.parseFloat(getComputedStyle(node).lineHeight),
+      );
+      expect(closedHeight).toBeLessThanOrEqual(lineHeight * 10 + 1);
+      await expect(body.locator("p")).toHaveCount(18);
+      await toggle.click();
+      await expect(label).toHaveText("Show less");
+      expect((await bounds(body)).height).toBeGreaterThan(closedHeight * 3);
+      await toggle.click();
+      // At the very end of the page the bar takes its own space: it never covers the footer.
+      await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+      const [barEnd, footerTop] = await Promise.all([
+        contact.boundingBox().then((box) => (box ? box.y + box.height : 0)),
+        page
+          .locator("footer")
+          .first()
+          .boundingBox()
+          .then((box) => box?.y ?? 0),
+      ]);
+      expect(barEnd).toBeLessThanOrEqual(footerTop + 1);
+      await page.evaluate(() => window.scrollTo(0, 0));
     } else {
+      await expect(main.locator("[data-description-toggle]")).toBeHidden();
       expect(contactBox.x).toBeGreaterThanOrEqual(galleryBox.x);
       expect(contactBox.x).toBeGreaterThan(aboutBox.x + 200);
       expect(contactBox.y).toBeLessThan(aboutBox.y);

@@ -153,6 +153,8 @@
   "similar": "נכסים דומים",
   "location": "מיקום",
   "about": "על הנכס",
+  "readDescription": "לקריאת התיאור המלא",
+  "readLess": "הצג פחות",
   "referenceLine": "מספר נכס {reference}. אושר לאחרונה: {date}.",
   "referenceOnly": "מספר נכס {reference}.",
   "noLocaleListings": "עדיין אין מודעות בעברית. מודעות בבולגרית: {count}.",

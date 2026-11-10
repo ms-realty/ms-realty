@@ -153,6 +153,8 @@
   "similar": "Похожие объекты",
   "location": "Расположение",
   "about": "Об объекте",
+  "readDescription": "Читать описание целиком",
+  "readLess": "Свернуть",
   "referenceLine": "Номер объекта {reference}. Последнее подтверждение: {date}.",
   "referenceOnly": "Номер объекта {reference}.",
   "noLocaleListings": "Пока нет объявлений на русском. Объявлений на болгарском: {count}.",

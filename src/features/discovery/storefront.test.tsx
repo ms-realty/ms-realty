@@ -167,9 +167,17 @@ describe("photo gallery", () => {
       <PhotoGallery media={media} title="Building plot near Sandanski" locale="en" copy={copy} />,
     );
     // One large photo and the next four, each a real link into the in-page gallery.
-    const tiles = container.querySelectorAll('#listing-photos > div > a[href^="#photo-"]');
+    const tiles = container.querySelectorAll('#listing-photos > div > div > a[href^="#photo-"]');
     expect(tiles).toHaveLength(5);
     expect(tiles[0]?.querySelector("img")).toHaveAttribute("loading", "eager");
+    // Phones: the next three sit in a row under the lead photo, each opening the gallery.
+    const thumbnails = [...container.querySelectorAll("[data-photo-thumbnails] a")];
+    expect(thumbnails.map((link) => link.getAttribute("href"))).toEqual([
+      "#photo-2",
+      "#photo-3",
+      "#photo-4",
+    ]);
+    expect(thumbnails.every((link) => link.querySelector("img[alt]"))).toBe(true);
     const all = screen.getByRole("link", { name: /All 7 photos/ });
     expect(all).toHaveAttribute("href", "#photos");
     // The full set is a real section the address can target; every photo has an anchor.

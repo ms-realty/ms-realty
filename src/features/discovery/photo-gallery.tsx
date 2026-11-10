@@ -56,56 +56,83 @@ export function PhotoGallery({
           : "";
   const allLabel = copy.allPhotos.replace("{count}", String(photos.length));
   return (
-    <section aria-label={copy.photos} id="listing-photos" className="relative">
-      <div
-        className={cx(
-          "-mx-gutter grid gap-2 overflow-hidden sm:mx-0 sm:rounded-panel sm:h-[min(34rem,62vh)]",
-          layout,
-        )}
-      >
-        {shown.map((item, index) => {
-          const lead = index === 0;
-          return (
-            <PhotoLink
-              key={item.relationId}
-              index={index}
-              href={`#${photoId(index)}`}
-              className={cx(
-                "relative block overflow-hidden bg-subtle",
-                lead
-                  ? cx(
-                      "aspect-4/3 sm:aspect-auto",
-                      shown.length >= 5 && "sm:col-span-2 sm:row-span-2",
-                      shown.length === 3 || shown.length === 4 ? "sm:row-span-2" : "",
-                    )
-                  : cx("hidden sm:block", shown.length === 4 && index === 3 && "sm:hidden"),
-              )}
-            >
-              <ListingPhoto
-                media={item}
-                alt={altOf(item, index)}
-                priority={lead}
-                unavailable={copy.noPhoto}
-                sizes={
-                  lead
-                    ? "(min-width: 64rem) 44rem, (min-width: 40rem) 60vw, 100vw"
-                    : "(min-width: 64rem) 22rem, 30vw"
-                }
-                className="transition-[filter] hover:brightness-95"
-              />
-            </PhotoLink>
-          );
-        })}
-      </div>
-      {photos.length > 1 ? (
-        <PhotoLink
-          index={0}
-          href={`#${gallerySectionId}`}
-          className="absolute bottom-3 end-3 inline-flex min-h-control items-center gap-2 rounded-control border border-border bg-surface px-4 font-semibold text-action shadow-sm hover:border-action"
+    <section aria-label={copy.photos} id="listing-photos">
+      <div className="relative">
+        <div
+          className={cx(
+            "-mx-gutter grid gap-2 overflow-hidden sm:mx-0 sm:rounded-panel sm:h-[min(34rem,62vh)]",
+            layout,
+          )}
         >
-          <PhotoIcon className="size-5" />
-          {allLabel}
-        </PhotoLink>
+          {shown.map((item, index) => {
+            const lead = index === 0;
+            return (
+              <PhotoLink
+                key={item.relationId}
+                index={index}
+                href={`#${photoId(index)}`}
+                className={cx(
+                  "relative block overflow-hidden bg-subtle",
+                  lead
+                    ? cx(
+                        "aspect-4/3 sm:aspect-auto",
+                        shown.length >= 5 && "sm:col-span-2 sm:row-span-2",
+                        shown.length === 3 || shown.length === 4 ? "sm:row-span-2" : "",
+                      )
+                    : cx("hidden sm:block", shown.length === 4 && index === 3 && "sm:hidden"),
+                )}
+              >
+                <ListingPhoto
+                  media={item}
+                  alt={altOf(item, index)}
+                  priority={lead}
+                  unavailable={copy.noPhoto}
+                  sizes={
+                    lead
+                      ? "(min-width: 64rem) 44rem, (min-width: 40rem) 60vw, 100vw"
+                      : "(min-width: 64rem) 22rem, 30vw"
+                  }
+                  className="transition-[filter] hover:brightness-95"
+                />
+              </PhotoLink>
+            );
+          })}
+        </div>
+        {photos.length > 1 ? (
+          <PhotoLink
+            index={0}
+            href={`#${gallerySectionId}`}
+            className="absolute bottom-3 end-3 inline-flex min-h-control items-center gap-2 rounded-control border border-border bg-surface px-4 font-semibold text-action shadow-sm hover:border-action"
+          >
+            <PhotoIcon className="size-5" />
+            {allLabel}
+          </PhotoLink>
+        ) : null}
+      </div>
+      {/* Phones show the lead photo large; the next few sit under it, each opening the gallery
+          at its own photo. From 40 rem the grid above shows them instead. */}
+      {photos.length > 1 ? (
+        <ul className="mt-2 grid grid-cols-3 gap-2 sm:hidden" data-photo-thumbnails>
+          {photos.slice(1, 4).map((item, offset) => {
+            const index = offset + 1;
+            return (
+              <li key={item.relationId}>
+                <PhotoLink
+                  index={index}
+                  href={`#${photoId(index)}`}
+                  className="relative block aspect-4/3 overflow-hidden rounded-control bg-subtle"
+                >
+                  <ListingPhoto
+                    media={item}
+                    alt={altOf(item, index)}
+                    unavailable={copy.noPhoto}
+                    sizes="30vw"
+                  />
+                </PhotoLink>
+              </li>
+            );
+          })}
+        </ul>
       ) : null}
 
       {/* The whole set without JavaScript: shown when the address targets it or one photo. */}

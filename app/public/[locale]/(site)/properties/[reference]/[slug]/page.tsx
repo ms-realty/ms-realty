@@ -8,18 +8,17 @@ import { Fragment, type ReactNode } from "react";
 import { butlerLevels } from "@/config/tenant";
 import { ButlerAnswers } from "@/features/butler-answers/block";
 import { discoveryCopy } from "@/features/discovery/copy";
-import { AvailabilityNote, ListingGrid } from "@/features/discovery/listing-card";
+import {
+  collapseAboveLines,
+  descriptionParagraphs,
+  estimatedLines,
+} from "@/features/discovery/description";
+import { AvailabilityNote, ListingGrid, PriceBasis } from "@/features/discovery/listing-card";
 import { CompareToggle, SaveToggle } from "@/features/discovery/local-selection";
 import { mapCopy } from "@/features/discovery/map-copy";
 import { DiscoveryPage } from "@/features/discovery/page";
 import { PhotoGallery } from "@/features/discovery/photo-gallery";
-import {
-  listingHref,
-  locality,
-  priceBasisText,
-  priceText,
-  shownFacts,
-} from "@/features/discovery/presentation";
+import { listingHref, locality, priceText, shownFacts } from "@/features/discovery/presentation";
 import { SearchMap } from "@/features/discovery/search-map";
 import { factFieldLabel } from "@/i18n/fact-labels";
 import { formatDate, formatExactArea } from "@/i18n/format";
@@ -33,6 +32,7 @@ import {
   readPublicSeoListing,
 } from "@/server/seo/public-metadata";
 import { buttonClass } from "@/ui/button-class";
+import { cx } from "@/ui/cx";
 import { PinIcon } from "@/ui/icons";
 import { Notice } from "@/ui/notice";
 import { StructuredData } from "@/ui/structured-data";
@@ -128,7 +128,6 @@ export default async function PropertyPage({
     `/${locale}/inquire?${new URLSearchParams({ purpose, reference: listing.reference, manifest: listing.manifestId })}`;
   const title = listing.title || listing.reference;
   const action = listing.availability.primaryAction;
-  const basis = priceBasisText(listing.price, copy);
   const facts = shownFacts(listing, locale, copy);
   const land = listing.facts.find((f) => f.key === "area.land")?.fact;
   const landArea =
@@ -141,10 +140,8 @@ export default async function PropertyPage({
   const features = listing.facts
     .filter((f) => featureKeys.includes(f.key) && f.fact.state === "known" && f.fact.value === true)
     .map((f) => factFieldLabel(f.key, locale));
-  const paragraphs = (listing.description ?? "")
-    .split(/\n\s*\n/)
-    .map((part) => part.trim())
-    .filter(Boolean);
+  const paragraphs = descriptionParagraphs(listing.description);
+  const collapsible = estimatedLines(paragraphs) > collapseAboveLines;
   const confirmed = listing.availability.confirmedAt;
   // On phones "Ask a question" scrolls to the Butler block when it is on; off, it opens the form.
   const butlerOn = butlerLevels.publicAnswers === "act" && publicAnswersEnabled();
@@ -193,13 +190,13 @@ export default async function PropertyPage({
         </div>
       </div>
       <PhotoGallery media={listing.media} title={title} locale={locale} copy={copy} />
-      <div className="grid gap-x-12 gap-y-8 pb-24 lg:grid-cols-[minmax(0,1fr)_20rem] lg:pb-0">
+      <div className="grid gap-x-12 gap-y-8 lg:grid-cols-[minmax(0,1fr)_20rem]">
         <div className="min-w-0 space-y-8">
           <header className="space-y-2">
             <p className="text-page font-semibold" data-price>
               <bdi>{priceText(listing.price, locale, copy)}</bdi>
             </p>
-            {basis ? <p className="text-compact text-text-muted">{basis}</p> : null}
+            <PriceBasis price={listing.price} copy={copy} />
             <h1 className="break-words text-heading font-semibold">{title}</h1>
             <p className="flex items-center gap-1.5 text-compact text-text-muted">
               <PinIcon className="size-4 shrink-0" />
@@ -238,13 +235,30 @@ export default async function PropertyPage({
               <h2 id="about-heading" className="text-subheading font-semibold">
                 {copy.about}
               </h2>
-              <div className="max-w-reading space-y-4 break-words text-body">
-                {paragraphs.map((paragraph, index) => (
-                  // biome-ignore lint/suspicious/noArrayIndexKey: paragraphs have no identity of their own and never reorder.
-                  <p key={index} className="whitespace-pre-line">
-                    {paragraph}
-                  </p>
-                ))}
+              {/* The whole text stays in the page. On phones a long one is held to about ten
+                  lines until the native disclosure below is opened (no JavaScript needed). */}
+              <div className="group/description space-y-2">
+                <div
+                  className={cx(
+                    "max-w-[65ch] space-y-4 break-words text-body",
+                    collapsible &&
+                      "max-lg:max-h-[10lh] max-lg:overflow-hidden max-lg:[mask-image:linear-gradient(to_bottom,black_70%,transparent)] group-has-[details[open]]/description:max-lg:max-h-none group-has-[details[open]]/description:max-lg:[mask-image:none]",
+                  )}
+                  data-description
+                >
+                  {paragraphs.map((paragraph, index) => (
+                    // biome-ignore lint/suspicious/noArrayIndexKey: paragraphs have no identity of their own and never reorder.
+                    <p key={index}>{paragraph}</p>
+                  ))}
+                </div>
+                {collapsible ? (
+                  <details className="group/toggle lg:hidden" data-description-toggle>
+                    <summary className="inline-flex min-h-control cursor-pointer list-none items-center font-semibold text-action underline underline-offset-4 [&::-webkit-details-marker]:hidden">
+                      <span className="group-open/toggle:hidden">{copy.readDescription}</span>
+                      <span className="hidden group-open/toggle:inline">{copy.readLess}</span>
+                    </summary>
+                  </details>
+                ) : null}
               </div>
             </section>
           ) : null}
@@ -311,9 +325,11 @@ export default async function PropertyPage({
           <ListingGrid items={result.alternatives} locale={locale} copy={copy} />
         </section>
       ) : null}
-      {/* Phones: the contact actions stay in reach at the bottom of the screen. */}
+      {/* Phones: the contact actions stay in reach at the bottom of the screen. The bar is
+          sticky inside the page, not fixed over it: it takes its own space at the end of the
+          page, so nothing (similar homes, the last lines) is ever covered. */}
       <div
-        className="fixed inset-x-0 bottom-0 z-40 flex gap-3 border-t border-border bg-surface px-gutter py-3 lg:hidden"
+        className="sticky bottom-0 z-40 -mx-gutter -mb-8 flex gap-3 border-t border-border bg-surface px-gutter py-3 lg:hidden"
         data-contact-bar
       >
         {contactWith(butlerOn ? "#ask-butler" : inquiry("question"))}

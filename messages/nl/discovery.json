@@ -153,6 +153,8 @@
   "similar": "Vergelijkbaar aanbod",
   "location": "Ligging",
   "about": "Over dit object",
+  "readDescription": "Lees de hele beschrijving",
+  "readLess": "Minder tonen",
   "referenceLine": "Referentie {reference}. Laatst bevestigd: {date}.",
   "referenceOnly": "Referentie {reference}.",
   "noLocaleListings": "Nog geen aanbod in het Nederlands. Aanbod in het Bulgaars: {count}.",

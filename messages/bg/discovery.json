@@ -153,6 +153,8 @@
   "similar": "Подобни имоти",
   "location": "Местоположение",
   "about": "За имота",
+  "readDescription": "Прочетете цялото описание",
+  "readLess": "Покажи по-малко",
   "referenceLine": "Номер {reference}. Последно потвърдено: {date}.",
   "referenceOnly": "Номер {reference}.",
   "noLocaleListings": "Все още няма обяви на този език. Обяви на български: {count}.",

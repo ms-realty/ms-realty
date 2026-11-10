@@ -153,6 +153,8 @@
   "similar": "Similar properties",
   "location": "Location",
   "about": "About this property",
+  "readDescription": "Read the whole description",
+  "readLess": "Show less",
   "referenceLine": "Reference {reference}. Last confirmed {date}.",
   "referenceOnly": "Reference {reference}.",
   "noLocaleListings": "There are no listings in English yet. Listings in Bulgarian: {count}.",

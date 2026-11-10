@@ -27,15 +27,24 @@ export function ListingPhoto({
 }) {
   const source = media ? approvedMediaHref(media) : null;
   if (!media || !source)
+    // A quiet stand-in with the frame's own ratio: the parent fixes it, this fills it. It is
+    // one image to assistive technology, named by the listing and the reason.
     return (
       <div
+        role="img"
+        aria-label={`${alt}. ${unavailable}`}
         className={cx(
           "flex size-full flex-col items-center justify-center gap-2 bg-subtle p-4 text-center text-caption text-text-muted",
           className,
         )}
       >
-        <NoPhotoIcon className="size-6" />
-        <span>{unavailable}</span>
+        <span
+          aria-hidden="true"
+          className="flex size-12 items-center justify-center rounded-full border border-border bg-surface"
+        >
+          <NoPhotoIcon className="size-6" />
+        </span>
+        <span aria-hidden="true">{unavailable}</span>
       </div>
     );
   const srcSet = approvedMediaSrcSet(media);

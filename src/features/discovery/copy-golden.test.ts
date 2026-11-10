@@ -74,6 +74,8 @@ const storefrontKeys = new Set([
   "similar",
   "location",
   "about",
+  "readDescription",
+  "readLess",
   "referenceLine",
   "referenceOnly",
   "noLocaleListings",

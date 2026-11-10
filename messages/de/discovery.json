@@ -153,6 +153,8 @@
   "similar": "Ähnliche Immobilien",
   "location": "Lage",
   "about": "Über die Immobilie",
+  "readDescription": "Ganze Beschreibung lesen",
+  "readLess": "Weniger anzeigen",
   "referenceLine": "Objektnummer {reference}. Zuletzt bestätigt: {date}.",
   "referenceOnly": "Objektnummer {reference}.",
   "noLocaleListings": "Noch keine Angebote auf Deutsch. Angebote auf Bulgarisch: {count}.",

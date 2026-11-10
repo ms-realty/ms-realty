@@ -6,7 +6,7 @@ import { buttonClass } from "@/ui/button-class";
 import { ApprovedMedia } from "./approved-media";
 import { compareCopy } from "./compare-copy";
 import type { DiscoveryCopy } from "./copy";
-import { Availability } from "./listing-card";
+import { Availability, PriceBasis } from "./listing-card";
 import { RemoveComparison } from "./local-selection";
 import { listingHref, locality, priceText, scalarFact } from "./presentation";
 
@@ -105,11 +105,11 @@ export function Comparison({
             {listing.price.state === "known" && listing.price.value.period === "total" ? (
               <span className="block font-normal text-text-muted">{labels.total}</span>
             ) : null}
-            {listing.price.state === "known" ? (
-              <span className="block font-normal text-text-muted">
-                {copy[listing.price.value.basis]}
-              </span>
-            ) : null}
+            <PriceBasis
+              price={listing.price}
+              copy={copy}
+              className="block font-normal text-caption"
+            />
           </>
         ),
       },

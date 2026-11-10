@@ -6,8 +6,8 @@
 import "server-only";
 import { and, eq } from "drizzle-orm";
 import { agency } from "@/config/tenant";
-import { currentPublications, listings } from "@/db/schema";
-import type { Fact, FactState } from "@/domain/facts";
+import { currentPublications, listings, properties } from "@/db/schema";
+import { type Fact, type FactState, type PropertyType, sameKindTypes } from "@/domain/facts";
 import { type PublicLocale, parseReference } from "@/domain/ids";
 import { decisionFactKeys } from "@/domain/listing-readiness";
 import { derivePublicPresentation } from "@/domain/publication";
@@ -75,7 +75,8 @@ function toConfirm(listing: PublishedListing): ToConfirmItem[] {
 }
 
 /**
- * Up to three similar public listings: the same purpose in the same place first, then the same
+ * Up to three similar public listings of the same kind group (homes, land, commercial): the
+ * same purpose in the same place first, then the same
  * purpose at a nearby price (within a third either way), newest first, never the one shown.
  * Built only from the public search, so every card is an eligible publication in this locale.
  */
@@ -86,7 +87,7 @@ async function alternatives(
     now: Date;
     /** The listing shown; only its reference and purpose when it is not public. */
     card: Pick<ListingCard, "reference" | "purpose"> &
-      Partial<Pick<ListingCard, "place" | "price">>;
+      Partial<Pick<ListingCard, "place" | "price">> & { propertyType?: PropertyType };
   },
 ): Promise<ListingCard[]> {
   const { card, locale, now } = input;
@@ -101,6 +102,9 @@ async function alternatives(
     purpose: card.purpose,
     sort: "newest" as const,
     pageSize: maxAlternatives + 1,
+    // Only the same kind of property: homes, land or commercial (an office is not an alternative
+    // to an apartment). Unknown for a listing that is no longer public.
+    ...(card.propertyType ? { propertyTypes: [...sameKindTypes(card.propertyType)] } : {}),
   };
   const place = card.place?.settlement?.id ?? card.place?.municipality?.id;
   if (place) add((await searchListings(db, { ...base, placeIds: [place] }, { now })).items);
@@ -162,9 +166,11 @@ export async function getPublicListing(
       state: currentPublications.state,
       purpose: listings.purpose,
       commercialState: listings.commercialState,
+      propertyType: properties.propertyType,
     })
     .from(currentPublications)
     .innerJoin(listings, eq(listings.id, currentPublications.listingId))
+    .innerJoin(properties, eq(properties.id, listings.propertyId))
     .where(
       and(
         eq(listings.reference, parsed.reference),
@@ -187,7 +193,11 @@ export async function getPublicListing(
     purpose: pointer.purpose,
     alternatives: await alternatives(db, {
       locale,
-      card: { reference: parsed.reference, purpose: pointer.purpose },
+      card: {
+        reference: parsed.reference,
+        purpose: pointer.purpose,
+        propertyType: pointer.propertyType,
+      },
       now,
     }),
   };

@@ -10,7 +10,7 @@ import { StatusBadge } from "@/ui/status-badge";
 import type { DiscoveryCopy } from "./copy";
 import { ListingPhoto } from "./listing-photo";
 import { CompareToggle, SaveToggle } from "./local-selection";
-import { listingHref, locality, priceText, shownFacts } from "./presentation";
+import { listingHref, locality, priceBasisText, priceText, shownFacts } from "./presentation";
 
 /** The known facts as one line of short items; unknown facts are simply absent. */
 export function ListingFacts({
@@ -43,6 +43,24 @@ export function ListingFacts({
       ))}
     </ul>
   );
+}
+
+/** The recorded price basis as one quiet line under the price; a plain asking price says nothing. */
+export function PriceBasis({
+  price,
+  copy,
+  className,
+}: {
+  price: Listing["price"];
+  copy: DiscoveryCopy;
+  className?: string;
+}) {
+  const basis = priceBasisText(price, copy);
+  return basis ? (
+    <p className={cx("text-compact text-text-muted", className)} data-price-basis>
+      {basis}
+    </p>
+  ) : null;
 }
 
 const availabilityTone = (state: Listing["availability"]["presented"]) =>
@@ -142,9 +160,12 @@ export function ListingCard({
         </div>
       </div>
       <div className="flex flex-1 flex-col gap-1.5 p-4">
-        <p className="text-price font-semibold" data-price>
-          <bdi>{priceText(listing.price, locale, copy)}</bdi>
-        </p>
+        <div>
+          <p className="text-price font-semibold" data-price>
+            <bdi>{priceText(listing.price, locale, copy)}</bdi>
+          </p>
+          <PriceBasis price={listing.price} copy={copy} />
+        </div>
         <h2 className="line-clamp-2 break-words text-body font-semibold">
           <a
             className="after:absolute after:inset-0 after:content-[''] focus-visible:outline-none group-hover:underline"

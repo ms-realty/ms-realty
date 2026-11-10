@@ -145,7 +145,12 @@ it("compares the exact three ordered public identities, approved images and fact
     });
   }
   expect(cell("price", values[0].reference)).toHaveTextContent("123,456.78");
-  expect(cell("price", values[0].reference)).toHaveTextContent(copy.asking);
+  // A plain asking price says nothing more; any other recorded basis is one quiet line.
+  expect(cell("price", values[0].reference)).not.toHaveTextContent(copy.asking);
+  expect(cell("price", values[0].reference).querySelector("[data-price-basis]")).toBeNull();
+  expect(cell("price", values[1].reference).querySelector("[data-price-basis]")).toHaveTextContent(
+    copy.negotiable,
+  );
   expect(cell("price", values[0].reference)).toHaveTextContent(labels.total);
   expect(cell("price", values[1].reference)).toHaveTextContent("700.05");
   expect(cell("price", values[1].reference)).toHaveTextContent(copy.perMonth);

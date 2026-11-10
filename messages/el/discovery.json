@@ -153,6 +153,8 @@
   "similar": "Παρόμοια ακίνητα",
   "location": "Τοποθεσία",
   "about": "Σχετικά με το ακίνητο",
+  "readDescription": "Διαβάστε ολόκληρη την περιγραφή",
+  "readLess": "Λιγότερα",
   "referenceLine": "Κωδικός {reference}. Τελευταία επιβεβαίωση: {date}.",
   "referenceOnly": "Κωδικός {reference}.",
   "noLocaleListings": "Δεν υπάρχουν ακόμη αγγελίες στα ελληνικά. Αγγελίες στα βουλγαρικά: {count}.",

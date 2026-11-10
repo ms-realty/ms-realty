@@ -7,7 +7,16 @@ import {
   rolePresets,
   roles,
 } from "./capabilities";
-import { isKnown, known, listingPurposes, money, presentInEuro, pricePeriods } from "./facts";
+import {
+  isKnown,
+  known,
+  listingPurposes,
+  money,
+  presentInEuro,
+  pricePeriods,
+  propertyTypes,
+  sameKindTypes,
+} from "./facts";
 import {
   formatListingReference,
   formatReference,
@@ -69,6 +78,16 @@ describe("facts", () => {
       amountMinor: 9_500_000,
       currency: "EUR",
     });
+  });
+});
+
+describe("property kind groups", () => {
+  it("keeps homes, land and commercial apart and places every type in a group", () => {
+    expect(sameKindTypes("apartment")).toContain("house");
+    expect(sameKindTypes("apartment")).not.toContain("commercial");
+    expect(sameKindTypes("commercial")).not.toContain("apartment");
+    expect(sameKindTypes("plot")).toEqual(["plot"]);
+    for (const type of propertyTypes) expect(sameKindTypes(type)).toContain(type);
   });
 });
 
