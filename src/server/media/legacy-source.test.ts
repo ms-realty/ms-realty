@@ -1,10 +1,10 @@
 // ADR 0016: the carry-over reads each photo by the key the legacy manifest gives it, from a
 // read-only source, and never anything outside that key space.
+import { readFileSync } from "node:fs";
 import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import manifest from "../../../data/legacy/media-manifest.json" with { type: "json" };
 import { buildMediaItems } from "../../db/import/mapping";
 import { loadLegacySources } from "../../db/import/sources";
 import {
@@ -13,6 +13,15 @@ import {
   legacyMediaSource,
   R2LegacyMediaSource,
 } from "./legacy-source";
+
+// Read at run time, not imported: the image build type-checks this file without the raw legacy
+// captures, which stay outside the image (.dockerignore).
+const manifest = JSON.parse(
+  readFileSync(new URL("../../../data/legacy/media-manifest.json", import.meta.url), "utf8"),
+) as {
+  key_shape: string;
+  objects: { r2_key: string; original_url: string; listing_references: string[] }[];
+};
 
 let root: string;
 beforeAll(async () => {
