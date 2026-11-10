@@ -268,7 +268,7 @@ export function BulkPublishForm({
               {/* Aligned columns: select, photo, listing, price, area. */}
               <div
                 aria-hidden="true"
-                className="hidden grid-cols-[2.75rem_5rem_minmax(0,1fr)_9rem_6rem] gap-x-4 border-b border-divider pb-2 text-caption font-semibold text-text-muted md:grid"
+                className="hidden grid-cols-[2.75rem_7rem_minmax(0,1fr)_9rem_6rem] gap-x-4 border-b border-divider pb-2 text-caption font-semibold text-text-muted lg:grid"
               >
                 <span />
                 <span>{labels.photo}</span>
@@ -280,7 +280,7 @@ export function BulkPublishForm({
                 {rows.map((row) => (
                   <li
                     key={row.reference}
-                    className="grid grid-cols-[2.75rem_5rem_minmax(0,1fr)] items-start gap-x-4 gap-y-1 py-3 md:grid-cols-[2.75rem_5rem_minmax(0,1fr)_9rem_6rem]"
+                    className="grid grid-cols-[2.75rem_auto_minmax(0,1fr)] items-start gap-x-4 gap-y-1 py-3 lg:grid-cols-[2.75rem_auto_minmax(0,1fr)_9rem_6rem]"
                   >
                     {/* 44 px target around the 20 px box (WCAG 2.5.8 and the UI kit minimum). */}
                     <label className="flex size-11 items-center justify-center rounded-control hover:bg-subtle">
@@ -304,8 +304,8 @@ export function BulkPublishForm({
                         <bdi>{row.reference}</bdi>
                         {row.detail ? <span>{row.detail}</span> : null}
                       </span>
-                      {/* Below md the figures sit under the title, each with its own label. */}
-                      <dl className="flex flex-wrap gap-x-4 text-dense md:hidden">
+                      {/* Below lg the figures sit under the title, each with its own label. */}
+                      <dl className="flex flex-wrap gap-x-4 text-dense lg:hidden">
                         <div className="flex gap-1">
                           <dt className="text-text-muted">{labels.price}</dt>
                           <dd className="font-semibold">{row.price}</dd>
@@ -321,10 +321,15 @@ export function BulkPublishForm({
                         </span>
                       ))}
                     </span>
-                    <span className="hidden pt-1 text-end font-semibold tabular-nums md:block">
+                    {/* The column header row is visual only; each figure names itself. */}
+                    <span className="hidden pt-1 text-end font-semibold tabular-nums lg:block">
+                      <span className="sr-only">{labels.price} </span>
                       {row.price}
                     </span>
-                    <span className="hidden pt-1 text-end tabular-nums md:block">{row.area}</span>
+                    <span className="hidden pt-1 text-end tabular-nums lg:block">
+                      <span className="sr-only">{labels.area} </span>
+                      {row.area}
+                    </span>
                   </li>
                 ))}
               </ul>

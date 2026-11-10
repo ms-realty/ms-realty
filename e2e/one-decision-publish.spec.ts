@@ -18,6 +18,7 @@ type Seed = {
   token: string;
   single: { reference: string; listingId: string; title: string };
   bulk: { reference: string; listingId: string }[];
+  rent: { reference: string; listingId: string; title: string };
 };
 function seed(): Seed {
   return JSON.parse(
@@ -141,4 +142,25 @@ test("publishes a selection of ready listings on one attestation", async ({ page
   await expect(page.getByText("Published: 2. Needs attention: 0.")).toBeVisible();
   // The single listing seeded alongside was not selected and stays unpublished.
   expect(await live(f.single.listingId)).toEqual([]);
+});
+
+test("confirms the period of an imported rent as part of the same decision", async ({ page }) => {
+  test.setTimeout(90_000);
+  const f = seed();
+  await signIn(page, f.token);
+  await page.goto(hostUrl("staff", `/en/inventory/${f.rent.reference}/publish`));
+  // The rent is not in the bulk selection: it needs this one confirmation.
+  await expect(page.getByText("€450, per month")).toBeVisible();
+  await expect(page.getByLabel("Rent period")).toHaveValue("month");
+  await page
+    .getByRole("checkbox", { name: /I checked this listing\. The facts are right/ })
+    .check();
+  await page.getByRole("button", { name: "Publish", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Published", exact: true })).toBeVisible();
+  expect(await live(f.rent.listingId)).toEqual(["bg"]);
+  const [revision] = await connection`select r.terms from listing_revisions r
+    join listings l on l.approved_revision_id = r.id where l.id = ${f.rent.listingId}`;
+  expect(revision?.terms).toMatchObject({
+    facts: { price: { state: "known", value: { amountMinor: 45_000, period: "month" } } },
+  });
 });

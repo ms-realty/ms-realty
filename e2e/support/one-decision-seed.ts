@@ -18,7 +18,7 @@ const unreviewed = { reviewed: false, sourceClass: "legacy_import" as const };
 try {
   const broker = await staffFixture(db);
   // Same lock and unique reference rewrite as the other listing fixtures.
-  const listing = (name: string) =>
+  const listing = (name: string, rent = false) =>
     db.transaction(async (tx) => {
       // A distinct title per run: other seeded listings may share the base name on the site.
       const title = `${name} ${randomBytes(3).toString("hex")}`;
@@ -36,6 +36,13 @@ try {
         sellerInstruction: false,
         photos: 1,
         photoState: "pending",
+        ...(rent
+          ? {
+              purpose: "long_term_rent" as const,
+              price: { state: "unknown" as const },
+              rentWithoutPeriod: { amountMinor: 45_000, currency: "EUR" },
+            }
+          : {}),
         facts: {
           bedrooms: { state: "known", value: 2, ...unreviewed },
           "area.living": {
@@ -62,7 +69,9 @@ try {
   const single = await listing("Синтетичен апартамент за публикуване");
   const first = await listing("Синтетична къща за масово публикуване");
   const second = await listing("Синтетично студио за масово публикуване");
-  console.log(JSON.stringify({ token: broker.token, single, bulk: [first, second] }));
+  // A rent the legacy import recorded without its period.
+  const rent = await listing("Синтетичен апартамент под наем", true);
+  console.log(JSON.stringify({ token: broker.token, single, bulk: [first, second], rent }));
 } finally {
   await connection.end();
 }
