@@ -26,6 +26,8 @@ import {
   legacyCurrency,
   legacyDomains,
   mediaPolicy,
+  legacyTitleSuffixes,
+  privatePageRecheckAfterMs,
   publicationPolicy,
   publicLocales,
   referencePrefixes,
@@ -210,6 +212,7 @@ describe("tenant profile", () => {
       photosRequired: false,
       signIn: "active_session",
       attestationOutlivesAuthor: true,
+      publisherApprovesLanguages: true,
     });
     expect(strictPublicationPolicy).toEqual({
       sellerEvidence: "reviewed_documents",
@@ -217,6 +220,7 @@ describe("tenant profile", () => {
       photosRequired: true,
       signIn: "recent",
       attestationOutlivesAuthor: false,
+      publisherApprovesLanguages: false,
     });
   });
 
@@ -258,5 +262,11 @@ describe("tenant profile", () => {
     expect(imageAdmissionRules).toEqual(["reencode", "virus_scan"]);
     expect(mediaPolicy).toEqual({ imageAdmission: "reencode" });
     expect(scanFirstMediaPolicy).toEqual({ imageAdmission: "virus_scan" });
+  });
+
+  it("names the old site's title endings for every public locale and the private-page threshold", () => {
+    for (const locale of publicLocales)
+      expect(legacyTitleSuffixes[locale]?.length).toBeGreaterThan(0);
+    expect(privatePageRecheckAfterMs).toBe(15 * 60_000);
   });
 });

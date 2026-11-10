@@ -265,18 +265,24 @@ export default async function InventoryDetailPage({
         meta={optionLabel(listing.editorialState, locale)}
         summary={[property.settlement, ...summary].join(" · ")}
       >
-        {/* ADR 0012: the primary way to publish is one decision on its own screen. */}
+        {/* ADR 0012: the primary way to publish is one decision on its own screen. The action
+            keeps one name through the flow; whether the listing is live is shown beside it. */}
         {mayPublish ? (
-          <a
-            href={`${path}/publish`}
-            className={buttonClass(
-              data.publications.some((p) => p.state === "active") ? "secondary" : "primary",
-            )}
-          >
-            {data.publications.some((p) => p.state === "active")
-              ? publishCopy(locale).live
-              : publishCopy(locale).publish}
-          </a>
+          <div className="flex flex-wrap items-center gap-3">
+            {data.publications.some((p) => p.state === "active") ? (
+              <span className="text-dense font-semibold text-success" data-publish-state="live">
+                {publishCopy(locale).live}
+              </span>
+            ) : null}
+            <a
+              href={`${path}/publish`}
+              className={buttonClass(
+                data.publications.some((p) => p.state === "active") ? "secondary" : "primary",
+              )}
+            >
+              {publishCopy(locale).publish}
+            </a>
+          </div>
         ) : null}
       </ListingIdentity>
       {error}

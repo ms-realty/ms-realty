@@ -395,7 +395,11 @@ function factsOf(draft: ListingDraft, property: typeof properties.$inferSelect) 
 
 export async function freezeListingDraft(
   db: Executor,
-  command: InventoryCommand & { reference: string },
+  command: InventoryCommand & {
+    reference: string;
+    /** Keep this disclosure (public location precision) instead of the editor's default. */
+    disclosure?: unknown;
+  },
 ) {
   parse(envelope, command);
   await human(db, command.actor);
@@ -469,7 +473,7 @@ export async function freezeListingDraft(
         locale: "bg",
         text: { title: draft.title, description: draft.description },
       };
-      const disclosure = { publicPrecision: "settlement" };
+      const disclosure = command.disclosure ?? { publicPrecision: "settlement" };
       const media = await tx
         .select()
         .from(mediaRelations)

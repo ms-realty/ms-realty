@@ -190,7 +190,7 @@ it("gives staff the deal kind in words, neutral sentences and one-step actions o
   expect(within(passed as HTMLElement).queryByText("Record this step")).toBeNull();
   const checked = region.querySelector<HTMLElement>('li[data-step="identity_checks"]');
   expect(within(checked as HTMLElement).getByText("Copies filed.")).toBeInTheDocument();
-  expect(checked?.querySelector("summary")?.textContent).toBe("Reopen");
+  expect(checked?.querySelector("summary")?.textContent).toMatch(/^Reopen/);
   const current = region.querySelector<HTMLElement>('li[aria-current="step"]') as HTMLElement;
   expect(within(current).getByText("Current step")).toBeVisible();
   expect(

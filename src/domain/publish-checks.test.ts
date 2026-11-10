@@ -57,11 +57,14 @@ describe("publish checks (ADR 0012)", () => {
   it("warns about missing or unprocessed photos without blocking", () => {
     const none = publishChecks({ ...ready, photos: { ready: 0, notReady: 0 } });
     expect(none).toEqual({ blockers: [], warnings: ["no_photos"] });
+    // One photo line, the true one: photos exist but are not ready yet.
     const pending = publishChecks({ ...ready, photos: { ready: 0, notReady: 4 } });
-    expect(pending.warnings).toEqual(["no_photos", "photos_not_ready"]);
+    expect(pending.warnings).toEqual(["photos_not_ready"]);
+    const some = publishChecks({ ...ready, photos: { ready: 2, notReady: 1 } });
+    expect(some.warnings).toEqual(["photos_not_ready"]);
     const legacy = publishChecks({ ...ready, photos: { ready: 0, notReady: 0, notCopied: 12 } });
     expect(legacy.blockers).toEqual([]);
-    expect(legacy.warnings).toEqual(["no_photos", "photos_not_copied"]);
+    expect(legacy.warnings).toEqual(["photos_not_copied"]);
   });
 
   it("warns about a very short description", () => {
@@ -80,7 +83,7 @@ describe("publish checks (ADR 0012)", () => {
     );
   });
 
-  it("warns when copy frames inland Sandanski as a sea or beach place", () => {
+  it("blocks when copy frames inland Sandanski as a sea or beach place", () => {
     expect(framesInlandAsCoast(["Сандански"], ["Апартамент близо до морето"])).toBe(true);
     expect(framesInlandAsCoast(["Sandanski"], ["A short walk to the beach"])).toBe(true);
     expect(framesInlandAsCoast(["Сандански"], ["Квартира у моря, пляж рядом"])).toBe(true);
@@ -88,8 +91,12 @@ describe("publish checks (ADR 0012)", () => {
     // Inland wording, and coast wording for a real coast place, are not flagged.
     expect(framesInlandAsCoast(["Сандански"], ["Минерални извори и планина"])).toBe(false);
     expect(framesInlandAsCoast(["Несебър"], ["На първа линия до плажа"])).toBe(false);
-    expect(publishChecks({ ...ready, texts: ["Sandanski flat with sea views"] }).warnings).toEqual([
-      "inland_framed_as_coast",
-    ]);
+    const framed = publishChecks({ ...ready, texts: ["Sandanski flat with sea views"] });
+    expect(framed.blockers).toEqual(["inland_framed_as_coast"]);
+    expect(framed.warnings).toEqual([]);
+  });
+
+  it("blocks a recorded owner refusal", () => {
+    expect(publishChecks({ ...ready, ownerRefused: true }).blockers).toEqual(["owner_refused"]);
   });
 });

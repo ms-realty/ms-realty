@@ -90,3 +90,26 @@ possible and becomes supporting evidence, not a gate.
 - Under `photosRequired: false` a photo whose details are being edited, or that is not processed
   yet, is left out of a new publication instead of blocking it.
 - The strict policy is tested alongside the agency's (`attested-strict.int.test.ts`).
+
+## Round 4 amendments
+
+- The attestation stores what the person saw (latest version digest, saved-draft digest, location
+  precision, publication generation). Every call, including a replay or a resume, compares the
+  listing with it: a changed saved text, a version someone else wrote, or an unpublish since stops
+  with "This listing changed since you opened it."
+- A recorded refusal (the latest agreed seller instruction without publication permission) is a
+  blocker; only a new recorded agreement lifts it. Expired or missing documents stay attestable.
+  Sea, beach or coast wording for Sandanski is a blocker for the source text and every language.
+- A photo with pending details is left out. Publishing never widens the location precision.
+  Languages still showing an older version go offline until approved again.
+- Every permission a later step needs is checked before a live version goes offline; a sibling
+  live on the same facts blocks before this listing is touched; a later stop says the previous
+  version is offline.
+- "Ready to publish" reads one page of candidates per request (cursor, search by pasted
+  references or title); the Today count is capped and worded "N or more".
+- Under `publisherApprovesLanguages` (this agency) whoever may publish approves a ticked language;
+  the strict policy needs the translation-reviewer role.
+- Import: the live record carries the agency's lot number. An active crawl twin of an archived lot
+  listing takes the lot reference and the archived record takes the crawl-era one (URL decisions
+  and photos follow their record); an active twin of an active lot listing is attached as an
+  archived duplicate.

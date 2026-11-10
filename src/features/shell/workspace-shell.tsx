@@ -1,5 +1,4 @@
 // O01/X02 workspace navigation: everyday work, records and personal controls share one shell.
-import { randomUUID } from "node:crypto";
 import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import { type ReactNode, Suspense } from "react";
@@ -112,7 +111,7 @@ export async function WorkspaceShell({
   const work = primary.filter((item) => workLabels.has(item.label));
   const records = primary.filter((item) => !workLabels.has(item.label));
   return (
-    <PrivatePageGuard locale={locale} verification={randomUUID()}>
+    <PrivatePageGuard locale={locale}>
       <WorkspaceFrame initialMode={initialMode}>
         <AgencyToolsBehavior dialogId={toolsMenuId} />
         <SkipLink targetId={workspaceMainId}>{a11y("skipToContent")}</SkipLink>

@@ -127,8 +127,35 @@ describe("legacy import pipeline (AT55)", () => {
       expect(await count(t, table)).toBe(0);
     }
     expect(await count(t, "listings", "publication_generation <> 0")).toBe(0);
-    expect(await count(t, "listings", "commercial_state = 'confirmation_required'")).toBe(30);
-    expect(await count(t, "listings", "commercial_state = 'withdrawn'")).toBe(135);
+    // One active crawl twin is attached to its active lot listing: the property is listed once.
+    expect(await count(t, "listings", "commercial_state = 'confirmation_required'")).toBe(29);
+    // The public sees the agency's lot number, never a crawl placeholder, on every live listing.
+    expect(
+      await count(t, "listings", "reference like 'MS-CRAWL-%' and commercial_state <> 'withdrawn'"),
+    ).toBe(0);
+    const live = await t.sql<{ reference: string; migration: string }[]>`
+      select reference, legacy_identity->'ids'->>'migration_id' as migration from listings
+      where reference in ('MS-00872','MS-00788','MS-00744','MS-00286','MS-00893')
+        and commercial_state = 'confirmation_required' order by reference`;
+    expect(live.map((r) => [r.reference, r.migration])).toEqual([
+      ["MS-00286", "MS-CRAWL-0153"],
+      ["MS-00744", "MS-CRAWL-0150"],
+      ["MS-00788", "MS-CRAWL-0136"],
+      ["MS-00872", "MS-CRAWL-0129"],
+      ["MS-00893", "MS-CRAWL-0164"],
+    ]);
+    // The duplicate pair stays one public listing: MS-00927 live, its crawl twin attached.
+    expect(
+      await count(t, "listings", "reference = 'MS-CRAWL-0117' and commercial_state = 'withdrawn'"),
+    ).toBe(1);
+    expect(
+      await count(
+        t,
+        "listings",
+        "reference = 'MS-00927' and commercial_state = 'confirmation_required'",
+      ),
+    ).toBe(1);
+    expect(await count(t, "listings", "commercial_state = 'withdrawn'")).toBe(136);
     expect(await count(t, "listings", "availability_confirmed_at is not null")).toBe(0);
     expect(await count(t, "listings", "legacy_identity is null")).toBe(0);
     expect(await count(t, "properties", "approved_fact_revision_id is not null")).toBe(0);

@@ -18,7 +18,7 @@ import { aiCopy } from "@/features/ai/copy";
 import { caseCopy } from "@/features/cases/copy";
 import { caseEmailCopy } from "@/features/cases/email-copy";
 import { inventoryCopy } from "@/features/inventory/copy";
-import { publishCopy } from "@/features/inventory/publish-copy";
+import { blockReason, fillCopy, publishCopy } from "@/features/inventory/publish-copy";
 import { custodyCopy } from "@/features/key-custody/copy";
 import { readAssistanceSource } from "@/server/ai/assistance";
 import { assistanceAvailability } from "@/server/ai/config";
@@ -819,24 +819,36 @@ function ListingReviewRow({
 }) {
   const t = todayCopy(locale);
   const path = listingPath(locale, item.reference);
-  // ADR 0012: nothing to fix, and this person may publish it: one decision away.
-  if (item.readyToPublish) {
-    const publish = publishCopy(locale).today;
+  const publish = publishCopy(locale);
+  // ADR 0012: every listing with nothing to fix is one line that opens "Ready to publish".
+  if (item.readyCount) {
+    return (
+      <Row
+        href={`/${locale}/inventory?view=ready`}
+        Icon={HomeIcon}
+        data={{ "data-listing-ready": String(item.readyCount) }}
+        title={fillCopy(
+          item.readyOrMore ? publish.today.readySummaryMore : publish.today.readySummary,
+          { n: item.readyCount },
+        )}
+        details={[next(locale, publish.today.readyNext)]}
+      />
+    );
+  }
+  // A listing with something to fix keeps its own line, saying what.
+  if (item.fix) {
     return (
       <Row
         href={`${path}/publish`}
         Icon={HomeIcon}
-        data={{ "data-listing-review": item.id }}
-        title={publish.title
+        data={{ "data-listing-review": item.id, "data-listing-fix": item.fix }}
+        title={publish.today.fixTitle
           .split("{reference}")
           .flatMap((part, index) =>
             index === 0 ? [part] : [<bdi key={item.reference}>{item.reference}</bdi>, part],
           )}
-        details={[
-          owner(locale, item.ownerName, item.needsCoverage),
-          ...(item.dueAt ? [["time", due(locale, item.dueAt, now)] satisfies Detail] : []),
-          next(locale, publish.next),
-        ]}
+        // One detail: what to fix (no joined labels).
+        details={[next(locale, blockReason(locale, item.fix))]}
       />
     );
   }

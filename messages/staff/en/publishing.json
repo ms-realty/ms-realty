@@ -18,12 +18,14 @@
   "mustFix": "Fix before publishing",
   "worthALook": "Worth checking",
   "blockers": {
-    "title_missing": "There is no Bulgarian title. Add one in the listing text.",
-    "description_missing": "There is no Bulgarian description. Add one in the listing text.",
+    "title_missing": "There is no title in {language}. Add one in the listing text.",
+    "description_missing": "There is no description in {language}. Add one in the listing text.",
     "price_undecided": "There is no price. Enter the price, or choose “price on request”.",
     "location_missing": "The location is missing. Add the settlement in the listing facts.",
     "not_available": "The property is sold, let or off the market, so it cannot be advertised. If it is on offer again, record that in Detailed review first.",
-    "rent_period_unconfirmed": "The rent has no period. Choose “per month” in the Rent period field."
+    "rent_period_unconfirmed": "The rent has no period. Choose “per month” in the Rent period field.",
+    "owner_refused": "The owner has withdrawn permission to advertise this property. Record a new agreement with the owner in Detailed review first.",
+    "inland_framed_as_coast": "The text describes an inland town as being by the sea or a beach. Correct the wording in the listing text."
   },
   "warnings": {
     "no_photos": "There are no photos to show. The listing will go online without photos.",
@@ -31,12 +33,12 @@
     "photos_not_copied": "Photos from the old website are not copied yet, so they will not be shown.",
     "short_description": "The description is very short. Buyers usually need more detail.",
     "bedrooms_unknown": "The number of bedrooms is not known.",
-    "inland_framed_as_coast": "The text describes an inland town as being by the sea or a beach. Please check the wording."
+    "title_site_suffix": "The title ends with the old site's name. It is shown without it below."
   },
   "attestation": "I checked this listing. The facts are right, the owner asked us to advertise it on these terms, we may use these photos, and it is available.",
   "attestationRequired": "Tick the box to confirm that you checked the listing.",
   "note": "Note for the history (optional)",
-  "fixFirst": "Fix the items marked “Must be fixed” first, then come back here.",
+  "fixFirst": "Fix the items under “Fix before publishing” first, then come back here.",
   "editListing": "Edit the listing",
   "detailedReview": "Detailed review",
   "detailedReviewHint": "Every recorded check and decision, one by one.",
@@ -60,9 +62,10 @@
     "photos_required": "Some photos are not ready yet, and this agency publishes only with every photo ready.",
     "shared_facts_published": "Another listing of the same property is online. Unpublish it first, then publish both again.",
     "no_permission": "Your role cannot do one of the steps needed to publish this listing.",
-    "changed_since_opened": "The listing changed while you were checking it. Open it again and check the new version.",
+    "changed_since_opened": "This listing changed since you opened it. Check it again.",
     "facts_incomplete": "Some facts are still missing. Complete them in the listing.",
-    "other": "The listing could not be published. Open Detailed review to see what is missing."
+    "other": "The listing could not be published. Open Detailed review to see what is missing.",
+    "not_attempted": "Not attempted, because an earlier listing stopped the run. Select it again to continue."
   },
   "ready": {
     "view": "Ready to publish",
@@ -78,11 +81,33 @@
     "needsAttention": "Needs attention",
     "summary": "Published: {n}. Needs attention: {total}.",
     "listing": "Listing",
-    "photo": "Photo"
+    "photo": "Photo",
+    "languagesLabel": "Language",
+    "languageLead": "These listings are online in Bulgarian and their {language} text passed every check. Read each text, tick the box and publish them in {language}.",
+    "languageNone": "No {language} texts are ready. A text appears here when the listing is online in Bulgarian and the text passes every check.",
+    "publishLanguage": "Publish in {language}",
+    "languageAttest": "I read these texts in {language} and each says the same as the Bulgarian.",
+    "shown": "Listings shown: {n}.",
+    "more": "Not looked at yet: {n}. Some of them may be ready.",
+    "showMore": "Show more",
+    "search": "Find listings",
+    "searchHint": "Listing numbers or title. Paste several numbers separated by spaces or commas.",
+    "searchApply": "Search",
+    "noMatch": "No listing that is ready matches this search among the ones looked at.",
+    "resultLead": "Each listing below says what happened to it.",
+    "resultNext": "Open a listing marked “Needs attention” to see what to fix.",
+    "open": "Open {reference}",
+    "publishedWarning": "Published with a warning",
+    "notAttempted": "Not attempted",
+    "noneHere": "None of the listings looked at so far is ready to publish."
   },
   "today": {
     "title": "Check and publish {reference}",
-    "next": "nothing to fix first"
+    "next": "nothing to fix first",
+    "readySummary": "Ready to check and publish: {n}",
+    "readyNext": "open the list, check and publish",
+    "fixTitle": "Fix before publishing {reference}",
+    "readySummaryMore": "Ready to check and publish: {n} or more"
   },
   "rentPeriod": "Rent period",
   "perMonth": "per month",
@@ -99,5 +124,42 @@
     "unusable": "This photo could not be copied from the old website: the file is damaged or missing. Hide it from the gallery.",
     "imageCheck": "Image check",
     "imageCheckPassed": "Passed: saved again as a clean image"
-  }
+  },
+  "cleanTitle": "Remove the old site's ending from the title",
+  "cleanTitleHint": "Removed ending: {title}",
+  "cleanTitles": "Remove the old site's endings from the titles shown",
+  "languages": {
+    "heading": "Languages",
+    "lead": "Each language goes online only when you tick it. Tick only the languages you can read.",
+    "attest": "I read the {language} text and it says the same as the Bulgarian.",
+    "legacy": "The old site recorded this text as approved and published by the agency. Your tick confirms it.",
+    "live": "Published",
+    "fixFirst": "Fix before approving",
+    "worthChecking": "Worth checking",
+    "cannot": "Your role cannot approve translations in this language.",
+    "submit": "Publish languages",
+    "none": "There are no translations of this listing yet.",
+    "detailed": "Edit a translation in detail",
+    "result": "{language}: {reason}",
+    "checks": {
+      "empty": "The translation is empty. Add the text in Edit a translation in detail.",
+      "same_as_source": "The text is the same as the Bulgarian, so it is not translated yet.",
+      "numbers_differ": "These numbers are not in the listing: {code}. Correct them in Edit a translation in detail.",
+      "inland_framed_as_coast": "The text describes an inland town as being by the sea or a beach. Correct the wording.",
+      "length_implausible": "The text is much shorter or longer than the Bulgarian, so part may be missing.",
+      "length_unusual": "The text is noticeably shorter or longer than the Bulgarian.",
+      "place_name_missing": "The place named in the Bulgarian text does not appear."
+    },
+    "reasons": {
+      "source_not_published": "Publish the listing first; its languages follow it.",
+      "checks_failed": "The check found a problem in this text.",
+      "no_permission": "Your role cannot approve translations in this language.",
+      "no_draft": "There is no translation in this language.",
+      "other": "This language could not be published. Open Detailed review."
+    },
+    "withPublish": "Languages you tick under Languages below go online with it."
+  },
+  "previousOffline": "The previous version is offline until you publish again.",
+  "liveOutdated": "The website still shows the previous version. Publish to update it.",
+  "photosAll": "All {n} photos"
 }

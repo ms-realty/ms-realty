@@ -7,11 +7,17 @@ import { getDb } from "@/db/client";
 import { bedroomCount, inventoryCopy } from "@/features/inventory/copy";
 import {
   copyLegacyPhotosAction,
+  publishLanguagesAction,
   publishListingAction,
   unpublishListingAction,
 } from "@/features/inventory/publish-actions";
-import { fillCopy, publishCopy } from "@/features/inventory/publish-copy";
-import { PublishForm, UnpublishForm } from "@/features/inventory/publish-forms";
+import {
+  blockReason,
+  fillCopy,
+  languageName,
+  publishCopy,
+} from "@/features/inventory/publish-copy";
+import { LanguagesForm, PublishForm, UnpublishForm } from "@/features/inventory/publish-forms";
 import { PrivateMediaPreview } from "@/features/inventory/thumbnail";
 import { ListingIdentity, ListingNavigation } from "@/features/inventory/workspace";
 import { privateRead } from "@/features/work/screens";
@@ -20,7 +26,8 @@ import { requireStaffPage } from "@/server/auth/pages";
 import { can } from "@/server/authz";
 import { getEnv } from "@/server/config/env";
 import { legacyMediaSource } from "@/server/media/legacy-source";
-import { publishView } from "@/server/publication/attested";
+import { publishView, reviewBlockers } from "@/server/publication/attested";
+import { languageView } from "@/server/publication/languages";
 import { buttonClass } from "@/ui/button-class";
 import { SubmitButton } from "@/ui/form/submit-button";
 import { Notice } from "@/ui/notice";
@@ -53,6 +60,7 @@ export default async function PublishPage({
   const query = await searchParams;
   const session = await requireStaffPage(locale);
   const view = await privateRead(() => publishView(getDb(), session.actor, reference));
+  const languages = await privateRead(() => languageView(getDb(), session.actor, reference));
   const copy = publishCopy(locale);
   const inventory = inventoryCopy(locale);
   const ref = view.listing.reference;
@@ -68,6 +76,8 @@ export default async function PublishPage({
     view.photos.some((photo) => photo.readiness === "clearable");
   // A rent period the import left open is fixed in place by the decision itself.
   const blockers = checks.blockers.filter((code) => code !== "rent_period_unconfirmed");
+  const fixedInReview =
+    blockers.length > 0 && blockers.every((code) => reviewBlockers.includes(code));
   const showForm = view.mayPublish && blockers.length === 0 && (!live || newerVersion);
   const notKnown = copy.notKnown;
   const shownPhotos = view.photos.filter(
@@ -117,10 +127,18 @@ export default async function PublishPage({
   });
   const publishOperation = randomUUID();
   const unpublishOperation = randomUUID();
+  const languagesOperation = randomUUID();
+  const title = content.cleanedTitle ?? content.title;
+  // Language ticks join the Publish decision before the listing is online, and their own
+  // decision once it is (a language never goes online before the Bulgarian text).
+  const languageForm = showForm ? "listing-publish-form" : live ? "listing-languages-form" : null;
+  const tickable = languages.languages.filter(
+    (language) => !language.live && language.mayApprove && language.checks.blockers.length === 0,
+  );
 
   return (
     <div className="flex flex-col gap-6 px-gutter py-5 sm:px-gutter-wide sm:py-6">
-      <ListingIdentity locale={locale} reference={ref} title={content.title} heading />
+      <ListingIdentity locale={locale} reference={ref} title={title} heading />
       <ListingNavigation locale={locale} reference={ref} current="publish" />
 
       {query.unpublished && !live ? (
@@ -143,6 +161,7 @@ export default async function PublishPage({
           <p role={query.done ? "status" : undefined}>
             {fillCopy(copy.liveLead, { reference: ref })}
           </p>
+          {newerVersion ? <p className="font-semibold">{copy.liveOutdated}</p> : null}
           <a href={publicUrl} className={buttonClass("secondary", "justify-self-start")}>
             {copy.liveAt}
           </a>
@@ -217,8 +236,8 @@ export default async function PublishPage({
                 </div>
               ) : null}
               <article className="grid gap-4 rounded-panel border border-divider bg-surface p-5">
-                <h3 lang="bg" className="text-heading font-semibold">
-                  {content.title || notKnown}
+                <h3 lang={sourceLocale} className="text-heading font-semibold">
+                  {title || notKnown}
                 </h3>
                 <dl className="grid gap-3 sm:grid-cols-2">
                   {preview.map(([label, value]) => (
@@ -249,17 +268,35 @@ export default async function PublishPage({
                           </li>
                         ))}
                       </ul>
+                      <p className="text-dense">
+                        {fillCopy(copy.photoCount, { n: shownPhotos.length })}
+                      </p>
+                      {/* The tick covers every photo it will show: all of them are one click away. */}
                       {shownPhotos.length > 8 ? (
-                        <p className="text-dense">
-                          {fillCopy(copy.photoCount, { n: shownPhotos.length })}
-                        </p>
+                        <details className="rounded-control border border-divider p-3">
+                          <summary className="min-h-control cursor-pointer font-semibold">
+                            {fillCopy(copy.photosAll, { n: shownPhotos.length })}
+                          </summary>
+                          <ul className="grid grid-cols-2 gap-2 pt-3 sm:grid-cols-4">
+                            {shownPhotos.map(({ asset }) => (
+                              <li key={asset.id}>
+                                <PrivateMediaPreview
+                                  source={`/api/files/private/media/${asset.id}?preview=1`}
+                                  alt={asset.altText || content.title}
+                                  unavailable={copy.noPhotos}
+                                  className="aspect-4/3 object-cover"
+                                />
+                              </li>
+                            ))}
+                          </ul>
+                        </details>
                       ) : null}
                     </>
                   ) : (
                     <p className="text-dense">{copy.noPhotos}</p>
                   )}
                 </div>
-                <p lang="bg" className="whitespace-pre-wrap">
+                <p lang={sourceLocale} className="whitespace-pre-wrap">
                   {content.description || notKnown}
                 </p>
               </article>
@@ -281,7 +318,7 @@ export default async function PublishPage({
                   <ul className="list-disc ps-5">
                     {blockers.map((code) => (
                       <li key={code} data-blocker={code}>
-                        {copy.blockers[code]}
+                        {blockReason(locale, code)}
                       </li>
                     ))}
                   </ul>
@@ -302,40 +339,183 @@ export default async function PublishPage({
               {blockers.length ? (
                 <div className="grid gap-3">
                   <p>{copy.fixFirst}</p>
-                  <a href={path} className={buttonClass("primary", "self-start")}>
-                    {copy.editListing}
-                  </a>
+                  {/* Blockers that are recorded in the detailed review are fixed there. */}
+                  {fixedInReview ? (
+                    <a href={`${path}?tab=review`} className={buttonClass("primary", "self-start")}>
+                      {copy.detailedReview}
+                    </a>
+                  ) : (
+                    <a href={path} className={buttonClass("primary", "self-start")}>
+                      {copy.editListing}
+                    </a>
+                  )}
                 </div>
               ) : !view.mayPublish ? (
                 <p>{copy.cannotPublish}</p>
               ) : showForm ? (
-                <PublishForm
-                  action={publishListingAction.bind(null, locale, ref)}
-                  initialState={{
-                    values: {
-                      attested: "",
-                      note: "",
-                      rentPeriod: content.rentAmount ? "month" : "",
-                    },
-                    operationId: publishOperation,
-                    expectedRevision: view.listing.version,
-                    responseId: randomUUID(),
-                    outcome: { kind: "idle" },
-                  }}
-                  permalink={permalink}
-                  reconciliation={status(publishOperation)}
-                  formCopy={inventory.form}
-                  labels={{ attested: copy.attestation, note: copy.note, submit: copy.publish }}
-                  {...(content.rentAmount
-                    ? {
-                        rent: { label: copy.rentPeriod, month: copy.perMonth, hint: copy.rentHint },
-                      }
-                    : {})}
-                />
+                <>
+                  {tickable.length ? (
+                    <p className="text-dense text-text-muted">{copy.languages.withPublish}</p>
+                  ) : null}
+                  <PublishForm
+                    action={publishListingAction.bind(null, locale, ref)}
+                    initialState={{
+                      values: {
+                        attested: "",
+                        note: "",
+                        rentPeriod: content.rentAmount ? "month" : "",
+                      },
+                      operationId: publishOperation,
+                      expectedRevision: view.listing.version,
+                      responseId: randomUUID(),
+                      outcome: { kind: "idle" },
+                    }}
+                    permalink={permalink}
+                    reconciliation={status(publishOperation)}
+                    formCopy={inventory.form}
+                    formId="listing-publish-form"
+                    labels={{ attested: copy.attestation, note: copy.note, submit: copy.publish }}
+                    {...(content.cleanedTitle
+                      ? {
+                          cleanTitle: {
+                            label: copy.cleanTitle,
+                            hint: fillCopy(copy.cleanTitleHint, {
+                              title: content.title.slice(content.cleanedTitle.length).trim(),
+                            }),
+                          },
+                        }
+                      : {})}
+                    {...(content.rentAmount
+                      ? {
+                          rent: {
+                            label: copy.rentPeriod,
+                            month: copy.perMonth,
+                            hint: copy.rentHint,
+                          },
+                        }
+                      : {})}
+                  />
+                </>
               ) : null}
             </section>
           </div>
         </>
+      ) : null}
+
+      {languages.languages.length ? (
+        <section
+          id="languages"
+          aria-labelledby="publish-languages"
+          className="grid gap-4 border-t border-divider pt-6"
+        >
+          <h2 id="publish-languages" className="text-section font-semibold">
+            {copy.languages.heading}
+          </h2>
+          <p className="max-w-reading">{copy.languages.lead}</p>
+          <ul className="grid gap-6">
+            {languages.languages.map((language) => {
+              const name = languageName(locale, language.locale);
+              const blocked = language.checks.blockers.length > 0;
+              return (
+                <li
+                  key={language.locale}
+                  className="grid gap-3 border-b border-divider pb-6"
+                  data-language={language.locale}
+                >
+                  <h3 className="font-semibold">{name}</h3>
+                  <div className="grid gap-4 lg:grid-cols-2">
+                    <div lang={language.locale} className="grid content-start gap-2">
+                      <p className="font-semibold">{language.title}</p>
+                      <p className="whitespace-pre-wrap text-dense">{language.description}</p>
+                    </div>
+                    <div lang={sourceLocale} className="grid content-start gap-2 text-text-muted">
+                      <p className="font-semibold">{languages.source?.title}</p>
+                      <p className="whitespace-pre-wrap text-dense">
+                        {languages.source?.description}
+                      </p>
+                    </div>
+                  </div>
+                  {blocked ? (
+                    <Notice tone="error" title={copy.languages.fixFirst}>
+                      <ul className="list-disc ps-5">
+                        {language.checks.blockers.map((code) => (
+                          <li key={code} data-language-blocker={code}>
+                            {fillCopy(copy.languages.checks[code], {
+                              code: language.checks.unexpectedNumbers.join(", "),
+                            })}
+                          </li>
+                        ))}
+                      </ul>
+                    </Notice>
+                  ) : null}
+                  {language.checks.warnings.length ? (
+                    <ul className="grid gap-1 text-dense text-warning">
+                      {language.checks.warnings.map((code) => (
+                        <li key={code}>{copy.languages.checks[code]}</li>
+                      ))}
+                    </ul>
+                  ) : null}
+                  {language.live ? (
+                    <p className="font-semibold text-success">{copy.languages.live}</p>
+                  ) : !language.mayApprove ? (
+                    <p className="text-dense text-text-muted">{copy.languages.cannot}</p>
+                  ) : languageForm && !blocked ? (
+                    <label className="flex min-h-control items-start gap-3 py-2">
+                      <input
+                        type="checkbox"
+                        name="language"
+                        value={language.locale}
+                        form={languageForm}
+                        defaultChecked={language.legacyApproved}
+                        className="mt-1 size-5 shrink-0 accent-action"
+                        aria-describedby={
+                          language.legacyApproved ? `legacy-${language.locale}` : undefined
+                        }
+                      />
+                      <span className="grid gap-1">
+                        {fillCopy(copy.languages.attest, { language: name })}
+                        {language.legacyApproved ? (
+                          <span
+                            id={`legacy-${language.locale}`}
+                            className="text-caption text-text-muted"
+                          >
+                            {copy.languages.legacy}
+                          </span>
+                        ) : null}
+                      </span>
+                    </label>
+                  ) : null}
+                  <a
+                    href={`${path}/translations/${language.locale}`}
+                    className="justify-self-start text-dense text-action underline"
+                  >
+                    {copy.languages.detailed}
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+          {/* Mounted whenever the listing is live, even when nothing is left to tick, so the
+              confirmation of a plain form post (no JavaScript) is still on the page. */}
+          {live && !showForm && view.mayPublish ? (
+            <LanguagesForm
+              commandAvailable={tickable.length > 0}
+              action={publishLanguagesAction.bind(null, locale, ref)}
+              initialState={{
+                values: { attested: "" },
+                operationId: languagesOperation,
+                expectedRevision: null,
+                responseId: randomUUID(),
+                outcome: { kind: "idle" },
+              }}
+              permalink={permalink}
+              reconciliation={{ href: permalink, label: copy.languages.heading }}
+              formCopy={inventory.form}
+              formId="listing-languages-form"
+              labels={{ attested: copy.languages.heading, submit: copy.languages.submit }}
+            />
+          ) : null}
+        </section>
       ) : null}
 
       <p className="grid gap-1 border-t border-divider pt-4 text-dense">
