@@ -73,6 +73,9 @@ Watch, Suggest, Ask me first, Act.
 | Suggest      | Summaries, matches, next actions, listing text                                                                                                                                                                   |
 | Never        | Price, offers, terms and conditions, contracts, money, publication and withdrawal, access, cancellations, legal, tax and process conclusions                                                                     |
 
+The owner confirmed the Act row for public answers and inquiry acknowledgements when this ADR was
+written.
+
 Every action Butler takes has a receipt and a manual path, uses only approved facts, and stops at
 one switch per brand. A task reaches Act only with an evaluation set that passes for the exact
 build. The "Never" row is the pack's human-only catalogue and no approval lifts it.
