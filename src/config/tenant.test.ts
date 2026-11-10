@@ -165,6 +165,7 @@ describe("tenant profile", () => {
       photosRequired: false,
       signIn: "active_session",
       attestationOutlivesAuthor: true,
+      publisherApprovesLanguages: true,
     });
     expect(strictPublicationPolicy).toEqual({
       sellerEvidence: "reviewed_documents",
@@ -172,6 +173,7 @@ describe("tenant profile", () => {
       photosRequired: true,
       signIn: "recent",
       attestationOutlivesAuthor: false,
+      publisherApprovesLanguages: false,
     });
   });
 

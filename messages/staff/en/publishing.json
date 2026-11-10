@@ -87,7 +87,7 @@
     "publishLanguage": "Publish in {language}",
     "languageAttest": "I read these texts in {language} and each says the same as the Bulgarian.",
     "shown": "Listings shown: {n}.",
-    "more": "Not looked at yet: {m}. Some of them may be ready.",
+    "more": "Not looked at yet: {n}. Some of them may be ready.",
     "showMore": "Show more",
     "search": "Find listings",
     "searchHint": "Listing numbers or title. Paste several numbers separated by spaces or commas.",

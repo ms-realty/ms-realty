@@ -68,6 +68,7 @@ describe("strict publication policy (reviewed documents, independent review)", (
       photosRequired: true,
       signIn: "recent",
       attestationOutlivesAuthor: false,
+      publisherApprovesLanguages: false,
     });
   });
 

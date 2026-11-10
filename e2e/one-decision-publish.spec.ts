@@ -195,7 +195,7 @@ test("publishes a selection of ready listings on one attestation", async ({ page
   await expect(page.getByText("Published with a warning").first()).toBeVisible();
   // The attestation recorded is the sentence shown for the whole selection.
   const [attested] = await connection`select payload from audit_events
-    where action = 'listing.publication.attested' and record_id = ${f.bulk[0]?.listingId ?? ''}`;
+    where action = 'listing.publication.attested' and record_id = ${f.bulk[0]?.listingId ?? ""}`;
   expect(attested?.payload).toMatchObject({
     attestation: expect.stringContaining("I checked each selected listing."),
   });

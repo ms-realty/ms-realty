@@ -220,6 +220,12 @@ export async function ReadyToPublish({
         </>
       ) : null}
       {chosen ? null : <p className="max-w-reading">{copy.ready.lead}</p>}
+      {chosen ? null : (
+        <p className="text-dense text-text-muted" data-ready-count>
+          {fillCopy(copy.ready.shown, { n: rows.length })}
+          {page && page.remaining > 0 ? ` ${fillCopy(copy.ready.more, { n: page.remaining })}` : ""}
+        </p>
+      )}
       {chosen ? null : rows.length === 0 ? (
         <p className="rounded-panel bg-subtle p-6">
           {typed ? copy.ready.noMatch : nextHref || cursor ? copy.ready.noneHere : copy.ready.none}
@@ -277,12 +283,6 @@ export async function ReadyToPublish({
         />
       )}
       {/* The count in words, and a link that carries the cursor to the next listings. */}
-      {chosen ? null : (
-        <p className="text-dense text-text-muted" data-ready-count>
-          {fillCopy(copy.ready.shown, { n: rows.length })}
-          {page && page.remaining > 0 ? ` ${fillCopy(copy.ready.more, { m: page.remaining })}` : ""}
-        </p>
-      )}
       {nextHref ? (
         <a href={nextHref} className={buttonClass("secondary", "justify-self-start")}>
           {copy.ready.showMore}

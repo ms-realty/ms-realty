@@ -3,6 +3,7 @@
 import { randomUUID } from "node:crypto";
 import { and, eq } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { strictPublicationPolicy } from "@/config/tenant";
 import {
   approvals,
   currentPublications,
@@ -239,13 +240,33 @@ describe("languages in one decision (ADR 0012)", () => {
     expect(approval).toBeDefined();
   });
 
-  it("refuses a person who may not review translations in that language", async () => {
+  it("lets whoever may publish approve a ticked language under this agency's policy", async () => {
     const f = await imported({ en: { title: "Two-room flat in Sandanski", text: enDescription } });
     await publishSource(f.reference);
     const publisher = await staff(["assigned_broker", "publishing_approver", "content_editor"]);
     expect(await approve(f.reference, ["en"], publisher.session)).toEqual([
-      { locale: "en", status: "blocked", reason: "no_permission" },
+      { locale: "en", status: "published" },
     ]);
+  });
+
+  it("refuses a person who may not review translations under the strict policy", async () => {
+    const f = await imported({ en: { title: "Two-room flat in Sandanski", text: enDescription } });
+    await publishSource(f.reference);
+    const publisher = await staff(["assigned_broker", "publishing_approver", "content_editor"]);
+    expect(
+      await approveListingLanguages(
+        t.db,
+        publisher.session,
+        {
+          reference: f.reference,
+          operationId: randomUUID(),
+          locales: ["en"],
+          locale: "en",
+          attestation: () => "I read the en text.",
+        },
+        { storage: publicationFixtureStorage, policy: strictPublicationPolicy },
+      ),
+    ).toEqual([{ locale: "en", status: "blocked", reason: "no_permission" }]);
     expect(await searchIn("en", f.reference)).toEqual([]);
   });
 });
