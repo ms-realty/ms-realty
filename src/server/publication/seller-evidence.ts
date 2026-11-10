@@ -10,9 +10,19 @@ import { sellerInstructions } from "@/db/schema";
 /** The `commercial_terms.basis` of a seller instruction recorded by staff attestation. */
 export const staffAttestationBasis = "staff_attestation";
 
-/** An attested instruction counts only while its author is an active staff member. */
-function attestedEvidence(): SQL {
-  return sql`(${sellerInstructions.commercialTerms}->>'basis' = ${staffAttestationBasis}
+/**
+ * An attested instruction was recorded by active staff (the command requires a live staff
+ * session). Under `attestationOutlivesAuthor` it keeps counting after that person leaves, so a
+ * listing does not drop off the site with them; otherwise it lapses with their membership.
+ */
+function attestedEvidence(policy: PublicationPolicy): SQL {
+  return policy.attestationOutlivesAuthor
+    ? sql`(${sellerInstructions.commercialTerms}->>'basis' = ${staffAttestationBasis}
+    and exists (
+      select 1 from principals attester
+      where attester.id = ${sellerInstructions.recordedById} and attester.kind = 'staff'
+    ))`
+    : sql`(${sellerInstructions.commercialTerms}->>'basis' = ${staffAttestationBasis}
     and exists (
       select 1 from principals attester
       join staff_memberships attester_membership on attester_membership.principal_id = attester.id
@@ -62,7 +72,7 @@ export function currentSellerEvidence(
         )
     )`,
     or(
-      policy.sellerEvidence === "staff_attestation" ? attestedEvidence() : undefined,
+      policy.sellerEvidence === "staff_attestation" ? attestedEvidence(policy) : undefined,
       documentEvidence(at),
     ),
   );

@@ -30,6 +30,12 @@ describe("publish checks (ADR 0012)", () => {
       expect(publishChecks({ ...ready, priceState }).blockers).toEqual(["price_undecided"]);
   });
 
+  it("asks for the rent period when only a rent amount was recorded, never guessing it", () => {
+    const rent = { ...ready, priceState: "unknown" as const, rentAmountWithoutPeriod: true };
+    expect(publishChecks(rent).blockers).toEqual(["rent_period_unconfirmed"]);
+    expect(publishChecks({ ...rent, rentPeriodConfirmed: true }).blockers).toEqual([]);
+  });
+
   it("blocks without a location", () => {
     expect(publishChecks({ ...ready, locationKnown: false }).blockers).toEqual([
       "location_missing",

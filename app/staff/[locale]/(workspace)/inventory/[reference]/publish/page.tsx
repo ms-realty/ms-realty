@@ -56,7 +56,9 @@ export default async function PublishPage({
   const publicUrl = `${getEnv().hosts.public}/${sourceLocale}/properties/${ref}/${ref.toLowerCase()}`;
   const newerVersion =
     content.pendingDraft || view.listing.approvedRevisionId !== (view.revision?.id ?? null);
-  const showForm = view.mayPublish && checks.blockers.length === 0 && (!live || newerVersion);
+  // A rent period the import left open is fixed in place by the decision itself.
+  const blockers = checks.blockers.filter((code) => code !== "rent_period_unconfirmed");
+  const showForm = view.mayPublish && blockers.length === 0 && (!live || newerVersion);
   const notKnown = copy.notKnown;
   const shownPhotos = view.photos.filter(
     (photo) => photo.readiness === "shown" || photo.readiness === "clearable",
@@ -66,7 +68,9 @@ export default async function PublishPage({
       copy.price,
       content.price.state === "withheld"
         ? copy.priceOnRequest
-        : (money(locale, content.price.value) ?? notKnown),
+        : content.rentAmount
+          ? `${money(locale, content.rentAmount)}, ${copy.perMonth}`
+          : (money(locale, content.price.value) ?? notKnown),
     ],
     [copy.area, area(locale, content.area.value) ?? notKnown],
     [
@@ -209,13 +213,13 @@ export default async function PublishPage({
               <h2 id="publish-checks" className="text-section font-semibold">
                 {copy.checks}
               </h2>
-              {checks.blockers.length === 0 && checks.warnings.length === 0 ? (
+              {blockers.length === 0 && checks.warnings.length === 0 ? (
                 <p className="text-dense text-text-muted">{copy.allClear}</p>
               ) : null}
-              {checks.blockers.length ? (
+              {blockers.length ? (
                 <Notice tone="error" title={copy.mustFix}>
                   <ul className="list-disc ps-5">
-                    {checks.blockers.map((code) => (
+                    {blockers.map((code) => (
                       <li key={code} data-blocker={code}>
                         {copy.blockers[code]}
                       </li>
@@ -235,7 +239,7 @@ export default async function PublishPage({
                 </Notice>
               ) : null}
 
-              {checks.blockers.length ? (
+              {blockers.length ? (
                 <div className="grid gap-3">
                   <p>{copy.fixFirst}</p>
                   <a href={path} className={buttonClass("primary", "self-start")}>
@@ -248,7 +252,11 @@ export default async function PublishPage({
                 <PublishForm
                   action={publishListingAction.bind(null, locale, ref)}
                   initialState={{
-                    values: { attested: "", note: "" },
+                    values: {
+                      attested: "",
+                      note: "",
+                      rentPeriod: content.rentAmount ? "month" : "",
+                    },
                     operationId: publishOperation,
                     expectedRevision: view.listing.version,
                     responseId: randomUUID(),
@@ -258,6 +266,11 @@ export default async function PublishPage({
                   reconciliation={status(publishOperation)}
                   formCopy={inventory.form}
                   labels={{ attested: copy.attestation, note: copy.note, submit: copy.publish }}
+                  {...(content.rentAmount
+                    ? {
+                        rent: { label: copy.rentPeriod, month: copy.perMonth, hint: copy.rentHint },
+                      }
+                    : {})}
                 />
               ) : null}
             </section>

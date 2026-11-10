@@ -2,11 +2,13 @@
 // ADR 0012 forms: one attestation and Publish, Unpublish, and the bulk selection. Native forms
 // through ActionForm, so each works without JavaScript; the server rechecks everything.
 import { useSyncExternalStore } from "react";
-import { errorClass } from "@/ui/field-class";
+import { cx } from "@/ui/cx";
+import { controlClass, errorClass, labelClass } from "@/ui/field-class";
 import type { FormAction, FormCopy, FormState } from "@/ui/form/contract";
 import { ActionForm } from "@/ui/form/form";
 import { FormField } from "@/ui/form/form-field";
 import type { BulkPublishValues, PublishValues, UnpublishValues } from "./publish-actions";
+import { InventoryThumbnail } from "./thumbnail";
 
 function Confirm({
   id,
@@ -60,6 +62,7 @@ export function PublishForm({
   reconciliation,
   formCopy,
   labels,
+  rent,
 }: {
   action: FormAction<PublishValues>;
   initialState: FormState<PublishValues>;
@@ -67,6 +70,8 @@ export function PublishForm({
   reconciliation: { href: string; label: string };
   formCopy: FormCopy;
   labels: { attested: string; note: string; submit: string };
+  /** A rent the import recorded without a period: confirmed here, in the same decision. */
+  rent?: { label: string; month: string; hint: string };
 }) {
   return (
     <ActionForm
@@ -76,14 +81,45 @@ export function PublishForm({
       nativeIdentity="listing-publish"
       reconciliation={reconciliation}
       copy={formCopy}
-      labels={{ attested: labels.attested, note: labels.note }}
+      labels={{ attested: labels.attested, note: labels.note, rentPeriod: rent?.label ?? "" }}
       submitLabel={labels.submit}
       layout="full"
     >
       {(form) => {
         const attested = form.field("attested");
+        const period = form.field("rentPeriod");
         return (
           <>
+            {rent ? (
+              <div className="grid gap-2" data-invalid={period.error ? "true" : undefined}>
+                <label htmlFor={period.id} className={labelClass}>
+                  {rent.label}
+                </label>
+                <p id={`${period.id}-hint`} className="text-caption text-text-muted">
+                  {rent.hint}
+                </p>
+                <select
+                  id={period.id}
+                  name={period.name}
+                  value={period.value}
+                  onChange={period.onChange}
+                  disabled={period.readOnly}
+                  className={controlClass}
+                  aria-invalid={Boolean(period.error) || undefined}
+                  aria-describedby={cx(`${period.id}-hint`, period.error && `${period.id}-error`)}
+                >
+                  <option value="month">{rent.month}</option>
+                </select>
+                {period.readOnly ? (
+                  <input type="hidden" name="rentPeriod" value={period.value} />
+                ) : null}
+                {period.error ? (
+                  <p className={errorClass} id={`${period.id}-error`}>
+                    {period.error}
+                  </p>
+                ) : null}
+              </div>
+            ) : null}
             <Confirm
               id={attested.id}
               name="attested"
@@ -151,6 +187,9 @@ export type BulkRow = {
   version: number;
   title: string;
   detail: string;
+  price: string;
+  area: string;
+  thumbnail?: string;
   warnings: readonly string[];
   href: string;
   selectLabel: string;
@@ -173,7 +212,17 @@ export function BulkPublishForm({
   reconciliation: { href: string; label: string };
   formCopy: FormCopy;
   rows: readonly BulkRow[];
-  labels: { attested: string; submit: string; list: string; selectAll: string };
+  labels: {
+    attested: string;
+    submit: string;
+    list: string;
+    selectAll: string;
+    listing: string;
+    photo: string;
+    price: string;
+    area: string;
+    noPhoto: string;
+  };
 }) {
   const hydrated = useSyncExternalStore(
     noSubscription,
@@ -216,11 +265,25 @@ export function BulkPublishForm({
                   {labels.selectAll}
                 </label>
               ) : null}
-              <ul className="divide-y divide-divider border-y border-divider">
+              {/* Aligned columns: select, photo, listing, price, area. */}
+              <div
+                aria-hidden="true"
+                className="hidden grid-cols-[2.75rem_5rem_minmax(0,1fr)_9rem_6rem] gap-x-4 border-b border-divider pb-2 text-caption font-semibold text-text-muted md:grid"
+              >
+                <span />
+                <span>{labels.photo}</span>
+                <span>{labels.listing}</span>
+                <span className="text-end">{labels.price}</span>
+                <span className="text-end">{labels.area}</span>
+              </div>
+              <ul className="divide-y divide-divider border-b border-divider">
                 {rows.map((row) => (
-                  <li key={row.reference} className="flex items-start gap-2 py-2">
+                  <li
+                    key={row.reference}
+                    className="grid grid-cols-[2.75rem_5rem_minmax(0,1fr)] items-start gap-x-4 gap-y-1 py-3 md:grid-cols-[2.75rem_5rem_minmax(0,1fr)_9rem_6rem]"
+                  >
                     {/* 44 px target around the 20 px box (WCAG 2.5.8 and the UI kit minimum). */}
-                    <label className="flex size-11 shrink-0 items-center justify-center rounded-control hover:bg-subtle">
+                    <label className="flex size-11 items-center justify-center rounded-control hover:bg-subtle">
                       <input
                         id={`ready-${row.reference}`}
                         type="checkbox"
@@ -232,7 +295,8 @@ export function BulkPublishForm({
                       />
                     </label>
                     <input type="hidden" name={`version:${row.reference}`} value={row.version} />
-                    <span className="grid min-w-0 gap-1 py-2">
+                    <InventoryThumbnail source={row.thumbnail} label={labels.noPhoto} />
+                    <span className="grid min-w-0 gap-1">
                       <a href={row.href} lang="bg" className="font-semibold text-action underline">
                         {row.title}
                       </a>
@@ -240,12 +304,27 @@ export function BulkPublishForm({
                         <bdi>{row.reference}</bdi>
                         {row.detail ? <span>{row.detail}</span> : null}
                       </span>
+                      {/* Below md the figures sit under the title, each with its own label. */}
+                      <dl className="flex flex-wrap gap-x-4 text-dense md:hidden">
+                        <div className="flex gap-1">
+                          <dt className="text-text-muted">{labels.price}</dt>
+                          <dd className="font-semibold">{row.price}</dd>
+                        </div>
+                        <div className="flex gap-1">
+                          <dt className="text-text-muted">{labels.area}</dt>
+                          <dd className="font-semibold">{row.area}</dd>
+                        </div>
+                      </dl>
                       {row.warnings.map((warning) => (
                         <span key={warning} className="text-caption text-warning">
                           {warning}
                         </span>
                       ))}
                     </span>
+                    <span className="hidden pt-1 text-end font-semibold tabular-nums md:block">
+                      {row.price}
+                    </span>
+                    <span className="hidden pt-1 text-end tabular-nums md:block">{row.area}</span>
                   </li>
                 ))}
               </ul>

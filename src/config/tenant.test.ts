@@ -161,11 +161,15 @@ describe("tenant profile", () => {
       sellerEvidence: "staff_attestation",
       independentReview: false,
       photosRequired: false,
+      signIn: "active_session",
+      attestationOutlivesAuthor: true,
     });
     expect(strictPublicationPolicy).toEqual({
       sellerEvidence: "reviewed_documents",
       independentReview: true,
       photosRequired: true,
+      signIn: "recent",
+      attestationOutlivesAuthor: false,
     });
   });
 });

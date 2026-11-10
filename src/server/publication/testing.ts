@@ -189,6 +189,8 @@ export interface ListingFixtureOptions {
   readonly photoFixture?: { bytes: Buffer; width: number; height: number };
   readonly sellerInstruction?: boolean;
   readonly regulatedClaims?: readonly string[];
+  /** As the legacy import records a rent without its period: price unknown plus the amount. */
+  readonly rentWithoutPeriod?: { readonly amountMinor: number; readonly currency: string };
 }
 
 export interface ListingFixture {
@@ -297,6 +299,17 @@ export async function createListingFixture(
         basis: null,
         note: null,
       },
+      ...(options.rentWithoutPeriod
+        ? {
+            "price.amount_without_period": {
+              state: "known",
+              value: options.rentWithoutPeriod,
+              unit: null,
+              basis: null,
+              note: "Rent period not recorded; confirm month or year before use.",
+            },
+          }
+        : {}),
     },
   };
   const sourceCopy = {

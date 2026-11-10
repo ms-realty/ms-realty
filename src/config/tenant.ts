@@ -123,6 +123,17 @@ export interface PublicationPolicy {
   readonly independentReview: boolean;
   /** Publishing waits until every placed photo is processed and cleared. */
   readonly photosRequired: boolean;
+  /**
+   * How recent the publisher's sign-in must be to publish or unpublish: an active staff session,
+   * or a sign-in within the staff step-up window (5 minutes). Other sensitive actions keep their
+   * own step-up rule.
+   */
+  readonly signIn: "active_session" | "recent";
+  /**
+   * An attestation keeps counting after its author leaves the agency (it was valid when it was
+   * recorded by active staff). When false, it lapses with the author's membership (fail closed).
+   */
+  readonly attestationOutlivesAuthor: boolean;
 }
 
 /** The strict policy another brand may adopt; kept tested alongside the agency's own. */
@@ -130,12 +141,16 @@ export const strictPublicationPolicy: PublicationPolicy = {
   sellerEvidence: "reviewed_documents",
   independentReview: true,
   photosRequired: true,
+  signIn: "recent",
+  attestationOutlivesAuthor: false,
 };
 
 export const publicationPolicy: PublicationPolicy = {
   sellerEvidence: "staff_attestation",
   independentReview: false,
   photosRequired: false,
+  signIn: "active_session",
+  attestationOutlivesAuthor: true,
 };
 
 // Deal path (ADR 0013). The steps a person records after terms are agreed, from the first
