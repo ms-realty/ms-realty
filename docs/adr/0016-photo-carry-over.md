@@ -41,7 +41,7 @@ removed.
 
 ## How it is recorded
 
-- `media_assets.admission` (`virus_scan` | `reencode`, migration `0040_media_admission`) names the
+- `media_assets.admission` (`virus_scan` | `reencode`, migration `0041_media_admission`) names the
   check whose outcome `scan` and the scan evidence columns record for the exact sealed digest. A
   re-encode writes `scan = clean`, `scanned_sha256 = sha256` and a `scanner_version` of the form
   `reencode sharp/<version> libvips/<version>`.
