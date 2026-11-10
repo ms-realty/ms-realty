@@ -221,7 +221,8 @@ function foldView(text: string): View {
   return { text: out, start, end };
 }
 
-function fold(text: string): string {
+/** Lower case without diacritics; "й" reads "и", "ё" reads "е". Shared with the answer router. */
+export function fold(text: string): string {
   return foldView(text).text;
 }
 
@@ -455,9 +456,9 @@ const areaRe = new RegExp(
   "gu",
 );
 
-const bedroomWords =
+export const bedroomWords =
   "bed(?:room)?s?|br|bd|bdr|bdrm|спалн\\p{L}*|спальн\\p{L}*|schlafzimmer\\p{L}*|slaapkamers?|υπνοδωματι\\p{L}*|חדרי\\s+שינה|חדר\\s+שינה";
-const roomWords = "rooms?|стаи|стая|комнат\\p{L}*|zimmer|kamers?|δωματι\\p{L}*|חדרים|חדר";
+export const roomWords = "rooms?|стаи|стая|комнат\\p{L}*|zimmer|kamers?|δωματι\\p{L}*|חדרים|חדר";
 const countPrefix = `${B}${countNumber}(?:\\s*${rangeJoin}\\s*${countNumber})?\\s*(\\+)?\\s*-?\\s*`;
 const bedroomRe = new RegExp(`${countPrefix}(?:${bedroomWords})${E}`, "gu");
 const roomRe = new RegExp(

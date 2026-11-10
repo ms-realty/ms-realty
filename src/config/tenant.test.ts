@@ -6,6 +6,7 @@ import {
   assistantLabel,
   availabilityReviewIntervalDays,
   brokerageWithdrawalDays,
+  butlerLevels,
   currencyCodes,
   customerDueDiligenceScope,
   type DealPathStepTemplate,
@@ -268,5 +269,9 @@ describe("tenant profile", () => {
     for (const locale of publicLocales)
       expect(legacyTitleSuffixes[locale]?.length).toBeGreaterThan(0);
     expect(privatePageRecheckAfterMs).toBe(15 * 60_000);
+  });
+
+  it("lets Butler answer visitors on listing pages for this brand (ADR 0011 §5, ADR 0017)", () => {
+    expect(butlerLevels).toEqual({ publicAnswers: "act" });
   });
 });

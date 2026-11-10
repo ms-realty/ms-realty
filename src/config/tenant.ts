@@ -462,3 +462,19 @@ export const serviceNotifications: {
 export function serviceNotificationEnabled(event: ServiceNotificationEvent): boolean {
   return serviceNotifications.enabled && serviceNotifications.events[event] === true;
 }
+
+// Butler levels (ADR 0011 §5). The level each Butler task runs at for this brand; "off" removes
+// the task from every surface. A task at "act" also needs its evaluation set to pass for the
+// build, a receipt per action, a manual path and the deployment's kill switch left on.
+
+export interface ButlerTaskLevels {
+  /**
+   * Answers visitor questions on a published listing page from that listing's approved public
+   * content (ADR 0017). "off": the block is not rendered and the page is the inquiry form alone.
+   */
+  readonly publicAnswers: "act" | "off";
+}
+
+export const butlerLevels: ButlerTaskLevels = {
+  publicAnswers: "act",
+};

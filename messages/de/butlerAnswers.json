@@ -1,0 +1,104 @@
+{
+  "heading": "Fragen zu dieser Immobilie",
+  "intro": "Butler, der Assistent der Agentur, antwortet anhand dieses Inserats.",
+  "label": "Ihre Frage",
+  "hint": "Preis, Größe, Zimmer, Etage, Lage oder Besichtigung.",
+  "submit": "Fragen",
+  "pending": "Inserat wird geprüft",
+  "suggestions": "Häufige Fragen",
+  "suggest": {
+    "price": "Wie viel kostet sie?",
+    "area": "Wie groß ist sie?",
+    "bedrooms": "Wie viele Schlafzimmer hat sie?",
+    "floor": "In welcher Etage liegt sie?",
+    "place": "Wo liegt sie?",
+    "viewing": "Wie vereinbare ich eine Besichtigung?"
+  },
+  "answerLabel": "Antwort von Butler",
+  "asked": "Ihre Frage",
+  "sources": {
+    "listing": "Aus dem Inserat {reference}",
+    "description": "Aus der Beschreibung im Inserat",
+    "area": "Aus dem Gebietsführer {title}",
+    "agency": "Aus den Angaben der Agentur"
+  },
+  "handoff": "Makler fragen",
+  "handoffNote": "Das Anfrageformular öffnet sich mit Ihrer Frage. Sie senden es selbst ab.",
+  "limited": "Sie haben in kurzer Zeit viele Fragen gestellt. Versuchen Sie es in einigen Minuten erneut oder fragen Sie einen Makler.",
+  "budget": "Butler kann heute keine weiteren Fragen beantworten. Ein Makler schon.",
+  "failed": "Butler konnte gerade nicht antworten. Ein Makler kann es.",
+  "empty": "Schreiben Sie eine Frage oder wählen Sie eine der häufigen Fragen.",
+  "tooLong": "Kürzen Sie Ihre Frage auf höchstens {max} Zeichen.",
+  "unknown": "Das Inserat sagt dazu nichts. Ein Makler kann es Ihnen sagen.",
+  "brokerCan": "Ein Makler kann es Ihnen sagen.",
+  "answers": {
+    "priceSale": "Der Preis beträgt {price}.",
+    "priceRent": "Die Miete beträgt {price} im Monat.",
+    "basis": {
+      "asking": "Das ist der Angebotspreis.",
+      "negotiable": "Das Inserat bezeichnet den Preis als verhandelbar.",
+      "fixed": "Das Inserat nennt einen Festpreis.",
+      "indicative": "Das Inserat nennt diesen Preis als Richtwert."
+    },
+    "includes": "Laut Inserat ist enthalten: {items}.",
+    "area": "Die {basis} beträgt {area}.",
+    "areaBasis": {
+      "living": "Wohnfläche",
+      "usable": "Nutzfläche",
+      "built": "bebaute Fläche",
+      "gross_floor": "Bruttogeschossfläche",
+      "total": "Gesamtfläche",
+      "land": "Grundstücksfläche"
+    },
+    "bedrooms": "{count, plural, one {Sie hat # Schlafzimmer.} other {Sie hat # Schlafzimmer.}}",
+    "rooms": "{count, plural, one {Sie hat insgesamt # Zimmer.} other {Sie hat insgesamt # Zimmer.}}",
+    "type": {
+      "apartment": "Es ist eine Wohnung.",
+      "house": "Es ist ein Haus.",
+      "plot": "Es ist ein Grundstück.",
+      "commercial": "Es ist eine Gewerbeimmobilie.",
+      "hotel": "Es ist ein Hotel.",
+      "development": "Es ist ein Bauprojekt.",
+      "other": "Das Inserat gibt die Art als sonstige an."
+    },
+    "purpose": {
+      "sale": "Sie steht zum Verkauf.",
+      "long_term_rent": "Sie wird langfristig vermietet."
+    },
+    "floor": "Sie liegt in Etage {floor}.",
+    "floorOf": "Sie liegt in Etage {floor} von {total}.",
+    "place": "Sie liegt in {place}. Das Inserat zeigt die Lage nur bis zu dieser Ebene.",
+    "availability": {
+      "available": "Sie ist verfügbar.",
+      "confirmation_required": "Die Agentur muss bestätigen, dass sie noch verfügbar ist.",
+      "negotiating": "Mit einem Interessenten werden gerade Bedingungen besprochen.",
+      "reserved_with_recorded_basis": "Sie ist reserviert.",
+      "sold": "Sie ist verkauft.",
+      "let": "Sie ist vermietet.",
+      "withdrawn": "Sie wird nicht mehr angeboten."
+    },
+    "confirmedAt": "Die Agentur hat das zuletzt am {date} bestätigt.",
+    "reference": "Die Inseratsnummer ist {reference}.",
+    "viewing": "Wählen Sie auf dieser Seite „{action}“ und schlagen Sie einige Zeiten vor. Ein Makler bestätigt den Termin mit Ihnen.",
+    "viewingAsk": "Senden Sie über „{action}“ auf dieser Seite eine Frage. Ein Makler sagt Ihnen, wann eine Besichtigung möglich ist.",
+    "viewingClosed": "Für diese Immobilie werden derzeit keine Besichtigungen angeboten.",
+    "contact": "{agency} betreut diese Immobilie. Rufen Sie {phone} an oder senden Sie eine Frage über das Anfrageformular.",
+    "unknown": {
+      "price": "Das Inserat nennt keinen Preis.",
+      "area": "Das Inserat nennt keine Größe.",
+      "bedrooms": "Das Inserat nennt keine Zahl der Schlafzimmer.",
+      "floor": "Das Inserat sagt nicht, in welcher Etage sie liegt.",
+      "place": "Das Inserat nennt keine Lage."
+    }
+  },
+  "refusals": {
+    "negotiation": "Butler bespricht keine Angebote oder Preisnachlässe. Ein Makler spricht gern mit Ihnen darüber.",
+    "legal": "Butler beantwortet keine Rechtsfragen. Ein Makler sagt Ihnen, wer helfen kann.",
+    "tax": "Butler beantwortet keine Steuerfragen. Ein Makler sagt Ihnen, wer helfen kann.",
+    "money": "Butler berät nicht zu Hypotheken, Kautionen oder Zahlungen. Ein Makler erklärt, wie es hier abläuft.",
+    "value": "Butler gibt keine Einschätzung zu Wert oder Rendite. Ein Makler sagt Ihnen, was er weiß.",
+    "people": "Butler gibt nichts über andere Personen weiter. Ein Makler hilft Ihnen mit dem, was Sie wissen müssen.",
+    "action": "Butler kann nichts buchen, reservieren oder zurückhalten. Ein Makler kann das.",
+    "injection": "Butler beantwortet nur Fragen zu dieser Immobilie. Bei allem anderen hilft ein Makler."
+  }
+}

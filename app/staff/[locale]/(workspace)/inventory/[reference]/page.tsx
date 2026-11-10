@@ -19,6 +19,7 @@ import { safeNext } from "@/features/inventory/next";
 import { publishCopy } from "@/features/inventory/publish-copy";
 import { describePriceEvidence } from "@/features/inventory/recorded-price";
 import { UnsavedGuard } from "@/features/inventory/unsaved-guard";
+import { VisitorQuestions } from "@/features/inventory/visitor-questions";
 import { ListingIdentity, ListingNavigation } from "@/features/inventory/workspace";
 import { privateRead } from "@/features/work/screens";
 import { workflowCopy } from "@/i18n/workflow-copy";
@@ -502,6 +503,7 @@ export default async function InventoryDetailPage({
                 </a>
               </div>
             </details>
+            <VisitorQuestions locale={locale} listingId={listing.id} />
           </aside>
         </div>
       </div>

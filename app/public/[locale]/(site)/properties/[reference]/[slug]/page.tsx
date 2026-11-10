@@ -5,6 +5,8 @@
 
 import { notFound } from "next/navigation";
 import { Fragment, type ReactNode } from "react";
+import { butlerLevels } from "@/config/tenant";
+import { ButlerAnswers } from "@/features/butler-answers/block";
 import { discoveryCopy } from "@/features/discovery/copy";
 import { AvailabilityNote, ListingGrid } from "@/features/discovery/listing-card";
 import { CompareToggle, SaveToggle } from "@/features/discovery/local-selection";
@@ -22,6 +24,7 @@ import { SearchMap } from "@/features/discovery/search-map";
 import { factFieldLabel } from "@/i18n/fact-labels";
 import { formatDate, formatExactArea } from "@/i18n/format";
 import { listingStructuredData } from "@/i18n/structured-data";
+import { publicAnswersEnabled } from "@/server/ai/public-answer-config";
 import { publicMapRelease } from "@/server/publication/map-config";
 import {
   normalizePublicListingRoute,
@@ -62,8 +65,10 @@ export async function generateMetadata({
 }
 export default async function PropertyPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string; reference: string; slug: string }>;
+  searchParams?: Promise<{ butler?: string | string[] }>;
 }) {
   const { locale, reference, slug } = normalizePublicListingRoute(await params);
   const copy = discoveryCopy(locale);
@@ -141,7 +146,9 @@ export default async function PropertyPage({
     .map((part) => part.trim())
     .filter(Boolean);
   const confirmed = listing.availability.confirmedAt;
-  const contact =
+  // On phones "Ask a question" scrolls to the Butler block when it is on; off, it opens the form.
+  const butlerOn = butlerLevels.publicAnswers === "act" && publicAnswersEnabled();
+  const contactWith = (askHref: string) =>
     action === "view_similar" ? (
       <a
         href={`/${locale}/properties?purpose=${listing.purpose}`}
@@ -164,7 +171,7 @@ export default async function PropertyPage({
             action === "request_viewing" ? "secondary" : "primary",
             "flex-1 px-3 whitespace-nowrap",
           )}
-          href={inquiry("question")}
+          href={askHref}
         >
           {copy.askQuestion}
         </a>
@@ -241,8 +248,13 @@ export default async function PropertyPage({
               </div>
             </section>
           ) : null}
-          {/* Reserved: another branch mounts "Ask about this home" here. Keep the id. */}
-          <div id="ask-about-this-home" data-slot="ask-about-this-home" />
+          <div id="ask-about-this-home" data-slot="ask-about-this-home">
+            <ButlerAnswers
+              reference={listing.reference}
+              locale={locale}
+              butler={(await searchParams)?.butler}
+            />
+          </div>
           <section aria-labelledby="location-heading" className="space-y-3">
             <h2 id="location-heading" className="text-subheading font-semibold">
               {copy.location}
@@ -284,7 +296,7 @@ export default async function PropertyPage({
           className="hidden min-w-0 flex-col gap-3 self-start rounded-panel border border-border bg-surface p-5 lg:sticky lg:top-6 lg:flex"
         >
           <p className="font-semibold">{listing.responsibleTeam.label}</p>
-          <div className="flex flex-col gap-3">{contact}</div>
+          <div className="flex flex-col gap-3">{contactWith(inquiry("question"))}</div>
           <div className="flex items-center justify-between gap-3 border-t border-divider pt-3">
             <CompareToggle reference={listing.reference} copy={copy} />
             <SaveToggle reference={listing.reference} copy={copy} />
@@ -304,7 +316,7 @@ export default async function PropertyPage({
         className="fixed inset-x-0 bottom-0 z-40 flex gap-3 border-t border-border bg-surface px-gutter py-3 lg:hidden"
         data-contact-bar
       >
-        {contact}
+        {contactWith(butlerOn ? "#ask-butler" : inquiry("question"))}
       </div>
     </DiscoveryPage>
   );
