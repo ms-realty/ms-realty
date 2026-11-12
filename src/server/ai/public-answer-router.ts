@@ -18,9 +18,11 @@ export interface RoutedQuestion {
 }
 
 const emailRe = /[^\s@<>()[\],;:]+@[^\s@<>()[\],;:]+\.[^\s@<>()[\],;:]{2,}/gu;
-// A run of digits with the separators people put in phone numbers. A run glued to letters or a
-// hyphen (a listing reference such as MS-2026123) is not a phone number.
-const phoneRe = /(?<![\p{L}\p{N}-])(?:\+|00)?\(?\d[\d\s().\u2010-\u2015-]{5,}\d(?![\p{L}\p{N}-])/gu;
+// A run of digits with the separators people put in phone numbers, including the slash common in
+// Bulgaria (0879/696870). A run glued to letters or a hyphen (a listing reference such as
+// MS-2026123) is not a phone number.
+const phoneRe =
+  /(?<![\p{L}\p{N}-])(?:\+|00)?\(?\d[\d\s()./\u2010-\u2015-]{5,}\d(?![\p{L}\p{N}-])/gu;
 
 function isPhone(run: string): boolean {
   const digits = run.replace(/\D/g, "").length;

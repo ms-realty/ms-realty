@@ -204,6 +204,13 @@ describe("ADR 0015: one recorded decision agrees the terms", () => {
     const seen = await readProposal(t.db, f.client.session, f.proposal.id);
     expect(seen.revision.state).toBe("agreed_for_next_step");
     expect(seen.responses.every((r) => r.byBroker)).toBe(true);
+    // The broker's note is for the team: staff read it, the client never does.
+    expect(JSON.stringify(seen)).not.toContain("Both said yes at the viewing");
+    const team = await readProposal(t.db, f.staff.session, f.proposal.id);
+    expect(team.responses.map((r) => r.reason)).toEqual([
+      "Both said yes at the viewing",
+      "Both said yes at the viewing",
+    ]);
 
     // The path exists now. Duties are steps: identity checks cannot be skipped on a sale, and
     // money, signatures and the property wait for them.

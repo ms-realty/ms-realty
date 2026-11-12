@@ -105,7 +105,10 @@ export async function readProposal(db: Executor, session: Session, id: string) {
     .select({
       partyId: proposalResponses.partyId,
       decision: proposalResponses.decision,
-      reason: proposalResponses.reason,
+      // A broker's note on an answer they recorded is for the team, never for the client.
+      reason: staff
+        ? proposalResponses.reason
+        : sql<string>`case when ${proposalResponses.actorKind} = 'staff' then '' else ${proposalResponses.reason} end`,
       at: proposalResponses.createdAt,
       termsHash: proposalResponses.termsHash,
       byBroker: sql<boolean>`${proposalResponses.actorKind} = 'staff'`,

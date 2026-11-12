@@ -869,7 +869,6 @@ export async function recordAgreement(db: Executor, session: Session, raw: Recor
           approvalId,
           submittedAt: revision.submittedAt ?? now,
           respondedAt: now,
-          responseNote: input.note || null,
           version: revision.version + 1,
         })
         .where(eq(proposalRevisions.id, revision.id));

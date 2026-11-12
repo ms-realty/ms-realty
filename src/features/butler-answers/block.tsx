@@ -12,7 +12,7 @@ import { butlerAnswersCopy } from "@/server/ai/public-answer-copy";
 import { suggestedQuestions } from "@/server/ai/public-answer-facts";
 import { loadPublicAnswerSource } from "@/server/ai/public-answer-source";
 import { AskForm } from "./ask-form";
-import { notePanel, panelForQuery } from "./panel";
+import { handoffHref, notePanel, panelForQuery } from "./panel";
 
 export async function ButlerAnswers({
   reference,
@@ -68,6 +68,7 @@ export async function ButlerAnswers({
         suggestions={suggestions}
         initial={initial}
         failed={notePanel(locale, listing, "failed")}
+        handoffHref={handoffHref(locale, listing)}
       />
     </section>
   );

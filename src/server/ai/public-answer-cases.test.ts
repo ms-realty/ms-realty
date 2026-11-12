@@ -104,6 +104,9 @@ describe("router, contact details", () => {
     "Mein Mail: a.b+c@sub.example.test",
     "Мой телефон 088-812-3456",
     "(02) 123 45 67",
+    "Обадете се на 0879/696870",
+    "+359/879/696/870",
+    "02/987 65 43",
   ])("routes %j to the fixed note and nothing else", (question) => {
     expect(containsContactDetails(question)).toBe(true);
     expect(routeQuestion(question)).toMatchObject({
@@ -121,6 +124,8 @@ describe("router, contact details", () => {
     "It is 72.5 m2 and costs 95 000 EUR, right?",
     "Is it on floor 2 of 5, built in 1998?",
     "Can I see it at 10:30 on 12.05?",
+    "Is it 68/72 m2, floor 2/5?",
+    "Is the shop open 24/7?",
   ])("does not take %j for a contact detail", (question) => {
     expect(containsContactDetails(question)).toBe(false);
   });

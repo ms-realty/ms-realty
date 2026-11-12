@@ -28,6 +28,7 @@ export function AskForm({
   suggestions,
   initial,
   failed,
+  handoffHref,
 }: {
   action: string;
   reference: string;
@@ -38,6 +39,8 @@ export function AskForm({
   initial: AnswerPanel | null;
   /** Shown when the background request itself fails. */
   failed: AnswerPanel;
+  /** The inquiry form for this listing, offered before any question: a person never needs Butler. */
+  handoffHref: string;
 }) {
   const [panel, setPanel] = useState<AnswerPanel | null>(initial);
   const [pending, setPending] = useState(false);
@@ -142,6 +145,12 @@ export function AskForm({
           </div>
         ) : null}
       </form>
+
+      {panel ? null : (
+        <a href={handoffHref} className={buttonClass("secondary", "self-start")}>
+          {copy.handoff}
+        </a>
+      )}
 
       <div aria-live="polite" id="ask-butler-answer">
         {panel ? (
