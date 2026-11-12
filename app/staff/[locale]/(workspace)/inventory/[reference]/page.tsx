@@ -16,8 +16,10 @@ import { type InventoryField, missingInput } from "@/features/inventory/fields";
 import { FocusedState } from "@/features/inventory/focused-state";
 import { LeaveControl } from "@/features/inventory/leave-control";
 import { safeNext } from "@/features/inventory/next";
+import { publishCopy } from "@/features/inventory/publish-copy";
 import { describePriceEvidence } from "@/features/inventory/recorded-price";
 import { UnsavedGuard } from "@/features/inventory/unsaved-guard";
+import { VisitorQuestions } from "@/features/inventory/visitor-questions";
 import { ListingIdentity, ListingNavigation } from "@/features/inventory/workspace";
 import { privateRead } from "@/features/work/screens";
 import { workflowCopy } from "@/i18n/workflow-copy";
@@ -263,7 +265,27 @@ export default async function InventoryDetailPage({
         heading
         meta={optionLabel(listing.editorialState, locale)}
         summary={[property.settlement, ...summary].join(" · ")}
-      />
+      >
+        {/* ADR 0012: the primary way to publish is one decision on its own screen. The action
+            keeps one name through the flow; whether the listing is live is shown beside it. */}
+        {mayPublish ? (
+          <div className="flex flex-wrap items-center gap-3">
+            {data.publications.some((p) => p.state === "active") ? (
+              <span className="text-dense font-semibold text-success" data-publish-state="live">
+                {publishCopy(locale).live}
+              </span>
+            ) : null}
+            <a
+              href={`${path}/publish`}
+              className={buttonClass(
+                data.publications.some((p) => p.state === "active") ? "secondary" : "primary",
+              )}
+            >
+              {publishCopy(locale).publish}
+            </a>
+          </div>
+        ) : null}
+      </ListingIdentity>
       {error}
       <DuplicateIdentityLink
         locale={locale}
@@ -481,6 +503,7 @@ export default async function InventoryDetailPage({
                 </a>
               </div>
             </details>
+            <VisitorQuestions locale={locale} listingId={listing.id} />
           </aside>
         </div>
       </div>

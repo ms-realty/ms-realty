@@ -1,8 +1,7 @@
 {
   "title": "Deal path",
-  "lead": "The client sees the same steps, except the hidden ones. Record each step when it happens.",
+  "lead": "The client sees the steps in their own wording, without the hidden steps and without steps passed with no record. Record each step when it happens.",
   "preview": "Nothing recorded yet. These steps are created from the template when the terms are agreed, or with your first action here.",
-  "template": "Template",
   "currentStep": "Current step",
   "hidden": "Hidden from the client",
   "evidenceUsual": "A document is usually kept",
@@ -31,11 +30,39 @@
     "evidence": "Deed or lease document",
     "reviewed": "I checked every step on this path and the date above.",
     "submit": "Complete the deal",
-    "boundary": "Completing closes the deal with a recorded outcome the client sees. It does not certify a legal transfer, and the listing's status is changed separately."
+    "boundary": "Completing closes the deal with a recorded outcome the client sees and marks the home as sold or let, so it is no longer offered. It does not certify a legal transfer."
   },
   "blocked": {
     "terms_not_agreed": "The terms are not agreed yet.",
     "steps_open": "Some steps are still open.",
-    "final_step_open": "The last step must be done, not marked as not needed."
-  }
+    "final_step_open": "The last step must be done, not marked as not needed.",
+    "duty_open": "The brokerage contract and the identity checks must be done, not marked as not needed."
+  },
+  "passed": "Passed without a record in the app",
+  "kinds": {
+    "BG_sale": "Sale in Bulgaria",
+    "BG_long_term_rent": "Long-term rent in Bulgaria",
+    "GR_sale": "Sale in Greece",
+    "generic_sale": "Sale",
+    "generic_long_term_rent": "Long-term rent"
+  },
+  "template": "Template",
+  "brokerage": {
+    "away": "Signed online or away from your office?",
+    "earlyStart": "Did the client ask in writing for your work to start within the withdrawal period?",
+    "yes": "Yes",
+    "no": "No",
+    "choose": "Choose",
+    "signedOn": "Date it was signed",
+    "withdrawalEnds": "Withdrawal period ends",
+    "signedAway": "Signed online or away from the office",
+    "signedOffice": "Signed at the office",
+    "earlyStartYes": "Client asked in writing to start early",
+    "earlyStartNo": "Client did not ask to start early",
+    "earlyStartHint": "Only when it was signed online or away from your office."
+  },
+  "waitsForIdentity": "Record the identity checks before this step.",
+  "required": "Required for this deal",
+  "sharedWith": "These steps are recorded once for both sides, on the other side's deal",
+  "shared": "Recorded once for both sides"
 }

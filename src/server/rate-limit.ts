@@ -33,6 +33,10 @@ export const rateLimitPolicies = {
   "public_share.creator": { capacity: 10, refillPerSecond: 1 / 180 },
   /** New public shortlist links per edge-observed client IP, even if cookies are rotated. */
   "public_share.ip": { capacity: 20, refillPerSecond: 1 / 30 },
+  /** Butler answers on listing pages per client IP: 12 at once, then one every 30 seconds. */
+  "butler_answer.ip": { capacity: 12, refillPerSecond: 1 / 30 },
+  /** Of those, questions that need the model, per client IP: 4 at once, then one every 5 min. */
+  "butler_answer_model.ip": { capacity: 4, refillPerSecond: 1 / 300 },
 } as const satisfies Record<string, RateLimitPolicy>;
 
 export type RateLimitPurpose = keyof typeof rateLimitPolicies;

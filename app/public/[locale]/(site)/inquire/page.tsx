@@ -87,6 +87,7 @@ export default async function InquiryPage({
       "comparisonReferences",
       "contentReference",
       "serviceScope",
+      "question",
     ].some((name) => Array.isArray(query[name])) ||
     (query.selection !== undefined &&
       (!selected ||
@@ -128,6 +129,7 @@ export default async function InquiryPage({
       "comparisonReferences",
       "contentReference",
       "serviceScope",
+      "question",
       "error",
     ]) {
       if (typeof query[name] === "string") next.set(name, query[name]);
@@ -203,6 +205,9 @@ export default async function InquiryPage({
     // Its returned draft and operation cannot be replaced by a new navigation-only page.
     values.listingReference =
       result?.status === "listing" ? result.listing.reference : query.reference;
+    // A question asked of Butler on the listing page: a draft only; the visitor sends it.
+    if (typeof query.question === "string" && query.question.length <= 300)
+      values.message = query.question;
     values.observedManifestId =
       typeof query.manifest === "string"
         ? query.manifest

@@ -4,6 +4,7 @@ import { and, desc, eq, inArray, lte, ne, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import { appointmentsConfiguredIn } from "@/config/tenant";
 import {
+  activityEvents,
   appointmentParticipants,
   appointmentResources,
   appointments,
@@ -33,6 +34,7 @@ import {
 import { hashRequest } from "../crypto";
 import type { Executor } from "../db";
 import { AppError } from "../errors";
+import { notifyViewingChange } from "../notifications/appointments";
 import { captureOperatingPolicy } from "../operating-policy/service";
 import { runOperation } from "../operations";
 import { loadPublishedListings } from "../publication/presentation";
@@ -61,6 +63,7 @@ const arrangeSchema = z.object({
   externalBusyChecked: z.boolean(),
   accessNotes: z.string().trim().max(1500),
 });
+const clientConfirmSchema = z.object({ ...commandEnvelope });
 const responseSchema = z.object({
   ...commandEnvelope,
   state: z.enum(["reschedule_requested", "cancelled", "completed", "no_show", "declined"]),
@@ -593,6 +596,13 @@ export async function arrangeAppointment(
         input.action === "confirm" ? "appointment.confirmed" : "appointment.proposed",
         "appointment.manage",
       );
+      await notifyViewingChange(
+        ctx.tx,
+        input.action === "confirm" ? "confirmed" : "proposed",
+        row,
+        changed,
+        live.actor,
+      );
       return {
         id: row.id,
         reference: row.reference,
@@ -681,10 +691,96 @@ export async function respondToAppointment(
       if (!changed) throw new Error("Appointment response failed");
       await recordAppointmentVersion(ctx.tx, changed, live);
       await caseEvent(ctx, "appointment", row.id, `appointment.${input.state}`, capability);
+      await notifyViewingChange(ctx.tx, input.state, row, changed, live.actor);
       return {
         id: row.id,
         reference: row.reference,
         version: changed.version,
+        recordedAt: new Date().toISOString(),
+      };
+    },
+  );
+}
+
+/** The time a client may confirm now: the confirmed arrangement, else the proposed one. */
+function confirmableTime(row: typeof appointments.$inferSelect) {
+  const start = row.state === "confirmed" ? row.confirmedStartsAt : row.proposedStartsAt;
+  const end = row.state === "confirmed" ? row.confirmedEndsAt : row.proposedEndsAt;
+  if (
+    row.purpose !== "viewing" ||
+    !["proposed", "confirmed"].includes(row.state) ||
+    !start ||
+    !end ||
+    start.getTime() <= Date.now()
+  )
+    return null;
+  return { startsAt: start, endsAt: end };
+}
+
+/** The start time this client last confirmed for this viewing, if any. */
+async function clientConfirmedStart(db: Executor, id: string, clientId: string) {
+  const [entry] = await db
+    .select({ params: activityEvents.params })
+    .from(activityEvents)
+    .where(
+      and(
+        eq(activityEvents.recordType, "appointment"),
+        eq(activityEvents.recordId, id),
+        eq(activityEvents.messageKey, "appointment.client_confirmed"),
+        eq(activityEvents.actorKind, "client"),
+        eq(activityEvents.actorId, clientId),
+      ),
+    )
+    .orderBy(desc(activityEvents.occurredAt))
+    .limit(1);
+  const parsed = z.object({ startsAt: z.iso.datetime() }).safeParse(entry?.params);
+  return parsed.success ? parsed.data.startsAt : null;
+}
+
+/**
+ * C-side "this time works for me" (ADR 0014). It records the client's answer and tells the
+ * accountable broker; it is not a confirmation of the booking, which stays staff work with its
+ * resource checks, and it changes no appointment state.
+ */
+export async function confirmAppointmentTime(
+  db: Executor,
+  session: Session,
+  raw: z.input<typeof clientConfirmSchema>,
+) {
+  const input = parseInput(clientConfirmSchema, raw);
+  const { live } = await appointmentFor(db, session, input.id, true);
+  if (live.account.kind !== "client") throw new AppError("forbidden");
+  return runOperation(
+    db,
+    {
+      actor: live.actor,
+      type: "appointment.client_confirm",
+      idempotencyKey: input.operationId,
+      requestHash: hashRequest(input),
+      expectedVersion: input.expectedVersion,
+    },
+    async (ctx) => {
+      const { row } = await appointmentFor(ctx.tx, session, input.id, true, true);
+      version(row, input.expectedVersion);
+      const time = confirmableTime(row);
+      if (!time) throw new AppError("transition_denied");
+      const startsAt = time.startsAt.toISOString();
+      if ((await clientConfirmedStart(ctx.tx, row.id, live.account.id)) === startsAt)
+        throw new AppError("transition_denied");
+      await caseEvent(
+        ctx,
+        "appointment",
+        row.id,
+        "appointment.client_confirmed",
+        "portal.appointment.request",
+        { startsAt, endsAt: time.endsAt.toISOString() },
+        "participants",
+      );
+      await notifyViewingChange(ctx.tx, "client_confirmed", row, row, live.actor);
+      return {
+        id: row.id,
+        reference: row.reference,
+        version: row.version,
         recordedAt: new Date().toISOString(),
       };
     },
@@ -758,6 +854,11 @@ export async function readAppointment(
           .where(eq(principals.id, row.pendingHostId))
       : [];
   const canOfferHost = Boolean(ownHost && open && future && !row.pendingHostId);
+  const confirmable = live.account.kind === "client" ? confirmableTime(row) : null;
+  const confirmedByClient =
+    confirmable &&
+    (await clientConfirmedStart(db, row.id, live.account.id)) ===
+      confirmable.startsAt.toISOString();
   const hostReceivers = canOfferHost
     ? await readHostReceivers(
         db,
@@ -796,6 +897,10 @@ export async function readAppointment(
       icsSequence: row.icsSequence,
     },
     canManage: live.account.kind === "staff",
+    /** Client: the shown time can be confirmed (it is not yet confirmed by this client). */
+    canConfirmTime: Boolean(confirmable && !confirmedByClient),
+    /** Client: this client already confirmed the time shown now. */
+    timeConfirmedByClient: Boolean(confirmedByClient),
     canDownload: row.purpose !== "photography" || row.hostId === live.account.id,
     needsCoverage: Boolean(coverage?.needed),
     canOfferHost,

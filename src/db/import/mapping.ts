@@ -84,13 +84,14 @@ export interface ListingItem {
   readonly type: "listing";
   readonly sourceKey: string;
   readonly issues: Issue[];
-  readonly reference: string;
+  /** The agency's lot reference where the record carries one; see `settleTwinReferences`. */
+  reference: string;
   readonly lotNumber: number | null;
   /**
    * The surviving listing an archived duplicate was merged into. The duplicate's listing is
    * attached to that listing's property; it creates no property and writes no property facts.
    */
-  readonly mergedInto: string | null;
+  mergedInto: string | null;
   readonly placeKey: string | null;
   readonly property: {
     propertyType: PropertyType;
@@ -126,7 +127,7 @@ export interface ListingItem {
   readonly approval: ApprovalInput | null;
   readonly translations: TranslationInput[];
   readonly mediaKeys: string[];
-  readonly summary: string;
+  summary: string;
 }
 
 export interface MediaItem {
@@ -782,6 +783,7 @@ const mediaKindMap: Record<string, MediaKind> = { photo: "photo", floorplan: "fl
 export function buildMediaItems(
   sources: LegacySources,
   listings: ReadonlyMap<string, LegacyListing>,
+  renamed: ReadonlyMap<string, string> = new Map(),
 ): MediaItem[] {
   const entryByKey = new Map<string, LegacyListing["media"][number]>();
   for (const l of listings.values()) {
@@ -811,7 +813,7 @@ export function buildMediaItems(
       const owners = [
         ...new Set(o.listing_references.map((r) => listings.get(r)?.legacy_ids.merged_into ?? r)),
       ].sort();
-      if (owners.length === 1) owner = owners[0] as string;
+      if (owners.length === 1) owner = renamed.get(owners[0] as string) ?? (owners[0] as string);
       else {
         issues.push(
           review(
@@ -829,7 +831,7 @@ export function buildMediaItems(
         ...new Set((listings.get(reference)?.media ?? []).flatMap((m) => m.r2_key ?? [])),
       ];
       const position = keys.indexOf(o.r2_key);
-      return position >= 0 ? [{ reference, position }] : [];
+      return position >= 0 ? [{ reference: renamed.get(reference) ?? reference, position }] : [];
     });
     return {
       type: "media",
@@ -869,6 +871,7 @@ const decisionStatus: Record<string, number> = {
 export function buildUrlDecisionItems(
   sources: LegacySources,
   listings: ReadonlyMap<string, LegacyListing>,
+  renamed: ReadonlyMap<string, string> = new Map(),
 ): UrlDecisionItem[] {
   const groups = new Map<string, LegacyUrlDecision[]>();
   for (const d of sources.urls.decisions) {
@@ -907,16 +910,23 @@ export function buildUrlDecisionItems(
       type: "url_decision",
       sourceKey: key,
       issues,
-      listingRef: d.listing_reference,
+      // A decision follows the record it was recorded for, whatever reference that record
+      // carries now (see `settleTwinReferences`); the recorded path is kept as evidence.
+      listingRef: d.listing_reference
+        ? (renamed.get(d.listing_reference) ?? d.listing_reference)
+        : null,
       decision: {
         domain: d.domain as UrlDecisionItem["decision"]["domain"],
         sourcePath: d.source_path,
         decision: d.decision as UrlDecisionItem["decision"]["decision"],
         statusCode: d.status,
-        targetPath: d.target.path,
+        targetPath: followRenamed(d.target.path, renamed),
         reason: d.reason,
         evidence: {
           ...d.evidence,
+          ...(followRenamed(d.target.path, renamed) !== d.target.path
+            ? { recordedTargetPath: d.target.path }
+            : {}),
           urlType: d.url_type,
           target: d.target,
           equivalentContent: d.equivalent_content,
@@ -1012,6 +1022,69 @@ export function buildContentItem(
   };
 }
 
+/** The path with each renamed listing reference replaced by the reference its record carries. */
+function followRenamed(path: string | null, renamed: ReadonlyMap<string, string>): string | null {
+  if (path === null) return null;
+  for (const [from, to] of renamed)
+    if (path.split("/").includes(from))
+      return path
+        .split("/")
+        .map((p) => (p === from ? to : p))
+        .join("/");
+  return path;
+}
+
+/**
+ * A crawl-era twin is the same property as the lot listing it was merged into. The public must
+ * see the agency's own lot number, never a crawl placeholder:
+ * - both are active: the twin is attached to the lot listing as an archived duplicate, so the
+ *   property is listed once;
+ * - only the twin is active (its lot listing was archived at the freeze): the twin is the live
+ *   record, so it takes the lot reference, and the archived lot record takes the crawl-era one.
+ *   Legacy URL decisions and photos follow the record they were recorded for; nothing is
+ *   re-pointed to a different record.
+ * Returns the references that changed hands.
+ */
+function settleTwinReferences(items: readonly ListingItem[]): Map<string, string> {
+  const byReference = new Map(items.map((i) => [i.reference, i]));
+  const renamed = new Map<string, string>();
+  for (const twin of items) {
+    const lot = twin.mergedInto ? byReference.get(twin.mergedInto) : undefined;
+    if (!lot || twin.listing.commercialState === "withdrawn") continue;
+    if (lot.listing.commercialState !== "withdrawn") {
+      const basis = `Attached to ${lot.reference}, which is active on the same property: the property is listed once. ${twin.listing.availabilityBasis}`;
+      twin.listing.commercialState = "withdrawn";
+      twin.listing.availabilityBasis = basis;
+      twin.summary = `Imported from the legacy site. ${basis}`;
+      twin.revision.terms = {
+        ...twin.revision.terms,
+        availability: { state: "withdrawn", basis },
+      };
+      sealRevision(twin);
+      twin.issues.push(
+        warn(
+          "merged_duplicate_attached",
+          `Active twin attached to ${lot.reference}; not listed twice.`,
+        ),
+      );
+      continue;
+    }
+    const [crawl, lotReference] = [twin.reference, lot.reference];
+    twin.reference = lotReference;
+    lot.reference = crawl;
+    twin.mergedInto = crawl;
+    renamed.set(crawl, lotReference);
+    renamed.set(lotReference, crawl);
+    twin.issues.push(
+      warn(
+        "lot_reference_assigned",
+        `Active record took the lot reference ${lotReference}; its archived lot record carries ${crawl}.`,
+      ),
+    );
+  }
+  return renamed;
+}
+
 export function buildImportItems(sources: LegacySources): ImportItem[] {
   const geo = buildPlaceItems(sources.geography.places);
   const legacyPlaces = new Map(sources.geography.places.map((p) => [p.place_key, p]));
@@ -1067,13 +1140,14 @@ export function buildImportItems(sources: LegacySources): ImportItem[] {
     }
   }
 
+  const renamed = settleTwinReferences(listingItems);
   return [
     ...geo.items,
     // Survivors first: a merged duplicate is attached to its survivor's property.
     ...listingItems.filter((i) => !i.mergedInto),
     ...listingItems.filter((i) => i.mergedInto),
-    ...buildMediaItems(sources, listingsByRef),
-    ...buildUrlDecisionItems(sources, listingsByRef),
+    ...buildMediaItems(sources, listingsByRef, renamed),
+    ...buildUrlDecisionItems(sources, listingsByRef, renamed),
     ...sources.content.area_guides.guides.map((g) =>
       buildContentItem(g, "area", placeKeyFor, placeLevelFor),
     ),

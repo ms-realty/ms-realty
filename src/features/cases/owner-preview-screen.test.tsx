@@ -142,6 +142,8 @@ describe.each(publicLocales)("C12 / AT18 owner source facts in %s", (locale) => 
       const money = new Intl.NumberFormat(displayLocale(locale), {
         style: "currency",
         currency,
+        // Four-digit amounts keep their separator in every locale (formatMoney).
+        useGrouping: "always",
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
       }).format(1234.5);

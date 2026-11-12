@@ -60,7 +60,7 @@ export class CloudflareMessageProvider implements MessageProvider {
   }
 
   async send(message: OutboundMessage): Promise<ProviderResult> {
-    const email = renderReviewedEmail(message, this.config);
+    const email = renderReviewedEmail(message, this.config, new Date(), { plainText: true });
     if (!email || !/^[\x21-\x7e]{1,256}$/.test(message.idempotencyKey))
       return { status: "rejected", code: "unsupported_or_expired_message", retryable: false };
     // Never silently omit a reviewed calendar/document. The relay currently accepts plaintext only.

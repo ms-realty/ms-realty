@@ -1,11 +1,12 @@
 import "server-only";
-import { and, asc, desc, eq, ilike, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, ilike, notInArray, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import {
   briefRevisions,
   caseParticipants,
   cases,
   interests,
+  listingRevisions,
   listings,
   messages,
   parties,
@@ -279,4 +280,56 @@ export async function readInterestContext(db: Executor, session: Session, intere
   );
   if (!allowed) throw new AppError("not_found");
   return interest;
+}
+
+/**
+ * The homes a broker can add to a buyer's or tenant's Deal (ADR 0015, broker's pick): every
+ * listing the agency holds for the Deal's purpose, published or not, that is not sold, let or
+ * withdrawn and not already on this Deal, labelled with its reference and Bulgarian title.
+ */
+export async function heldListingOptions(db: Executor, session: Session, caseId: string) {
+  const { row, live, resource } = await caseFor(db, session, caseId);
+  const purpose = row.kind === "buyer" ? "sale" : row.kind === "tenant" ? "long_term_rent" : null;
+  if (
+    !purpose ||
+    live.account.kind !== "staff" ||
+    !(await can(db, live.actor, "interest.manage", resource))
+  )
+    return [];
+  const rows = await db
+    .select({
+      id: listings.id,
+      reference: listings.reference,
+      propertyId: listings.propertyId,
+      title: sql<string | null>`${listingRevisions.sourceCopy}->'text'->>'title'`,
+    })
+    .from(listings)
+    .leftJoin(
+      listingRevisions,
+      and(
+        eq(listingRevisions.listingId, listings.id),
+        eq(listingRevisions.revisionNumber, listings.latestRevisionNumber),
+      ),
+    )
+    .where(
+      and(
+        eq(listings.purpose, purpose),
+        notInArray(listings.commercialState, ["sold", "let", "withdrawn"]),
+        sql`not exists (select 1 from ${interests} where ${interests.caseId} = ${row.id} and ${interests.listingId} = ${listings.id})`,
+      ),
+    )
+    .orderBy(asc(listings.reference))
+    .limit(300);
+  const readable = await Promise.all(
+    rows.map(async (listing) =>
+      (await can(db, live.actor, "listing.read", {
+        type: "listing",
+        id: listing.id,
+        propertyId: listing.propertyId,
+      }))
+        ? [{ reference: listing.reference, title: listing.title }]
+        : [],
+    ),
+  );
+  return readable.flat();
 }

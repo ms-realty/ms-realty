@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { and, asc, eq } from "drizzle-orm";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { auditEvents, grants, mediaAssets, mediaRelations, sessions } from "@/db/schema";
 import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
 import type { MediaDetailsDraft } from "@/domain/media";
@@ -16,6 +16,13 @@ import {
   publishForTest,
 } from "../publication/testing";
 import { mediaReceipt, reorderMedia, reviewMedia, saveMediaDetails } from "./commands";
+
+// These cases assert the strict photo rule (every placed photo cleared before publishing). The
+// agency's own policy shows only cleared photos instead (ADR 0012, attested.int.test.ts).
+vi.mock("@/config/tenant", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/config/tenant")>();
+  return { ...actual, publicationPolicy: { ...actual.publicationPolicy, photosRequired: true } };
+});
 
 let t: TestDatabase;
 let staff: Awaited<ReturnType<typeof staffFixture>>;

@@ -24,6 +24,18 @@ describe("formatting (ux-spec §19.3)", () => {
     expect(() => formatMoney("en", 10.5, "EUR")).toThrow();
   });
 
+  it("groups four-digit prices like longer ones in every locale", () => {
+    for (const locale of publicLocales) {
+      const four = plain(formatMoney(locale, 900_000, "EUR"));
+      const five = plain(formatMoney(locale, 2_500_000, "EUR"));
+      const separator = /9(\D)000/u.exec(four)?.[1];
+      expect(separator, `${locale}: ${four}`).toBeTruthy();
+      expect(five, locale).toContain(`25${separator}000`);
+    }
+    expect(plain(formatMoney("bg", 900_000, "EUR"))).toBe("9 000 €");
+    expect(plain(formatMoney("bg", 2_500_000, "EUR"))).toBe("25 000 €");
+  });
+
   it("formats numbers and areas per locale", () => {
     expect(plain(formatNumber("ru", 1234567.5))).toBe("1 234 567,5");
     expect(plain(formatArea("en", 85.25))).toBe("85.3 m²");

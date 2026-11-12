@@ -43,11 +43,12 @@ export async function caseFixture(db: Executor, broker?: Awaited<ReturnType<type
     })
     .returning();
   if (!inquiry) throw new Error("No inquiry fixture");
+  // An hour apart from the case's next action: equal instants made pages that show both ambiguous.
   await db.insert(tasks).values({
     inquiryId: inquiry.id,
     ownerId: staff.id,
     title: "Existing intake follow-up",
-    dueAt: new Date(Date.now() + 86400000),
+    dueAt: new Date(Date.now() + 86400000 + 3_600_000),
   });
   const created = await createCaseFromInquiry(db, staff.session, {
     id: inquiry.id,

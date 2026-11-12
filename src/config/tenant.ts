@@ -111,6 +111,72 @@ export const legacyCurrency = {
 
 export const availabilityReviewIntervalDays = { sale: 14, long_term_rent: 7 } as const;
 
+// Publication policy (ADR 0012). How a listing earns its place on the public site: one recorded
+// human decision ("staff_attestation") or the strict evidence path ("reviewed_documents": an
+// uploaded, scanned and reviewed seller authority and brokerage agreement). A person publishes
+// under either; a non-source translation still needs its own human approval.
+
+export interface PublicationPolicy {
+  /** What counts as the seller's permission to advertise. */
+  readonly sellerEvidence: "staff_attestation" | "reviewed_documents";
+  /** The person who wrote the listing may not be the one who publishes it. */
+  readonly independentReview: boolean;
+  /** Publishing waits until every placed photo is processed and cleared. */
+  readonly photosRequired: boolean;
+  /**
+   * How recent the publisher's sign-in must be to publish or unpublish: an active staff session,
+   * or a sign-in within the staff step-up window (5 minutes). Other sensitive actions keep their
+   * own step-up rule.
+   */
+  readonly signIn: "active_session" | "recent";
+  /**
+   * An attestation keeps counting after its author leaves the agency (it was valid when it was
+   * recorded by active staff). When false, it lapses with the author's membership (fail closed).
+   */
+  readonly attestationOutlivesAuthor: boolean;
+  /**
+   * A person who may publish may also approve a language they tick on the Publish screen. When
+   * false, only the separate translation-reviewer role approves languages.
+   */
+  readonly publisherApprovesLanguages: boolean;
+}
+
+/** The strict policy another brand may adopt; kept tested alongside the agency's own. */
+export const strictPublicationPolicy: PublicationPolicy = {
+  sellerEvidence: "reviewed_documents",
+  independentReview: true,
+  photosRequired: true,
+  signIn: "recent",
+  attestationOutlivesAuthor: false,
+  publisherApprovesLanguages: false,
+};
+
+export const publicationPolicy: PublicationPolicy = {
+  sellerEvidence: "staff_attestation",
+  independentReview: false,
+  photosRequired: false,
+  signIn: "active_session",
+  attestationOutlivesAuthor: true,
+  publisherApprovesLanguages: true,
+};
+
+// Media admission (ADR 0016). How a stored image becomes usable: decoded and re-encoded into
+// fresh renditions ("reencode": only pixels survive, nothing else in the file is ever served)
+// or checked by the malware scanner first ("virus_scan"). Documents, PDFs and anything that is
+// not a decodable image always go through the scanner, whatever this says.
+
+export const imageAdmissionRules = ["reencode", "virus_scan"] as const;
+export type ImageAdmissionRule = (typeof imageAdmissionRules)[number];
+
+export interface MediaPolicy {
+  readonly imageAdmission: ImageAdmissionRule;
+}
+
+/** The scanner-first policy another brand may adopt; kept tested alongside the agency's own. */
+export const scanFirstMediaPolicy: MediaPolicy = { imageAdmission: "virus_scan" };
+
+export const mediaPolicy: MediaPolicy = { imageAdmission: "reencode" };
+
 // Deal path (ADR 0013). The steps a person records after terms are agreed, from the first
 // check to keys in hand, per jurisdiction and transaction. Labels and explanations live in the
 // `dealPath` message catalogs under the same keys; this profile holds no wording. A Deal keeps
@@ -123,6 +189,15 @@ export type DealPathActor = (typeof dealPathActors)[number];
 export const dealPathTransactions = ["sale", "long_term_rent"] as const;
 export type DealPathTransaction = (typeof dealPathTransactions)[number];
 
+/**
+ * A duty the agency itself carries on a Deal (ADR 0015), held as a path step rather than as a
+ * wall before terms are agreed: `brokerage_contract` is the written brokerage contract with the
+ * agency's own client (ADR 0009); `customer_due_diligence` is identifying both parties
+ * (ADR 0008).
+ */
+export const dealPathDuties = ["brokerage_contract", "customer_due_diligence"] as const;
+export type DealPathDuty = (typeof dealPathDuties)[number];
+
 export interface DealPathStepTemplate {
   /** Stable key: stored on the recorded step and used as the message key. */
   readonly key: string;
@@ -131,42 +206,59 @@ export interface DealPathStepTemplate {
   readonly evidence: boolean;
   /** Whether the client sees the step on their Deal path. */
   readonly clientVisible: boolean;
+  /** The agency duty this step records; such a step cannot be marked not needed when in scope. */
+  readonly duty?: DealPathDuty;
+  /**
+   * The step hands over money, a signature or the property (deposit, preliminary contract,
+   * deed, registration, lease, keys): it can be marked done only after the identity checks.
+   */
+  readonly afterIdentityChecks?: boolean;
 }
 
 const step = (
   key: string,
   actor: DealPathActor,
   evidence = false,
-  clientVisible = true,
-): DealPathStepTemplate => ({ key, actor, evidence, clientVisible });
+  options: Partial<
+    Pick<DealPathStepTemplate, "clientVisible" | "duty" | "afterIdentityChecks">
+  > = {},
+): DealPathStepTemplate => ({ key, actor, evidence, clientVisible: true, ...options });
+const brokerage = step("brokerage_agreement", "agency", true, { duty: "brokerage_contract" });
+const identity = step("identity_checks", "agency", true, { duty: "customer_due_diligence" });
+/** A step that moves money, a signature or the property. */
+const handover = (key: string, actor: DealPathActor, evidence = false) =>
+  step(key, actor, evidence, { afterIdentityChecks: true });
 
 /** Recorded steps keyed `${jurisdiction}.${transaction}`; the last step completes the Deal. */
 export const dealPathTemplates: Readonly<
   Partial<Record<`${JurisdictionCode}.${DealPathTransaction}`, readonly DealPathStepTemplate[]>>
 > = {
   "BG.sale": [
-    step("identity_checks", "agency", true),
-    step("deposit_preliminary_contract", "client", true),
+    brokerage,
+    identity,
+    handover("deposit_preliminary_contract", "client", true),
     step("property_checks", "agency", true),
     step("funds_ready", "client"),
-    step("notary_deed", "notary", true),
-    step("registration", "notary", true),
-    step("keys_handed_over", "owner"),
+    handover("notary_deed", "notary", true),
+    handover("registration", "notary", true),
+    handover("keys_handed_over", "owner"),
   ],
   "BG.long_term_rent": [
-    step("identity_checks", "agency", true),
-    step("lease_signed", "client", true),
-    step("deposit_first_rent", "client"),
-    step("keys_handed_over", "owner"),
+    brokerage,
+    identity,
+    handover("lease_signed", "client", true),
+    handover("deposit_first_rent", "client"),
+    handover("keys_handed_over", "owner"),
   ],
   "GR.sale": [
-    step("identity_checks", "agency", true),
+    brokerage,
+    identity,
     step("tax_number", "client", true),
     step("lawyer_property_checks", "lawyer", true),
-    step("deposit_preliminary_contract", "client", true),
-    step("notary_deed", "notary", true),
-    step("registration", "lawyer", true),
-    step("keys_handed_over", "owner"),
+    handover("deposit_preliminary_contract", "client", true),
+    handover("notary_deed", "notary", true),
+    handover("registration", "lawyer", true),
+    handover("keys_handed_over", "owner"),
   ],
 };
 
@@ -175,15 +267,69 @@ export const genericDealPath: Readonly<
   Record<DealPathTransaction, readonly DealPathStepTemplate[]>
 > = {
   sale: [
-    step("identity_checks", "agency", true),
-    step("contract_signed", "client", true),
-    step("keys_handed_over", "owner"),
+    brokerage,
+    identity,
+    handover("contract_signed", "client", true),
+    handover("keys_handed_over", "owner"),
   ],
   long_term_rent: [
-    step("identity_checks", "agency", true),
-    step("lease_signed", "client", true),
-    step("keys_handed_over", "owner"),
+    brokerage,
+    identity,
+    handover("lease_signed", "client", true),
+    handover("keys_handed_over", "owner"),
   ],
+};
+
+/**
+ * Where the customer due diligence duty applies (ADR 0008 §1, for this brand's jurisdictions
+ * BG and GR): every sale, and a letting from this monthly rent. A letting in another currency
+ * is treated as in scope, because no rate is assumed.
+ */
+export const customerDueDiligenceScope = {
+  sale: true,
+  monthlyRentFrom: { amountMinor: 1_000_000, currency: "EUR" satisfies CurrencyCode },
+} as const;
+
+/**
+ * The withdrawal period of a brokerage contract concluded online or away from the office
+ * (ADR 0009 §4), in calendar days from signing. Shown on the path; never enforced as a wall.
+ */
+export const brokerageWithdrawalDays = 14;
+
+// Deal policy (ADR 0015). How a Deal reaches "terms agreed" and what a broker may record. A
+// brand that wants independent review, documents before agreement or client accounts for
+// every party turns the strict values on; the system checks and records either way.
+
+export interface DealPolicy {
+  /**
+   * `staff_attestation`: the broker's recorded word that each party accepted the exact terms is
+   * the basis; documents are optional evidence. `reviewed_process`: terms are agreed only after
+   * the reviewed process policy, per-party due diligence and signed service agreements
+   * (`assertCaseAgreementReady`).
+   */
+  readonly agreementBasis: "staff_attestation" | "reviewed_process";
+  /** The other side (seller or landlord on a buyer's Deal) must answer in the client area. */
+  readonly counterpartyAccountRequired: boolean;
+  /** A home joins a buyer's or tenant's Deal only through a structured Brief and match review. */
+  readonly shortlistNeedsStructuredBrief: boolean;
+  /** A proposal needs a published listing and a current agreed seller instruction. */
+  readonly proposalsNeedPublishedListing: boolean;
+}
+
+/** The behaviour the system shipped with before ADR 0015; kept for brands that want it. */
+export const strictDealPolicy: DealPolicy = {
+  agreementBasis: "reviewed_process",
+  counterpartyAccountRequired: true,
+  shortlistNeedsStructuredBrief: true,
+  proposalsNeedPublishedListing: true,
+};
+
+/** This brand: the broker's recorded decision is the basis (ADR 0015). */
+export const dealPolicy: DealPolicy = {
+  agreementBasis: "staff_attestation",
+  counterpartyAccountRequired: false,
+  shortlistNeedsStructuredBrief: false,
+  proposalsNeedPublishedListing: false,
 };
 
 // Human references. Listings keep the legacy lot-number format (MS-00100) so every reference
@@ -210,6 +356,48 @@ export const listingReferenceMinDigits = 5;
 
 export const legacyDomains = ["makler-realty.com", "makler-realty.ru"] as const;
 
+/**
+ * The old site's brand endings on listing titles, per locale ("<title> - Real estate in
+ * Bulgaria. Agency in Sandanski"). Publishing offers the title without the ending; a person's
+ * decision confirms it (ADR 0012). Matched case-insensitively after " - ", " – " or " | ".
+ */
+export const legacyTitleSuffixes: Readonly<Partial<Record<PublicLocale, readonly string[]>>> = {
+  bg: [
+    "Недвижими имоти в България. Агенция за недвижими имоти в Сандански",
+    "Недвижими имоти в България. Агенция в Сандански",
+    "Имоти в България. Агенция за недвижими имоти в Сандански",
+  ],
+  en: [
+    "Real estate in Bulgaria. Real estate agency in Sandanski",
+    "Real estate in Bulgaria. Agency in Sandanski",
+    "Property in Bulgaria. Real estate agency in Sandanski",
+    "Real estate in Sandanski",
+  ],
+  ru: ["Недвижимость в Сандански"],
+  de: [
+    "Immobilien in Bulgarien. Immobilienagentur in Sandanski",
+    "Immobilien in Bulgarien. Agentur in Sandanski",
+    "Immobilien in Sandanski",
+  ],
+  nl: [
+    "Vastgoed in Bulgarije. Makelaarskantoor in Sandanski",
+    "Vastgoed in Bulgarije. Makelaardij in Sandanski",
+    "Vastgoed in Bulgarije. Makelaar in Sandanski",
+    "Vastgoed in Sandanski",
+  ],
+  el: ["Ακίνητα στη Βουλγαρία. Μεσιτικό γραφείο στο Σαντάνσκι", "Ακίνητα στο Σαντάνσκι"],
+  he: [
+    "נדל״ן בבולגריה. סוכנות נדל״ן בסנדנסקי",
+    "נדל״ן בבולגריה. סוכנות בסנדנסקי",
+    "נדל״ן בסנדנסקי",
+  ],
+};
+
+// Private pages (AT39). A private tab hidden for longer than this, or restored from the browser's
+// back/forward cache, stays concealed until the server confirms the session; a shorter absence
+// is rechecked in the background and concealed only if the session is gone.
+export const privatePageRecheckAfterMs = 15 * 60_000;
+
 // Agency identity. Public copy keeps the brand in its message files; shared modules read it here.
 
 export const agency = {
@@ -226,3 +414,67 @@ export const agency = {
 
 /** How the assistant introduces itself to providers and OAuth consent screens. */
 export const assistantLabel = `${agency.name} ${agency.assistantName}`;
+
+// Service notifications (ADR 0014). Automatic e-mail notices about a person's own Deal, sent from
+// pre-approved templates without a person pressing send. Not marketing; the client area stays
+// the source of truth. `enabled: false` switches the whole family off for the brand; each event
+// can also be switched off on its own. Delivery still needs a configured email provider.
+
+export const serviceNotificationEvents = [
+  // To the client.
+  "viewing.proposed",
+  "viewing.confirmed",
+  "viewing.moved",
+  "viewing.cancelled",
+  "proposal.ready",
+  "proposal.withdrawn",
+  "proposal.expired",
+  "proposal.agreed",
+  "document.requested",
+  "message.from_broker",
+  "deal.step_done",
+  "deal.completed",
+  // To the accountable broker.
+  "client.viewing_confirmed",
+  "client.viewing_cancelled",
+  "client.viewing_new_time",
+  "client.proposal_accepted",
+  "client.proposal_declined",
+  "client.proposal_countered",
+  "client.document_uploaded",
+  "client.message",
+  // To a website visitor who left an e-mail address with an inquiry.
+  "inquiry.acknowledged",
+] as const;
+export type ServiceNotificationEvent = (typeof serviceNotificationEvents)[number];
+
+export const serviceNotifications: {
+  readonly enabled: boolean;
+  readonly events: Readonly<Record<ServiceNotificationEvent, boolean>>;
+} = {
+  enabled: true,
+  events: Object.fromEntries(serviceNotificationEvents.map((event) => [event, true])) as Record<
+    ServiceNotificationEvent,
+    boolean
+  >,
+};
+
+export function serviceNotificationEnabled(event: ServiceNotificationEvent): boolean {
+  return serviceNotifications.enabled && serviceNotifications.events[event] === true;
+}
+
+// Butler levels (ADR 0011 §5). The level each Butler task runs at for this brand; "off" removes
+// the task from every surface. A task at "act" also needs its evaluation set to pass for the
+// build, a receipt per action, a manual path and the deployment's kill switch left on.
+
+export interface ButlerTaskLevels {
+  /**
+   * Answers visitor questions on a published listing page from that listing's approved public
+   * content (ADR 0017). "off": the block is not rendered and the page is the inquiry form alone.
+   */
+  readonly publicAnswers: "act" | "off";
+}
+
+export const butlerLevels: ButlerTaskLevels = {
+  publicAnswers: "act",
+};

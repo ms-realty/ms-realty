@@ -167,6 +167,40 @@ describe("getPublicListing", () => {
     expect(alternatives).not.toContain(sold.reference);
   });
 
+  it("offers only the same kind group: no office under an apartment, no home under land", async () => {
+    const make = async (propertyType: "apartment" | "house" | "commercial" | "plot") => {
+      const item = await createListingFixture(t.db, {
+        reviewerId: staff.id,
+        placeId: places.settlementId,
+        propertyType,
+      });
+      await publishForTest(t.db, staff.actor, item);
+      return item;
+    };
+    const apartment = await make("apartment");
+    const house = await make("house");
+    const office = await make("commercial");
+    const plot = await make("plot");
+    const shown = async (reference: string) => {
+      const result = await getPublicListing(t.db, { reference, locale: "bg", now });
+      return result.status === "listing" ? result.alternatives.map((a) => a.reference) : [];
+    };
+    const forApartment = await shown(apartment.reference);
+    expect(forApartment).toContain(house.reference);
+    expect(forApartment).not.toContain(office.reference);
+    expect(forApartment).not.toContain(plot.reference);
+    const forOffice = await shown(office.reference);
+    expect(forOffice).not.toContain(apartment.reference);
+    expect(forOffice).not.toContain(house.reference);
+    expect(forOffice).not.toContain(plot.reference);
+    // A listing that is no longer public keeps its kind when it offers alternatives.
+    await t.db
+      .update(listings)
+      .set({ commercialState: "sold" })
+      .where(eq(listings.id, office.listingId));
+    expect(await shown(office.reference)).not.toContain(apartment.reference);
+  });
+
   it("keeps a truthful unavailable surface after withdrawal with only reference and purpose", async () => {
     const gone = await createListingFixture(t.db, {
       reviewerId: staff.id,

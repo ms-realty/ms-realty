@@ -1,0 +1,100 @@
+{
+  "heading": "Ask about this home",
+  "intro": "Butler, the agency's assistant, answers from this listing.",
+  "label": "Your question",
+  "hint": "Price, size, rooms, floor, location or viewings.",
+  "submit": "Ask",
+  "pending": "Checking the listing",
+  "suggestions": "Common questions",
+  "suggest": {
+    "price": "How much is it?",
+    "area": "How big is it?",
+    "bedrooms": "How many bedrooms does it have?",
+    "floor": "Which floor is it on?",
+    "place": "Where is it?",
+    "viewing": "How do I arrange a viewing?"
+  },
+  "answerLabel": "Butler",
+  "asked": "You asked",
+  "sources": {
+    "listing": "Butler, from the listing {reference}",
+    "description": "Butler, from the listing description",
+    "area": "Butler, from the area guide {title}",
+    "agency": "Butler, from the agency's details"
+  },
+  "handoff": "Ask a broker",
+  "handoffNote": "The inquiry form opens with your question. You send it yourself.",
+  "limited": "You have asked a lot of questions in a short time. Try again in a few minutes, or ask a broker.",
+  "budget": "Butler can't answer more questions today. A broker can.",
+  "failed": "Butler couldn't answer just now. A broker can.",
+  "empty": "Type a question or choose one of the common questions.",
+  "tooLong": "Shorten your question to {max} characters or fewer.",
+  "unknown": "The listing does not say. A broker can tell you.",
+  "brokerCan": "A broker can tell you.",
+  "answers": {
+    "priceSale": "The price is {price}.",
+    "priceRent": "The rent is {price} a month.",
+    "includes": "The listing says it includes: {items}.",
+    "area": "The {basis} is {area}.",
+    "areaBasis": {
+      "living": "living area",
+      "usable": "usable area",
+      "built": "built area",
+      "gross_floor": "gross floor area",
+      "total": "total area",
+      "land": "land area"
+    },
+    "bedrooms": "{count, plural, one {It has # bedroom.} other {It has # bedrooms.}}",
+    "rooms": "{count, plural, one {It has # room in all.} other {It has # rooms in all.}}",
+    "type": {
+      "apartment": "It is an apartment.",
+      "house": "It is a house.",
+      "plot": "It is a plot of land.",
+      "commercial": "It is a commercial property.",
+      "hotel": "It is a hotel.",
+      "development": "It is a development.",
+      "other": "The listing gives its type as other."
+    },
+    "purpose": {
+      "sale": "It is for sale.",
+      "long_term_rent": "It is for long-term rent."
+    },
+    "floor": "It is on floor {floor}.",
+    "floorOf": "It is on floor {floor} of {total}.",
+    "place": "It is in {place}. The listing shows the location only to this level.",
+    "availability": {
+      "available": "It is available.",
+      "confirmation_required": "The agency needs to confirm that it is still available.",
+      "negotiating": "Terms are being discussed with an interested party.",
+      "reserved_with_recorded_basis": "It is reserved.",
+      "sold": "It has been sold.",
+      "let": "It has been let.",
+      "withdrawn": "It is no longer offered."
+    },
+    "confirmedAt": "The agency last confirmed this on {date}.",
+    "reference": "Its reference is {reference}.",
+    "viewing": "Choose {action} on this page and suggest a few times. A broker confirms the time with you.",
+    "viewingAsk": "Send a question with {action} on this page. A broker will tell you when a viewing is possible.",
+    "viewingClosed": "Viewings are not offered for this home now.",
+    "contact": "{agency} handles this home. Call {phone}, or send a question with the inquiry form.",
+    "unknown": {
+      "price": "The listing does not give a price.",
+      "area": "The listing does not give the size.",
+      "bedrooms": "The listing does not give the number of bedrooms.",
+      "floor": "The listing does not say which floor it is on.",
+      "place": "The listing does not give the location.",
+      "inclusions": "The listing does not say what is included."
+    }
+  },
+  "refusals": {
+    "negotiation": "Butler can't discuss offers or discounts. A broker can talk this through with you.",
+    "legal": "Butler can't answer legal questions. A broker can tell you who can help.",
+    "tax": "Butler can't answer tax questions. A broker can tell you who can help.",
+    "money": "Butler can't advise on mortgages, deposits or payments. A broker can explain how it works here.",
+    "value": "Butler doesn't give opinions on value or returns. A broker can tell you what they know.",
+    "people": "Butler can't share anything about other people. A broker can help with what you need to know.",
+    "action": "Butler can't book, reserve or hold anything. A broker can.",
+    "injection": "Butler answers questions about this home only. A broker can help with anything else."
+  },
+  "contactDetails": "Please don't type a phone number or e-mail address here. Butler doesn't use or keep them. Put them in the inquiry form, where a broker can reply."
+}

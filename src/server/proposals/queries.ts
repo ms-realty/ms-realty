@@ -105,8 +105,15 @@ export async function readProposal(db: Executor, session: Session, id: string) {
     .select({
       partyId: proposalResponses.partyId,
       decision: proposalResponses.decision,
-      reason: proposalResponses.reason,
+      // A broker's note on an answer they recorded is for the team, never for the client.
+      reason: staff
+        ? proposalResponses.reason
+        : sql<string>`case when ${proposalResponses.actorKind} = 'staff' then '' else ${proposalResponses.reason} end`,
       at: proposalResponses.createdAt,
+      termsHash: proposalResponses.termsHash,
+      byBroker: sql<boolean>`${proposalResponses.actorKind} = 'staff'`,
+      channel: proposalResponses.channel,
+      givenOn: proposalResponses.givenOn,
     })
     .from(proposalResponses)
     .where(eq(proposalResponses.revisionId, current.id))
@@ -178,7 +185,10 @@ export async function proposalContext(
   return {
     listingReference: context.listing.reference,
     purpose: context.listing.purpose,
+    published: Boolean(context.published),
     buyers: context.buyers,
     seller: context.seller,
+    /** Sellers or landlords the agency knows for this property, recorded instruction first. */
+    sellerOptions: context.sellerOptions,
   };
 }

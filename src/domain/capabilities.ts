@@ -159,6 +159,7 @@ export const systemJobCapabilities: Readonly<Record<string, readonly Capability[
   "publication-delivery": ["publication.release"],
   "document-scanner": ["portal.document.upload", "document.review"],
   "file-scanner": ["media.manage", "document.review"],
+  "media-carry-over": ["media.manage"],
   "message-outbox": ["message.send_external"],
   "message-provider-callback": ["message.send_external"],
   "freshness-timer": ["listing.review_facts"],

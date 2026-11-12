@@ -16,8 +16,11 @@ let sources: LegacySources;
 let items: ImportItem[];
 const ofType = <T extends ImportItem>(type: T["type"]) =>
   items.filter((i): i is T => i.type === type);
-const listing = (reference: string) =>
-  ofType<ListingItem>("listing").find((l) => l.reference === reference) as ListingItem;
+/** The item for a legacy record, by the reference the legacy extraction gave it. */
+const listing = (legacyReference: string) =>
+  ofType<ListingItem>("listing").find(
+    (l) => l.sourceKey === `listing:${legacyReference}`,
+  ) as ListingItem;
 type Recorded = Record<string, { state: string; value: unknown }>;
 const termFacts = (l: ListingItem) => l.revision.terms.facts as Recorded;
 /** A property fact of revision 1, or a commercial term fact of listing revision 1. */
@@ -69,7 +72,7 @@ describe("legacy import mapping (AT21, AT55)", () => {
     }
     const legacy = new Map(sources.listings.listings.map((l) => [l.reference.id, l]));
     for (const l of ofType<ListingItem>("listing").filter((i) => !i.mergedInto)) {
-      const bedrooms = legacy.get(l.reference)?.bedrooms;
+      const bedrooms = legacy.get(l.sourceKey.replace("listing:", ""))?.bedrooms;
       const fact = factOf(l, "bedrooms");
       const propertyNotApplicable = bedrooms?.property_verification_state === "not_applicable";
       if (bedrooms?.recorded && !propertyNotApplicable) {
@@ -143,6 +146,53 @@ describe("legacy import mapping (AT21, AT55)", () => {
     expect(order.indexOf(true)).toBe(order.lastIndexOf(false) + 1);
   });
 
+  it("shows the agency's lot number, never a crawl placeholder, on every live record (L)", () => {
+    const live = ofType<ListingItem>("listing").filter(
+      (l) => l.listing.commercialState !== "withdrawn",
+    );
+    expect(live.filter((l) => l.reference.startsWith("MS-CRAWL"))).toEqual([]);
+    // Active crawl twin, archived lot listing: the live record takes the lot reference and the
+    // archived lot record takes the crawl-era one. Nothing is deleted.
+    for (const [crawl, lot] of [
+      ["MS-CRAWL-0129", "MS-00872"],
+      ["MS-CRAWL-0136", "MS-00788"],
+      ["MS-CRAWL-0150", "MS-00744"],
+      ["MS-CRAWL-0153", "MS-00286"],
+      ["MS-CRAWL-0164", "MS-00893"],
+    ] as const) {
+      const twin = listing(crawl);
+      const archivedLot = listing(lot);
+      expect(twin).toMatchObject({ reference: lot, mergedInto: crawl });
+      expect(twin.listing.commercialState).toBe("confirmation_required");
+      expect(archivedLot).toMatchObject({ reference: crawl, mergedInto: null });
+      expect(archivedLot.listing.commercialState).toBe("withdrawn");
+      // The legacy identity stays with the record it describes.
+      expect(twin.listing.legacyIdentity.ids).toMatchObject({ migration_id: crawl });
+    }
+    // The one real duplicate: both active on one property, so the crawl record is attached to
+    // the lot listing and the property is listed once.
+    const twin = listing("MS-CRAWL-0117");
+    expect(twin).toMatchObject({ reference: "MS-CRAWL-0117", mergedInto: "MS-00927" });
+    expect(twin.listing.commercialState).toBe("withdrawn");
+    expect(twin.listing.availabilityBasis).toMatch(/Attached to MS-00927/);
+    expect(twin.revision.terms.availability).toMatchObject({ state: "withdrawn" });
+    expect(listing("MS-00927").listing.commercialState).toBe("confirmation_required");
+    // Every reference is still unique, and legacy URL decisions follow their record.
+    const references = ofType<ListingItem>("listing").map((l) => l.reference);
+    expect(new Set(references).size).toBe(references.length);
+    const urls = ofType<UrlDecisionItem>("url_decision");
+    const russian = urls.find(
+      (u) => u.listingRef === "MS-00872" && u.decision.domain === "makler-realty.ru",
+    );
+    expect(russian?.decision.targetPath).toBe("/ru/properties/MS-00872");
+    expect(russian?.decision.evidence.recordedTargetPath).toBe("/ru/properties/MS-CRAWL-0129");
+    const german = urls.find(
+      (u) => u.listingRef === "MS-CRAWL-0129" && u.decision.domain === "makler-realty.com",
+    );
+    expect(german?.decision.targetPath).toBe("/bg/imoti/MS-CRAWL-0129");
+    expect(urls.filter((u) => u.listingRef)).toHaveLength(165);
+  });
+
   it("a locality label is never an alias of a whole municipality", () => {
     const municipalities = ofType<PlaceItem>("place").filter(
       (p) => p.place.level === "municipality",
@@ -186,8 +236,9 @@ describe("legacy import mapping (AT21, AT55)", () => {
 
   it("records commercial availability at the freeze, never as available", () => {
     const states = ofType<ListingItem>("listing").map((l) => l.listing.commercialState);
-    expect(states.filter((s) => s === "confirmation_required")).toHaveLength(30);
-    expect(states.filter((s) => s === "withdrawn")).toHaveLength(135);
+    // One active twin is attached to its active lot listing: the property is listed once.
+    expect(states.filter((s) => s === "confirmation_required")).toHaveLength(29);
+    expect(states.filter((s) => s === "withdrawn")).toHaveLength(136);
     for (const l of ofType<ListingItem>("listing")) {
       expect(l.listing.availabilityBasis).toMatch(/launch freeze MSR-LAUNCH-FREEZE-1/);
       expect(l.revision.terms.availability).toMatchObject({ state: l.listing.commercialState });
@@ -242,7 +293,9 @@ describe("legacy import mapping (AT21, AT55)", () => {
     expect(shared.every((m) => m.ownerListingRef === null)).toBe(true);
     // An archived duplicate's photos belong to the listing it was merged into.
     const merged = new Set(
-      sources.listings.listings.filter((l) => l.legacy_ids.merged_into).map((l) => l.reference.id),
+      ofType<ListingItem>("listing")
+        .filter((l) => l.mergedInto)
+        .map((l) => l.reference),
     );
     const viaDuplicate = media.filter(
       (m) => m.ownerListingRef && m.shownIn.some((r) => merged.has(r.reference)),

@@ -7,6 +7,7 @@ import {
   date,
   index,
   integer,
+  jsonb,
   pgTable,
   text,
   uniqueIndex,
@@ -48,6 +49,11 @@ export const casePathSteps = pgTable(
     internalNote: text("internal_note"),
     skipReason: text("skip_reason"),
     evidenceVersionId: uuid("evidence_version_id").references(() => documentVersions.id),
+    /**
+     * Answers recorded with a duty step when it is marked done (ADR 0015), e.g. whether the
+     * brokerage contract was signed away from the office. Cleared when the step is reopened.
+     */
+    details: jsonb("details").notNull().default({}),
   },
   (t) => [
     uniqueIndex("case_path_steps_key_idx").on(t.caseId, t.stepKey),

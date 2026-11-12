@@ -395,7 +395,13 @@ function factsOf(draft: ListingDraft, property: typeof properties.$inferSelect) 
 
 export async function freezeListingDraft(
   db: Executor,
-  command: InventoryCommand & { reference: string },
+  command: InventoryCommand & {
+    reference: string;
+    /** Keep this disclosure (public location precision) instead of the editor's default. */
+    disclosure?: unknown;
+    /** The publication attestation whose decision creates this version (ADR 0012). */
+    attestationId?: string;
+  },
 ) {
   parse(envelope, command);
   await human(db, command.actor);
@@ -469,7 +475,7 @@ export async function freezeListingDraft(
         locale: "bg",
         text: { title: draft.title, description: draft.description },
       };
-      const disclosure = { publicPrecision: "settlement" };
+      const disclosure = command.disclosure ?? { publicPrecision: "settlement" };
       const media = await tx
         .select()
         .from(mediaRelations)
@@ -523,6 +529,7 @@ export async function freezeListingDraft(
       await history(tx, command.actor, operationId, listing, "listing.revision.created", {
         revisionId: revision.id,
         factRevisionId: factRevision.id,
+        ...(command.attestationId ? { attestationId: command.attestationId } : {}),
       });
       return {
         reference: listing.reference,
@@ -828,34 +835,6 @@ export async function recordSellerInstruction(
       const price = termsFacts(revision.terms).price;
       if (!price || !["known", "withheld"].includes(price.state))
         throw new AppError("transition_denied");
-      const [previous] = await tx
-        .select()
-        .from(sellerInstructions)
-        .where(eq(sellerInstructions.propertyId, listing.propertyId))
-        .orderBy(desc(sellerInstructions.revisionNumber))
-        .limit(1);
-      const [effective] = await tx
-        .select({ id: sellerInstructions.id })
-        .from(sellerInstructions)
-        .where(
-          and(
-            eq(sellerInstructions.propertyId, listing.propertyId),
-            isNotNull(sellerInstructions.agreedAt),
-            sql`${sellerInstructions.state} <> 'draft'`,
-            or(
-              eq(sellerInstructions.listingId, listing.id),
-              and(
-                isNull(sellerInstructions.listingId),
-                inArray(sellerInstructions.representationScope, [
-                  listing.purpose === "sale" ? "sale" : "letting",
-                  "sale_and_letting",
-                ]),
-              ),
-            ),
-          ),
-        )
-        .orderBy(desc(sellerInstructions.revisionNumber))
-        .limit(1);
       const content = {
         commercialTerms: {
           price: price.value ?? null,
@@ -870,130 +849,191 @@ export async function recordSellerInstruction(
         publicationPermission: input.publicationPermission,
         expiresAt: input.expiresAt,
       };
-      const [instruction] = await tx
-        .insert(sellerInstructions)
-        .values({
-          ...content,
-          reference: await nextReference(tx, "seller_instruction"),
-          propertyId: listing.propertyId,
-          listingId: listing.id,
-          supersedesId: effective?.id ?? null,
-          revisionNumber: (previous?.revisionNumber ?? 0) + 1,
-          state: "agreed",
-          contentDigest: sha256Hex(canonicalJson(content)),
-          evidenceDocumentIds: [document.record.id],
-          agreedAt: new Date(input.agreedAt),
-          recordedById: command.actor.id,
-          expiresAt: input.expiresAt ? new Date(input.expiresAt) : null,
-        })
-        .returning();
-      if (!instruction) throw new Error("Instruction insert failed");
-      const reason = `Seller instruction replaced by ${instruction.reference}`;
-      const superseded = await tx
-        .update(sellerInstructions)
-        .set({
-          state: "superseded",
-          invalidatedAt: now,
-          invalidationReason: reason,
-          version: sql`${sellerInstructions.version} + 1`,
-        })
-        .where(
-          and(
-            eq(sellerInstructions.propertyId, listing.propertyId),
-            eq(sellerInstructions.listingId, listing.id),
-            eq(sellerInstructions.state, "agreed"),
-            sql`${sellerInstructions.id} <> ${instruction.id}`,
-          ),
-        )
-        .returning({ id: sellerInstructions.id });
-      // New consent changes the publication dependency even if it still permits exposure.
-      // Fence every old prepared manifest, and atomically remove active local projections.
-      // Legacy property-wide instructions remain available to unaffected sibling listings;
-      // currentSellerEvidence resolves their replacement separately for this exact listing.
-      const generation = listing.publicationGeneration + 1;
-      const pointers = await tx
-        .select()
-        .from(currentPublications)
-        .where(
-          and(
-            eq(currentPublications.listingId, listing.id),
-            eq(currentPublications.state, "active"),
-          ),
-        )
-        .for("update");
-      await tx
-        .update(listings)
-        .set({ version: listing.version + 1, publicationGeneration: generation })
-        .where(eq(listings.id, listing.id));
-      if (pointers.length > 0) {
-        await tx
-          .update(currentPublications)
-          .set({
-            state: "restricted",
-            reason,
-            restrictedAt: now,
-            version: sql`${currentPublications.version} + 1`,
-          })
-          .where(
-            inArray(
-              currentPublications.id,
-              pointers.map((pointer) => pointer.id),
-            ),
-          );
-      }
-      await tx
-        .delete(listingSearchDocuments)
-        .where(eq(listingSearchDocuments.listingId, listing.id));
-      for (const pointer of pointers) {
-        const local = pointer.destination === "website";
-        if (
-          local &&
-          (await loadPublishedListings(tx, { ids: [listing.id] }, pointer.locale)).length > 0
-        )
-          throw new Error(`Read-back still shows ${listing.reference}.`);
-        await tx.insert(destinationDeliveries).values({
-          manifestId: pointer.manifestId,
-          listingId: listing.id,
-          locale: pointer.locale,
-          destination: pointer.destination,
-          kind: "withdraw",
-          generation,
-          state: local ? "withdrawn" : "queued",
-          ...(local
-            ? { verifiedAt: now, evidence: { method: "read_back", instructionId: instruction.id } }
-            : {}),
-        });
-      }
-      await recordOutboxEvent(tx, {
-        eventType: "publication.restricted",
-        subjectType: "listing",
-        subjectId: listing.id,
-        payload: {
-          locales: pointers.map((pointer) => pointer.locale),
-          instructionId: instruction.id,
+      const recorded = await replaceSellerInstruction(tx, command.actor, operationId, listing, {
+        content,
+        evidenceDocumentIds: [document.record.id],
+        agreedAt: new Date(input.agreedAt),
+        now,
+        history: {
+          partyId: input.partyId,
+          documentVersionId: document.version.id,
+          sealedDigest: document.version.sha256,
         },
-        sourceGeneration: generation,
-        operationId,
       });
-      await history(tx, command.actor, operationId, listing, "seller.instruction.recorded", {
-        instructionId: instruction.id,
-        supersedesId: effective?.id ?? null,
-        supersededInstructionIds: superseded.map((row) => row.id),
-        previousGeneration: listing.publicationGeneration,
-        generation,
-        restrictedPointerIds: pointers.map((pointer) => pointer.id),
-        partyId: input.partyId,
-        documentVersionId: document.version.id,
-        sealedDigest: document.version.sha256,
-      });
-      return {
-        reference: listing.reference,
-        instructionId: instruction.id,
-        version: listing.version + 1,
-        generation,
-      };
+      return { reference: listing.reference, ...recorded };
     },
   );
+}
+
+export interface SellerInstructionContent {
+  readonly commercialTerms: Record<string, unknown>;
+  readonly disclosure: unknown;
+  readonly mediaUsageRights: { readonly granted: boolean; readonly basis?: string };
+  readonly representationScope: (typeof representationScopes)[number];
+  readonly commissionTerms: string;
+  readonly publicationPermission: boolean;
+  readonly expiresAt: string | null;
+}
+
+/**
+ * Records a new agreed seller instruction for the listing and supersedes the previous one, in the
+ * caller's transaction (the listing row is locked by the caller). New consent changes the
+ * publication dependency even if it still permits exposure: every old prepared manifest is
+ * fenced and active local projections are removed. Shared by the document path and the staff
+ * attestation path (ADR 0012); neither invents consent the person did not record.
+ */
+export async function replaceSellerInstruction(
+  tx: Transaction,
+  actor: Actor,
+  operationId: string,
+  listing: typeof listings.$inferSelect,
+  input: {
+    readonly content: SellerInstructionContent;
+    readonly evidenceDocumentIds: readonly string[];
+    readonly agreedAt: Date;
+    readonly now: Date;
+    readonly history: Record<string, unknown>;
+  },
+): Promise<{ instructionId: string; version: number; generation: number }> {
+  const { content, now } = input;
+  const [previous] = await tx
+    .select()
+    .from(sellerInstructions)
+    .where(eq(sellerInstructions.propertyId, listing.propertyId))
+    .orderBy(desc(sellerInstructions.revisionNumber))
+    .limit(1);
+  const [effective] = await tx
+    .select({ id: sellerInstructions.id })
+    .from(sellerInstructions)
+    .where(
+      and(
+        eq(sellerInstructions.propertyId, listing.propertyId),
+        isNotNull(sellerInstructions.agreedAt),
+        sql`${sellerInstructions.state} <> 'draft'`,
+        or(
+          eq(sellerInstructions.listingId, listing.id),
+          and(
+            isNull(sellerInstructions.listingId),
+            inArray(sellerInstructions.representationScope, [
+              listing.purpose === "sale" ? "sale" : "letting",
+              "sale_and_letting",
+            ]),
+          ),
+        ),
+      ),
+    )
+    .orderBy(desc(sellerInstructions.revisionNumber))
+    .limit(1);
+  const [instruction] = await tx
+    .insert(sellerInstructions)
+    .values({
+      ...content,
+      reference: await nextReference(tx, "seller_instruction"),
+      propertyId: listing.propertyId,
+      listingId: listing.id,
+      supersedesId: effective?.id ?? null,
+      revisionNumber: (previous?.revisionNumber ?? 0) + 1,
+      state: "agreed",
+      contentDigest: sha256Hex(canonicalJson(content)),
+      evidenceDocumentIds: [...input.evidenceDocumentIds],
+      agreedAt: input.agreedAt,
+      recordedById: actor.id,
+      expiresAt: content.expiresAt ? new Date(content.expiresAt) : null,
+    })
+    .returning();
+  if (!instruction) throw new Error("Instruction insert failed");
+  const reason = `Seller instruction replaced by ${instruction.reference}`;
+  const superseded = await tx
+    .update(sellerInstructions)
+    .set({
+      state: "superseded",
+      invalidatedAt: now,
+      invalidationReason: reason,
+      version: sql`${sellerInstructions.version} + 1`,
+    })
+    .where(
+      and(
+        eq(sellerInstructions.propertyId, listing.propertyId),
+        eq(sellerInstructions.listingId, listing.id),
+        eq(sellerInstructions.state, "agreed"),
+        sql`${sellerInstructions.id} <> ${instruction.id}`,
+      ),
+    )
+    .returning({ id: sellerInstructions.id });
+  // New consent changes the publication dependency even if it still permits exposure.
+  // Fence every old prepared manifest, and atomically remove active local projections.
+  // Legacy property-wide instructions remain available to unaffected sibling listings;
+  // currentSellerEvidence resolves their replacement separately for this exact listing.
+  const generation = listing.publicationGeneration + 1;
+  const pointers = await tx
+    .select()
+    .from(currentPublications)
+    .where(
+      and(eq(currentPublications.listingId, listing.id), eq(currentPublications.state, "active")),
+    )
+    .for("update");
+  await tx
+    .update(listings)
+    .set({ version: listing.version + 1, publicationGeneration: generation })
+    .where(eq(listings.id, listing.id));
+  if (pointers.length > 0) {
+    await tx
+      .update(currentPublications)
+      .set({
+        state: "restricted",
+        reason,
+        restrictedAt: now,
+        version: sql`${currentPublications.version} + 1`,
+      })
+      .where(
+        inArray(
+          currentPublications.id,
+          pointers.map((pointer) => pointer.id),
+        ),
+      );
+  }
+  await tx.delete(listingSearchDocuments).where(eq(listingSearchDocuments.listingId, listing.id));
+  for (const pointer of pointers) {
+    const local = pointer.destination === "website";
+    if (
+      local &&
+      (await loadPublishedListings(tx, { ids: [listing.id] }, pointer.locale)).length > 0
+    )
+      throw new Error(`Read-back still shows ${listing.reference}.`);
+    await tx.insert(destinationDeliveries).values({
+      manifestId: pointer.manifestId,
+      listingId: listing.id,
+      locale: pointer.locale,
+      destination: pointer.destination,
+      kind: "withdraw",
+      generation,
+      state: local ? "withdrawn" : "queued",
+      ...(local
+        ? { verifiedAt: now, evidence: { method: "read_back", instructionId: instruction.id } }
+        : {}),
+    });
+  }
+  await recordOutboxEvent(tx, {
+    eventType: "publication.restricted",
+    subjectType: "listing",
+    subjectId: listing.id,
+    payload: {
+      locales: pointers.map((pointer) => pointer.locale),
+      instructionId: instruction.id,
+    },
+    sourceGeneration: generation,
+    operationId,
+  });
+  await history(tx, actor, operationId, listing, "seller.instruction.recorded", {
+    instructionId: instruction.id,
+    supersedesId: effective?.id ?? null,
+    supersededInstructionIds: superseded.map((row) => row.id),
+    previousGeneration: listing.publicationGeneration,
+    generation,
+    restrictedPointerIds: pointers.map((pointer) => pointer.id),
+    ...input.history,
+  });
+  return { instructionId: instruction.id, version: listing.version + 1, generation };
 }
 
 export async function inventoryDetail(db: Executor, actor: Actor, reference: string) {

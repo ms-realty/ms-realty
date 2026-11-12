@@ -13,6 +13,7 @@ import {
 import { AppError } from "@/server/errors";
 import { formInstant, readTimeFormValues } from "@/server/forms/time";
 import { action } from "@/server/http/next";
+import { kickDealNotices } from "@/server/jobs/web";
 import { findOperation } from "@/server/operations";
 import type { FormState, FormValues } from "@/ui/form/contract";
 import { issueFormOperation, readFormEnvelope } from "@/ui/form/server";
@@ -110,8 +111,10 @@ export async function documentRequestAction(
     },
     { requireSession: true },
   );
-  if (result.ok)
+  if (result.ok) {
+    await kickDealNotices();
     redirect(`${path}?command=${binding.command}&key=${encodeURIComponent(operationId)}`);
+  }
   const error = result.error;
   if (error.outcome === "unknown")
     return {

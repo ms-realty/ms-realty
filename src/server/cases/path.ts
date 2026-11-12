@@ -5,7 +5,7 @@
 import "server-only";
 import { and, asc, desc, eq, inArray, isNotNull, min, sql } from "drizzle-orm";
 import { z } from "zod";
-import type { DealPathActor } from "@/config/tenant";
+import type { DealPathActor, DealPathDuty, DealPathTransaction } from "@/config/tenant";
 import { agencyTimeZone } from "@/config/tenant";
 import {
   appointments,
@@ -25,6 +25,8 @@ import {
 } from "@/db/schema";
 import { type CaseStage, caseStageTransitions, dispositionTransitions } from "@/domain/case";
 import {
+  type AgreedTerms,
+  type BrokerageDetails,
   calendarDate,
   completionReadiness,
   composePath,
@@ -32,8 +34,11 @@ import {
   dealCompletedOutcome,
   dealTransaction,
   derivedSteps,
+  dutyInScope,
   isCalendarDate,
   nextRecordedState,
+  ownerSide,
+  type PathStepAction,
   type PathStepBase,
   pathStepActions,
   previewSteps,
@@ -41,8 +46,11 @@ import {
   type RecordedStepState,
   recordedSteps,
   resolveTemplate,
+  stepDutyBlock,
   stepKeyPattern,
+  templateStep,
   templateSteps,
+  withdrawalEndsOn,
 } from "@/domain/deal-path";
 import { requireFreshAuth, type Session } from "../auth/sessions";
 import { can } from "../authz";
@@ -50,9 +58,12 @@ import { hashRequest } from "../crypto";
 import type { Executor } from "../db";
 import { AppError, isAppError } from "../errors";
 import { documentAccess } from "../files/access";
+import { recordListingOutcome } from "../listings/commercial";
+import { notifyDealCompleted, notifyPathStepDone } from "../notifications/deal-path";
 import { runOperation } from "../operations";
 import { termsDigest } from "../proposals/shared";
 import { allow, commandEnvelope, liveStaff, parseInput, version } from "../work/shared";
+import { counterpartDeal, ownerDeals } from "./deal-link";
 import { assertResolved, lifecycleCase } from "./lifecycle";
 import { bumpCase, caseEvent, caseFor } from "./shared";
 
@@ -66,8 +77,26 @@ const terminalStage = (kind: CaseRow["kind"]): CaseStage | null =>
       ? "completion_handover"
       : null;
 
-/** What the Case's existing records say, plus the property country the template follows. */
+/**
+ * What the Case's existing records say, plus the property country the template follows. An
+ * owner-side Deal whose home has an agreed proposal on a buyer's or tenant's Deal reads "terms
+ * agreed", the template country and the agreed terms from that Deal (ADR 0015).
+ */
 async function pathFacts(db: Executor, row: CaseRow) {
+  const counterpart = ownerSide(row.kind) ? await counterpartDeal(db, row) : null;
+  if (counterpart) {
+    const shared = await ownFacts(db, counterpart);
+    const own = await ownFacts(db, row);
+    return {
+      ...shared,
+      facts: { ...own.facts, termsAgreedAt: shared.facts.termsAgreedAt },
+      counterpart,
+    };
+  }
+  return { ...(await ownFacts(db, row)), counterpart: null };
+}
+
+async function ownFacts(db: Executor, row: CaseRow) {
   const [request] = await db
     .select({ at: min(inquiries.createdAt) })
     .from(inquiries)
@@ -105,7 +134,11 @@ async function pathFacts(db: Executor, row: CaseRow) {
     .map((v) => v.startsAt as Date)
     .sort((a, b) => a.getTime() - b.getTime());
   const offers = await db
-    .select({ revision: proposalRevisions, country: properties.country })
+    .select({
+      revision: proposalRevisions,
+      country: properties.country,
+      listingId: proposals.listingId,
+    })
     .from(proposals)
     .innerJoin(
       proposalRevisions,
@@ -143,7 +176,49 @@ async function pathFacts(db: Executor, row: CaseRow) {
     termsAgreedAt: agreed ? (agreed.revision.respondedAt ?? agreed.revision.updatedAt) : null,
   };
   const country = agreed?.country ?? offers[0]?.country ?? interestCountry?.country ?? null;
-  return { facts, country, agreedRevisionId: agreed?.revision.id ?? null };
+  return {
+    facts,
+    country,
+    agreedRevisionId: agreed?.revision.id ?? null,
+    agreedListingId: agreed?.listingId ?? null,
+    agreedTerms: agreed
+      ? {
+          amountMinor: agreed.revision.amountMinor,
+          currency: agreed.revision.currency,
+          period: agreed.revision.period,
+        }
+      : null,
+  };
+}
+
+const brokerageDetailsSchema = z.object({
+  away: z.boolean(),
+  earlyStart: z.boolean().nullable(),
+});
+
+/** The duty state of a stored path (ADR 0015): what is blocked and whether a duty is open. */
+function pathDuties(
+  stored: readonly StepRow[],
+  transaction: DealPathTransaction,
+  terms: AgreedTerms | null,
+) {
+  const identity = stored.find(
+    (s) => templateStep(s.template, s.stepKey)?.duty === "customer_due_diligence",
+  );
+  const identityChecks = (identity?.state as RecordedStepState | undefined) ?? null;
+  const dutyOpen = stored.some((s) => {
+    const duty = templateStep(s.template, s.stepKey)?.duty;
+    return duty && dutyInScope(duty, transaction, terms) && s.state !== "done";
+  });
+  const block = (row: StepRow, action: PathStepAction) =>
+    stepDutyBlock({
+      step: templateStep(row.template, row.stepKey),
+      action,
+      transaction,
+      terms,
+      identityChecks,
+    });
+  return { identityChecks, dutyOpen, block };
 }
 
 const stepInput = (row: StepRow): RecordedStepInput => ({
@@ -163,6 +238,62 @@ async function storedSteps(db: Executor, caseId: string, lock = false) {
     .where(eq(casePathSteps.caseId, caseId))
     .orderBy(asc(casePathSteps.position));
   return lock ? query.for("update") : query;
+}
+
+const dutyOf = (step: Pick<StepRow, "template" | "stepKey">) =>
+  templateStep(step.template, step.stepKey)?.duty;
+
+/**
+ * The recorded steps a Deal reads (ADR 0015). Usually its own. An owner-side Deal linked to an
+ * agreed buyer's or tenant's Deal reads that Deal's steps, one record for both sides, except the
+ * brokerage contract, which is its own (a pending placeholder until it records one).
+ */
+async function pathRows(
+  db: Executor,
+  row: CaseRow,
+  counterpart: CaseRow | null,
+  lock = false,
+): Promise<{ rows: StepRow[]; own: StepRow[]; sharedWith: CaseRow | null }> {
+  const own = await storedSteps(db, row.id, lock);
+  if (!counterpart) return { rows: own, own, sharedWith: null };
+  const theirs = await storedSteps(db, counterpart.id, lock);
+  if (!theirs.length) return { rows: own, own, sharedWith: null };
+  const ownBrokerage = own.find((s) => dutyOf(s) === "brokerage_contract");
+  const rows = theirs.map((s) =>
+    dutyOf(s) !== "brokerage_contract"
+      ? s
+      : (ownBrokerage ?? {
+          ...s,
+          id: "",
+          caseId: row.id,
+          state: "pending",
+          expectedOn: null,
+          doneOn: null,
+          recordedAt: null,
+          recordedById: null,
+          clientNote: null,
+          internalNote: null,
+          skipReason: null,
+          evidenceVersionId: null,
+          details: {},
+          version: 0,
+        }),
+  );
+  return { rows, own, sharedWith: counterpart };
+}
+
+/**
+ * A buyer's or tenant's Deal closes together with the owner-side Deals that share its path, so
+ * their own brokerage contract steps must be done too before it completes.
+ */
+async function linkedDutyOpen(db: Executor, row: CaseRow, agreedListingId: string | null) {
+  if (ownerSide(row.kind)) return false;
+  for (const owner of await ownerDeals(db, row, agreedListingId)) {
+    if (owner.disposition !== "active") continue;
+    const own = await storedSteps(db, owner.id);
+    if (own.find((s) => dutyOf(s) === "brokerage_contract")?.state !== "done") return true;
+  }
+  return false;
 }
 
 /**
@@ -202,6 +333,16 @@ export type CasePathStep = PathStepBase & {
   readonly internalNote?: string | null;
   readonly skipReason?: string | null;
   readonly evidence?: { readonly versionId: string; readonly fileName: string } | null;
+  /** The agency duty this step records (ADR 0015), if any. */
+  readonly duty?: DealPathDuty;
+  /** Staff: the step may be marked not needed (false for an in-scope duty). */
+  readonly canSkip?: boolean;
+  /** Staff: the step moves money, a signature or the property and waits for identity checks. */
+  readonly waitsForIdentityChecks?: boolean;
+  /** What was recorded with this Deal's own done brokerage contract step (staff and client). */
+  readonly brokerage?: (BrokerageDetails & { readonly withdrawalEndsOn: string | null }) | null;
+  /** Staff: recorded once for both sides, on the other side's Deal (ADR 0015). */
+  readonly shared?: boolean;
 };
 
 /**
@@ -216,9 +357,10 @@ export async function casePath(db: Executor, session: Session, caseId: string) {
   const staff = live.account.kind === "staff";
   const internal = staff && (await can(db, live.actor, "case.read_internal", resource));
   const canTransition = staff && (await can(db, live.actor, "case.transition", resource));
-  const { facts, country } = await pathFacts(db, row);
-  const stored = await storedSteps(db, row.id);
+  const { facts, country, agreedTerms, agreedListingId, counterpart } = await pathFacts(db, row);
+  const { rows: stored, sharedWith } = await pathRows(db, row, counterpart);
   const template = stored[0]?.template ?? resolveTemplate(country, transaction).key;
+  const duties = pathDuties(stored, transaction, agreedTerms);
   const rows = stored.length ? stored.map(stepInput) : previewSteps(templateSteps(template) ?? []);
   const evidenceIds = stored.flatMap((s) => (s.evidenceVersionId ? [s.evidenceVersionId] : []));
   const files =
@@ -229,19 +371,45 @@ export async function casePath(db: Executor, session: Session, caseId: string) {
           .where(inArray(documentVersions.id, evidenceIds))
       : [];
   const byKey = new Map(stored.map((s) => [s.stepKey, s]));
+  // A preview (nothing stored yet) reads its template's identity checks as still to do.
+  const identityState =
+    rows.find((r) => templateStep(template, r.key)?.duty === "customer_due_diligence")?.state ??
+    null;
   const base = [...derivedSteps(row.kind, facts), ...recordedSteps(rows)].map((step) => {
     const record = step.source === "recorded" ? byKey.get(step.key) : undefined;
     const evidence = record?.evidenceVersionId
       ? (files.find((f) => f.id === record.evidenceVersionId) ?? null)
       : null;
+    const definition = step.source === "recorded" ? templateStep(template, step.key) : undefined;
+    const brokerage =
+      definition?.duty === "brokerage_contract" && record?.state === "done"
+        ? brokerageDetailsSchema.safeParse(record.details)
+        : null;
+    // A step recorded on the other side's Deal: its note was written for that side's client.
+    const shared = Boolean(record && record.caseId !== row.id);
     return {
       ...step,
-      clientNote: record?.clientNote ?? null,
+      clientNote: shared && !staff ? null : (record?.clientNote ?? null),
+      ...(definition?.duty ? { duty: definition.duty } : {}),
+      ...(staff && shared ? { shared: true } : {}),
       ...(internal
         ? {
             internalNote: record?.internalNote ?? null,
             skipReason: record?.skipReason ?? null,
             evidence: evidence ? { versionId: evidence.id, fileName: evidence.fileName } : null,
+            canSkip: !(definition?.duty && dutyInScope(definition.duty, transaction, agreedTerms)),
+            waitsForIdentityChecks: Boolean(
+              definition?.afterIdentityChecks && identityState === "pending",
+            ),
+          }
+        : {}),
+      // The answers recorded with this Deal's own brokerage contract: its client sees them too.
+      ...(brokerage?.success && record?.doneOn && record.caseId === row.id
+        ? {
+            brokerage: {
+              ...brokerage.data,
+              withdrawalEndsOn: brokerage.data.away ? withdrawalEndsOn(record.doneOn) : null,
+            },
           }
         : {}),
     };
@@ -261,7 +429,11 @@ export async function casePath(db: Executor, session: Session, caseId: string) {
         .orderBy(desc(caseCompletions.createdAt))
         .limit(1)
     : [];
-  const readiness = completionReadiness(facts, stored.map(stepInput));
+  const readiness = completionReadiness(
+    facts,
+    stored.map(stepInput),
+    duties.dutyOpen || (await linkedDutyOpen(db, row, agreedListingId)),
+  );
   const canRecord = canTransition && internal && row.disposition === "active";
   return {
     caseId: row.id,
@@ -270,6 +442,8 @@ export async function casePath(db: Executor, session: Session, caseId: string) {
     transaction,
     template,
     recorded: stored.length > 0,
+    /** Staff: the other side's Deal this path is shared with (ADR 0015); clients never see it. */
+    sharedWith: staff && sharedWith ? { id: sharedWith.id, reference: sharedWith.reference } : null,
     steps: composed.steps as CasePathStep[],
     current: composed.current,
     next: composed.next,
@@ -288,7 +462,7 @@ export async function casePath(db: Executor, session: Session, caseId: string) {
 }
 
 /** Current document versions on this Case that the reader may open. */
-async function evidenceOptions(db: Executor, session: Session, caseId: string) {
+export async function evidenceOptions(db: Executor, session: Session, caseId: string) {
   const candidates = await db
     .select({
       id: documentVersions.id,
@@ -319,7 +493,12 @@ async function evidenceOptions(db: Executor, session: Session, caseId: string) {
 }
 
 /** An evidence document must be a current file of this Case that the actor may open. */
-async function caseEvidence(db: Executor, session: Session, caseId: string, versionId: string) {
+export async function caseEvidence(
+  db: Executor,
+  session: Session,
+  caseId: string,
+  versionId: string,
+) {
   const [file] = await db
     .select({ caseId: documents.caseId, version: documentVersions })
     .from(documentVersions)
@@ -349,6 +528,10 @@ const stepSchema = z.object({
   internalNote: optionalText(2000),
   reason: optionalText(2000),
   evidenceVersionId: evidenceInput,
+  /** Brokerage contract step: signed online or away from the office (yes/no). */
+  away: z.enum(["", "yes", "no"]).default(""),
+  /** Brokerage contract step: the client asked in writing for an early start (yes/no). */
+  earlyStart: z.enum(["", "yes", "no"]).default(""),
 });
 export type RecordPathStepInput = z.input<typeof stepSchema>;
 
@@ -390,12 +573,44 @@ export async function recordPathStep(db: Executor, session: Session, raw: Record
       const { row } = await lifecycleCase(ctx.tx, session, input.id, true);
       version(row, input.expectedVersion);
       if (row.disposition !== "active") throw new AppError("transition_denied");
-      if (!dealTransaction(row.kind)) throw new AppError("not_found");
-      const steps = await ensureCasePath(ctx.tx, row.id);
-      const step = steps.find((s) => s.stepKey === input.stepKey);
+      const transaction = dealTransaction(row.kind);
+      if (!transaction) throw new AppError("not_found");
+      const { agreedTerms, agreedListingId, counterpart } = await pathFacts(ctx.tx, row);
+      // ADR 0015: an owner-side Deal linked to an agreed buyer's or tenant's Deal records the
+      // shared steps on that Deal (one record for both sides) and its own brokerage contract.
+      const linked = counterpart ? await ensureCasePath(ctx.tx, counterpart.id) : [];
+      const sharedStep = linked.find(
+        (s) => s.stepKey === input.stepKey && dutyOf(s) !== "brokerage_contract",
+      );
+      const owner = sharedStep && counterpart ? counterpart : row;
+      if (sharedStep && (input.clientNote || input.evidenceVersionId))
+        // A note or document from this side would show on the other side's Deal.
+        throw invalid(input.clientNote ? "clientNote" : "evidenceVersionId", "shared_step");
+      const steps = sharedStep ? linked : await ensureCasePath(ctx.tx, row.id);
+      const step = sharedStep ?? steps.find((s) => s.stepKey === input.stepKey);
       if (!step) throw new AppError("not_found");
       const to = nextRecordedState(step.state as RecordedStepState, input.action);
       if (!to) throw new AppError("transition_denied");
+      const { rows: view } = await pathRows(ctx.tx, row, counterpart);
+      // ADR 0015: the agency's duties are steps that cannot be skipped while in scope, and the
+      // steps that move money, a signature or the property wait for the identity checks.
+      const blocked = pathDuties(view.length ? view : steps, transaction, agreedTerms).block(
+        step,
+        input.action,
+      );
+      if (blocked) throw new AppError("transition_denied", { fieldErrors: { form: [blocked] } });
+      let details: BrokerageDetails | Record<string, never> = {};
+      if (
+        input.action === "done" &&
+        templateStep(step.template, step.stepKey)?.duty === "brokerage_contract"
+      ) {
+        if (!input.away) throw invalid("away", "required");
+        if (input.away === "yes" && !input.earlyStart) throw invalid("earlyStart", "required");
+        details = {
+          away: input.away === "yes",
+          earlyStart: input.away === "yes" ? input.earlyStart === "yes" : null,
+        };
+      }
       if (input.evidenceVersionId)
         await caseEvidence(ctx.tx, session, row.id, input.evidenceVersionId);
       const now = new Date();
@@ -409,6 +624,7 @@ export async function recordPathStep(db: Executor, session: Session, raw: Record
               clientNote: input.clientNote || null,
               internalNote: input.internalNote || null,
               evidenceVersionId: input.evidenceVersionId || null,
+              details,
             }
           : input.action === "skip"
             ? {
@@ -425,6 +641,7 @@ export async function recordPathStep(db: Executor, session: Session, raw: Record
                   skipReason: null,
                   evidenceVersionId: null,
                   clientNote: null,
+                  details: {},
                   recordedAt: now,
                   recordedById: live.account.id,
                 }
@@ -434,23 +651,52 @@ export async function recordPathStep(db: Executor, session: Session, raw: Record
         .set({ ...patch, version: sql`${casePathSteps.version} + 1`, updatedAt: now })
         .where(and(eq(casePathSteps.id, step.id), eq(casePathSteps.version, step.version)));
       await bumpCase(ctx.tx, row.id, row.version);
-      await caseEvent(
-        ctx,
-        "case",
-        row.id,
-        `case.path.${input.action}`,
-        "case.transition",
-        {
-          stepKey: step.stepKey,
-          template: step.template,
-          from: step.state,
-          to,
-          ...(input.date ? { date: input.date } : {}),
-          ...(input.action === "reopen" ? { reason: input.reason } : {}),
-          ...(input.evidenceVersionId ? { evidenceVersionId: input.evidenceVersionId } : {}),
-        },
-        step.clientVisible && input.action !== "expect" ? "participants" : "internal",
-      );
+      // Every Deal that reads this step: its owner and, for a shared step, the other side.
+      const readers =
+        owner.id !== row.id
+          ? [row, owner]
+          : dutyOf(step) === "brokerage_contract" || ownerSide(row.kind)
+            ? [row]
+            : [row, ...(await ownerDeals(ctx.tx, row, agreedListingId))];
+      if (owner.id !== row.id) {
+        // The other side's page holds a stale version now, like any other change to its Deal.
+        const [current] = await ctx.tx.select().from(cases).where(eq(cases.id, owner.id));
+        if (current) await bumpCase(ctx.tx, owner.id, current.version);
+      }
+      for (const reader of readers)
+        await caseEvent(
+          ctx,
+          "case",
+          reader.id,
+          `case.path.${input.action}`,
+          "case.transition",
+          {
+            stepKey: step.stepKey,
+            template: step.template,
+            from: step.state,
+            to,
+            ...(input.date ? { date: input.date } : {}),
+            ...(input.action === "reopen" ? { reason: input.reason } : {}),
+            ...(input.evidenceVersionId ? { evidenceVersionId: input.evidenceVersionId } : {}),
+            ...("away" in details ? { details } : {}),
+            ...(reader.id !== owner.id ? { recordedOn: "shared" } : {}),
+          },
+          step.clientVisible && input.action !== "expect" ? "participants" : "internal",
+        );
+      // Only a client-visible step marked done tells the clients; reopen and skip send nothing.
+      // Each side's clients hear it once, in their own Deal's words.
+      if (input.action === "done" && step.clientVisible)
+        for (const reader of readers)
+          await notifyPathStepDone(
+            ctx.tx,
+            {
+              caseId: reader.id,
+              caseReference: reader.reference,
+              stepKey: step.stepKey,
+              version: step.version + 1,
+            },
+            live.actor,
+          );
       return { ...result(row), stepKey: step.stepKey, state: to };
     },
   );
@@ -471,7 +717,8 @@ export type CompleteDealInput = z.input<typeof completeSchema>;
  * pipeline's terminal stage and closes it with the structured `deal_completed` outcome, after
  * the same open-work check and step-up as the existing close flow. The path's recorded steps are
  * the completion evidence, so this route does not need the separate `case_completion` document
- * the stage form asks for. No command sets a Listing to sold or let, so this changes no Listing.
+ * the stage form asks for. A buyer's or tenant's completion also marks the agreed listing sold or
+ * let (ADR 0015), and an in-scope duty step must be done, never merely not needed.
  */
 export async function completeDealFromPath(db: Executor, session: Session, raw: CompleteDealInput) {
   const input = parseInput(completeSchema, raw);
@@ -489,110 +736,202 @@ export async function completeDealFromPath(db: Executor, session: Session, raw: 
       expectedVersion: input.expectedVersion,
     },
     async (ctx) => {
-      const { row } = await lifecycleCase(ctx.tx, session, input.id, true);
+      const { row: page } = await lifecycleCase(ctx.tx, session, input.id, true);
       requireFreshAuth(await liveStaff(ctx.tx, session));
-      version(row, input.expectedVersion);
-      const stage = terminalStage(row.kind);
-      if (row.disposition !== "active" || row.pendingOwnerId || !stage || !row.ownerId)
+      version(page, input.expectedVersion);
+      if (page.disposition !== "active") throw new AppError("transition_denied");
+      // ADR 0015: the buyer's or tenant's Deal holds the agreement and the shared steps. An
+      // owner-side Deal completes through it, and both close together with one recorded date.
+      const pageFacts = await pathFacts(ctx.tx, page);
+      const [deal] = pageFacts.counterpart
+        ? await ctx.tx
+            .select()
+            .from(cases)
+            .where(eq(cases.id, pageFacts.counterpart.id))
+            .for("update")
+        : [page];
+      if (deal?.disposition !== "active") throw new AppError("transition_denied");
+      const { facts, agreedTerms, agreedListingId } =
+        deal.id === page.id ? pageFacts : await pathFacts(ctx.tx, deal);
+      const transaction = dealTransaction(deal.kind);
+      if (!transaction) throw new AppError("transition_denied");
+      const steps = await storedSteps(ctx.tx, deal.id, true);
+      const owners = (
+        ownerSide(deal.kind) ? [] : await ownerDeals(ctx.tx, deal, agreedListingId)
+      ).filter((o) => o.disposition === "active");
+      if (owners.some((o) => o.pendingOwnerId || !o.ownerId))
         throw new AppError("transition_denied");
-      const steps = await storedSteps(ctx.tx, row.id, true);
-      const { facts } = await pathFacts(ctx.tx, row);
-      const readiness = completionReadiness(facts, steps.map(stepInput));
+      // A sale never completes with its identity checks or brokerage contract open, on either
+      // side (ADR 0015).
+      const readiness = completionReadiness(
+        facts,
+        steps.map(stepInput),
+        pathDuties(steps, transaction, agreedTerms).dutyOpen ||
+          (await linkedDutyOpen(ctx.tx, deal, agreedListingId)),
+      );
       if (!readiness.ready)
         throw new AppError("transition_denied", {
           fieldErrors: { form: [readiness.reason ?? "steps_open"] },
         });
       if (input.evidenceVersionId)
-        await caseEvidence(ctx.tx, session, row.id, input.evidenceVersionId);
-      const resolved = await assertResolved(ctx.tx, row.id);
-      const commitmentDispositions = Object.fromEntries(
-        resolved.map((t) => [
-          t.id,
-          `${t.state}: ${t.outcome ?? t.reason ?? "Recorded terminal state"}`,
-        ]),
-      );
+        await caseEvidence(ctx.tx, session, page.id, input.evidenceVersionId);
       const template = steps[0]?.template ?? "";
-      const [completion] = await ctx.tx
-        .insert(caseCompletions)
-        .values({
-          caseId: row.id,
-          template,
-          completedOn: input.completedOn,
-          registryReference: input.registryReference || null,
-          evidenceVersionId: input.evidenceVersionId || null,
-          recordedById: live.account.id,
-          operationId: ctx.operationId,
-        })
-        .returning({ id: caseCompletions.id });
-      if (!completion) throw new Error("Deal completion insert failed");
-      const reason = "Deal path completed";
-      // The stage guard's completion evidence is the recorded completion itself.
-      if (row.stage !== stage)
+      const close = async (row: CaseRow, ownSteps: readonly StepRow[], evidence: string | null) => {
+        const stage = terminalStage(row.kind);
+        if (row.pendingOwnerId || !stage || !row.ownerId) throw new AppError("transition_denied");
+        const resolved = await assertResolved(ctx.tx, row.id);
+        const commitmentDispositions = Object.fromEntries(
+          resolved.map((t) => [
+            t.id,
+            `${t.state}: ${t.outcome ?? t.reason ?? "Recorded terminal state"}`,
+          ]),
+        );
+        const [completion] = await ctx.tx
+          .insert(caseCompletions)
+          .values({
+            caseId: row.id,
+            template,
+            completedOn: input.completedOn,
+            registryReference: input.registryReference || null,
+            // A document stays on the Deal it belongs to; the other side gets the date only.
+            evidenceVersionId: evidence,
+            recordedById: live.account.id,
+            operationId: ctx.operationId,
+          })
+          .returning({ id: caseCompletions.id });
+        if (!completion) throw new Error("Deal completion insert failed");
+        const reason = "Deal path completed";
+        // The stage guard's completion evidence is the recorded completion itself.
+        if (row.stage !== stage)
+          allow(
+            caseStageTransitions(row.kind).guard(
+              row.stage as CaseStage,
+              stage,
+              {
+                responsibleBrokerId: row.ownerId,
+                completionEvidenceIds: [completion.id],
+                remainingObligations: [],
+                reason,
+              },
+              live.actor,
+            ),
+          );
         allow(
-          caseStageTransitions(row.kind).guard(
-            row.stage as CaseStage,
-            stage,
+          dispositionTransitions.guard(
+            row.disposition,
+            "closed",
             {
-              responsibleBrokerId: row.ownerId,
-              completionEvidenceIds: [completion.id],
-              remainingObligations: [],
               reason,
+              outcome: dealCompletedOutcome,
+              openCommitmentIds: [],
+              commitmentDispositions,
             },
             live.actor,
           ),
         );
-      allow(
-        dispositionTransitions.guard(
-          row.disposition,
-          "closed",
-          {
-            reason,
+        await bumpCase(ctx.tx, row.id, row.version, {
+          stage,
+          disposition: "closed",
+          dispositionReason: reason,
+          closureOutcome: dealCompletedOutcome,
+          commitmentDispositions,
+        });
+        await ctx.tx.insert(caseStageHistory).values({
+          caseId: row.id,
+          fromStage: row.stage,
+          toStage: stage,
+          reason,
+          // `toDisposition` starts the retention clock exactly as the existing close flow does.
+          evidence: {
+            kind: "deal_path_completed",
+            fromDisposition: row.disposition,
+            toDisposition: "closed",
             outcome: dealCompletedOutcome,
-            openCommitmentIds: [],
-            commitmentDispositions,
+            completionId: completion.id,
+            template,
+            completedOn: input.completedOn,
+            steps: ownSteps.map((s) => ({
+              key: s.stepKey,
+              state: s.state,
+              version: s.version,
+              ...(s.caseId !== row.id ? { recordedOn: "shared" } : {}),
+            })),
+            commitments: resolved,
+            remainingObligations: [],
           },
-          live.actor,
-        ),
-      );
-      await bumpCase(ctx.tx, row.id, row.version, {
-        stage,
-        disposition: "closed",
-        dispositionReason: reason,
-        closureOutcome: dealCompletedOutcome,
-        commitmentDispositions,
-      });
-      await ctx.tx.insert(caseStageHistory).values({
-        caseId: row.id,
-        fromStage: row.stage,
-        toStage: stage,
-        reason,
-        // `toDisposition` starts the retention clock exactly as the existing close flow does.
-        evidence: {
-          kind: "deal_path_completed",
-          fromDisposition: row.disposition,
-          toDisposition: "closed",
-          outcome: dealCompletedOutcome,
-          completionId: completion.id,
-          template,
-          completedOn: input.completedOn,
-          steps: steps.map((s) => ({ key: s.stepKey, state: s.state, version: s.version })),
-          commitments: resolved,
-          remainingObligations: [],
-        },
-        actorKind: ctx.actor.kind,
-        actorId: ctx.actor.id,
-        operationId: ctx.operationId,
-      });
+          actorKind: ctx.actor.kind,
+          actorId: ctx.actor.id,
+          operationId: ctx.operationId,
+        });
+        return completion.id;
+      };
+      const evidence = input.evidenceVersionId || null;
+      const completionId = await close(deal, steps, page.id === deal.id ? evidence : null);
+      // The agreed home is sold or let: it stops being offered as available. Only a buyer's or
+      // tenant's Deal holds the agreed proposal; the listing entry names no party.
+      const outcome = deal.kind === "buyer" ? "sold" : deal.kind === "tenant" ? "let" : null;
+      const listing =
+        outcome && agreedListingId
+          ? await recordListingOutcome(ctx.tx, live.actor, {
+              listingId: agreedListingId,
+              outcome,
+              reason: "Deal completed",
+              evidenceIds: [completionId],
+              operationId: ctx.operationId,
+            })
+          : null;
       await caseEvent(
         ctx,
         "case",
-        row.id,
+        deal.id,
         "case.deal_completed",
         "case.transition",
-        { completionId: completion.id, completedOn: input.completedOn, template },
+        {
+          completionId,
+          completedOn: input.completedOn,
+          template,
+          ...(listing
+            ? { listingOutcome: listing.status, listingReference: listing.reference }
+            : {}),
+        },
         "participants",
       );
-      return { ...result(row), completionId: completion.id };
+      await notifyDealCompleted(
+        ctx.tx,
+        { caseId: deal.id, caseReference: deal.reference, completionId },
+        live.actor,
+      );
+      let pageCompletionId = completionId;
+      for (const owner of owners) {
+        const [locked] = await ctx.tx
+          .select()
+          .from(cases)
+          .where(eq(cases.id, owner.id))
+          .for("update");
+        if (!locked) continue;
+        const { rows } = await pathRows(ctx.tx, locked, deal);
+        const ownerCompletion = await close(locked, rows, locked.id === page.id ? evidence : null);
+        if (locked.id === page.id) pageCompletionId = ownerCompletion;
+        await caseEvent(
+          ctx,
+          "case",
+          locked.id,
+          "case.deal_completed",
+          "case.transition",
+          { completionId: ownerCompletion, completedOn: input.completedOn, template },
+          "participants",
+        );
+        await notifyDealCompleted(
+          ctx.tx,
+          { caseId: locked.id, caseReference: locked.reference, completionId: ownerCompletion },
+          live.actor,
+        );
+      }
+      return {
+        ...result(page),
+        completionId: pageCompletionId,
+        listingOutcome: listing?.status ?? null,
+      };
     },
   );
 }

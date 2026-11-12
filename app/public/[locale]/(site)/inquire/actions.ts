@@ -33,6 +33,7 @@ import {
   reviewInquirySources,
   validInquiryReview,
 } from "@/server/inquiries/review";
+import { kickDealNotices } from "@/server/jobs/web";
 import { formFields } from "@/ui/form/contract";
 
 export async function sendInquiry(
@@ -152,6 +153,7 @@ export async function sendInquiry(
       receiptSession,
       correlationId: correlationIdFrom(requestHeaders),
     });
+    if (!result.replayed) await kickDealNotices();
     return {
       ...state,
       outcome: { kind: "confirmed", receipt: inquiryReceiptView(result.receipt, locale, copy) },

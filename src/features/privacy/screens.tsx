@@ -288,6 +288,7 @@ export async function PreferencesScreen({
     timezone?: string;
     channel?: string;
     contactWindow?: string;
+    dealNotices?: boolean;
   };
   const verified = data.contacts.filter(
     (contact) => contact.kind === "email" && contact.verification === "verified",
@@ -354,6 +355,16 @@ export async function PreferencesScreen({
           </select>
         </label>
         <TextField name="contactWindow" label={c.window} value={preferences.contactWindow} />
+        <div className="grid gap-1">
+          <Check
+            name="dealNotices"
+            required={false}
+            defaultChecked={preferences.dealNotices !== false}
+          >
+            {c.dealNotices}
+          </Check>
+          <p className="text-text-muted">{c.dealNoticesHint}</p>
+        </div>
         <Submit>{c.save}</Submit>
       </NativeForm>
       <h2 className="text-section font-semibold">{c.purposeChoices}</h2>

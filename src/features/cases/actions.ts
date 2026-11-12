@@ -16,6 +16,7 @@ import { acceptAppointmentHost } from "@/server/appointments/host-handover";
 import { offerAppointmentHost } from "@/server/appointments/host-offer";
 import {
   arrangeAppointment,
+  confirmAppointmentTime,
   requestAppointment,
   respondToAppointment,
 } from "@/server/appointments/service";
@@ -41,6 +42,7 @@ import { completeDealFromPath, recordPathStep } from "@/server/cases/path";
 import { AppError } from "@/server/errors";
 import { formInstant, readTimeFormValues } from "@/server/forms/time";
 import { action } from "@/server/http/next";
+import { kickDealNotices } from "@/server/jobs/web";
 import type { FormState, FormValues } from "@/ui/form/contract";
 import { issueFormOperation, readFormEnvelope } from "@/ui/form/server";
 import { hostHandoverCopy } from "../appointments/host-copy";
@@ -52,6 +54,7 @@ import {
   workflowTypes,
 } from "./contract";
 import { caseCopy } from "./copy";
+import { dealAgreementCopy } from "./deal-path-copy";
 import { matchReviewFromForm } from "./matching-review";
 
 export async function workflowAction(
@@ -227,6 +230,8 @@ export async function workflowAction(
               internalNote: values.internalNote ?? "",
               reason: values.reason ?? "",
               evidenceVersionId: values.evidenceVersionId ?? "",
+              away: (values.away ?? "") as "yes",
+              earlyStart: (values.earlyStart ?? "") as "yes",
             })
           ).outcome;
         case "pathComplete":
@@ -343,16 +348,22 @@ export async function workflowAction(
               reason: values.reason ?? "",
             })
           ).outcome;
+        case "appointmentConfirm":
+          return (await confirmAppointmentTime(db, s, base)).outcome;
       }
     },
     { requireSession: true },
   );
   if (result.ok) {
+    // Service notices this change queued go out now rather than on the next sweep.
+    await kickDealNotices();
     // Acceptance/cancellation removes the submitted form. Keep the recorded outcome
     // visible after a native POST by opening its actor-bound receipt instead.
     if (["handover", "appointmentHost", "appointmentHostHandover"].includes(command))
       redirect(status.href);
-    const appointment = ["request", "arrange", "appointment"].includes(command);
+    const appointment = ["request", "arrange", "appointment", "appointmentConfirm"].includes(
+      command,
+    );
     const destination = `/${locale}/${appointment ? (context === "staff" ? "calendar" : "appointments") : context === "staff" ? "cases" : "overview"}/${result.data.id}${command === "emailDraft" || command === "emailApprove" ? "/email" : ""}`;
     return {
       ...state,
@@ -430,13 +441,22 @@ export async function workflowAction(
         ),
       },
     };
-  const explanation = error.fieldErrors?.form?.includes("appointment_conflict")
+  const agreement = dealAgreementCopy(locale).errors;
+  const form = error.fieldErrors?.form ?? [];
+  const pathBlock = (["identity_checks_first", "duty_in_scope"] as const).find((code) =>
+    form.includes(code),
+  );
+  const explanation = form.includes("appointment_conflict")
     ? command === "appointmentHost"
       ? hostHandoverCopy(locale).busy
       : copy.calendarConflict
-    : ["NOT_FOUND", "NOT_AUTHORIZED", "UNAUTHENTICATED"].includes(error.code)
-      ? copy.denied
-      : copy.transition;
+    : pathBlock
+      ? agreement[pathBlock]
+      : error.code === "LISTING_UNAVAILABLE"
+        ? agreement.listing_unavailable
+        : ["NOT_FOUND", "NOT_AUTHORIZED", "UNAUTHENTICATED"].includes(error.code)
+          ? copy.denied
+          : copy.transition;
   return {
     ...(command === "appointmentHost" ? fresh : state),
     outcome: {
