@@ -1,7 +1,9 @@
 // Wording for Butler answers on a listing page (ADR 0017): the block's interface text and the
 // fixed answer and refusal sentences, in all seven public locales. Catalog drafts; placing a
 // message here grants no language approval (messages/_status.json).
-import { createTranslator } from "next-intl";
+// use-intl/core, not next-intl: the worker bundle runs outside Next, where next-intl's
+// react-server entry cannot load next/headers.
+import { createTranslator } from "use-intl/core";
 import type { PublicLocale } from "@/domain/ids";
 import bg from "../../../messages/bg/butlerAnswers.json" with { type: "json" };
 import de from "../../../messages/de/butlerAnswers.json" with { type: "json" };
