@@ -75,6 +75,13 @@ describe("production runtime role boundary", () => {
     expect(migrator).not.toHaveProperty("AUTH_SECRET");
     expect(worker).not.toHaveProperty("ORIGIN_VERIFY_SECRET");
     expect(web.BUTLER_ENABLED).toBe("0");
+    expect(web).not.toHaveProperty("BUTLER_PUBLIC_ANSWERS");
+    const disabled = { ...env, BUTLER_PUBLIC_ANSWERS: "0" };
+    expect(productionRuntimeEnvironment(disabled, "web").BUTLER_PUBLIC_ANSWERS).toBe("0");
+    for (const role of ["worker", "migrator"] as const)
+      expect(productionRuntimeEnvironment(disabled, role)).not.toHaveProperty(
+        "BUTLER_PUBLIC_ANSWERS",
+      );
     expect(worker.CASE_EMAIL_ENABLED).toBe("0");
   });
   it.each([
@@ -92,6 +99,7 @@ describe("production runtime role boundary", () => {
     { DATABASE_TRANSPORT: "" },
     { FILE_SCAN_MODE: "staging-unverified" },
     { BUTLER_ENABLED: "1" },
+    { BUTLER_PUBLIC_ANSWERS: "1" },
   ])("rejects ambiguous/staging/unreviewed runtime context %#", (change) =>
     expect(() =>
       productionRuntimeEnvironment({ ...productionEnvFixture(), ...change }, "web"),

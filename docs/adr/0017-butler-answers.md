@@ -86,6 +86,9 @@ states a basis (asking, negotiable) so the answer never reads firmer than the li
   `tenant.test.ts`. `"off"` removes the block; the page is the inquiry form alone.
 - Deployment kill switch: `BUTLER_PUBLIC_ANSWERS=0` (legacy `HERMES_PUBLIC_ANSWERS=0` is read
   when the Butler name is absent). Removes the block and the route's answers at once.
+  Reviewed container inputs accept `runtimeVars.BUTLER_PUBLIC_ANSWERS` set to `"0"` and forward it
+  to the web role. Omitting the override uses the brand policy. A force-on override is rejected.
+  The operator applies the reviewed configuration to the target environment.
 - The switched-off case is covered by unit and integration tests, not by a browser run: the
   browser server's environment is fixed for the whole run and a second server for one case is
   not cheap. `block.test.ts` shows the block renders nothing and reads nothing,

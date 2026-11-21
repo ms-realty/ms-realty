@@ -28,6 +28,14 @@ describe("Staging image role isolation", () => {
       worker = runtimeEnvironment(env, "worker"),
       migrator = runtimeEnvironment(env, "migrator");
     expect(web.DATABASE_URL).toBe(env.WEB_DATABASE_URL);
+    expect(web).not.toHaveProperty("BUTLER_PUBLIC_ANSWERS");
+    const disabled = { ...env, BUTLER_PUBLIC_ANSWERS: "0" };
+    expect(runtimeEnvironment(disabled, "web").BUTLER_PUBLIC_ANSWERS).toBe("0");
+    for (const role of ["worker", "migrator"] as const)
+      expect(runtimeEnvironment(disabled, role)).not.toHaveProperty("BUTLER_PUBLIC_ANSWERS");
+    expect(() => runtimeEnvironment({ ...env, BUTLER_PUBLIC_ANSWERS: "1" }, "web")).toThrow(
+      /override must be off/,
+    );
     expect(worker.DATABASE_URL).toBe(env.WORKER_DATABASE_URL);
     expect(migrator.DATABASE_URL).toBe(env.MIGRATOR_DATABASE_URL);
     for (const role of [web, worker]) {

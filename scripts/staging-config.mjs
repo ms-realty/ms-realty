@@ -322,6 +322,7 @@ export function validateStaging(
           "CLAMAV_MAX_SIGNATURE_AGE_HOURS",
           "GTM_CONTAINER_ID",
           "SITE_GOOGLE_VERIFICATION",
+          "BUTLER_PUBLIC_ANSWERS",
         ].includes(k),
       ),
     "allowlisted runtime variables",
@@ -339,6 +340,11 @@ export function validateStaging(
     input.runtimeVars.SITE_GOOGLE_VERIFICATION === undefined ||
       /^[A-Za-z0-9_-]{20,128}$/.test(input.runtimeVars.SITE_GOOGLE_VERIFICATION),
     "nonsecret Search Console verification token",
+  );
+  demand(
+    input.runtimeVars.BUTLER_PUBLIC_ANSWERS === undefined ||
+      input.runtimeVars.BUTLER_PUBLIC_ANSWERS === "0",
+    "public Butler override must be off",
   );
   const scanMode = input.runtimeVars.FILE_SCAN_MODE ?? "clamav";
   demand(["clamav", "staging-unverified"].includes(scanMode), "explicit file scan mode");

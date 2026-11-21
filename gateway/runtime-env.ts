@@ -96,7 +96,13 @@ export function runtimeEnvironment(env: RuntimeEnv, role: RuntimeRole): Record<s
       EXPECTED_SOURCE_COMMIT: expectedSource,
       ...transport,
     };
-  if (role === "web") output.ORIGIN_VERIFY_SECRET = value(env, "ORIGIN_VERIFY_SECRET");
+  if (role === "web") {
+    output.ORIGIN_VERIFY_SECRET = value(env, "ORIGIN_VERIFY_SECRET");
+    if (env.BUTLER_PUBLIC_ANSWERS !== undefined) {
+      if (env.BUTLER_PUBLIC_ANSWERS !== "0") throw new Error("Public Butler override must be off");
+      output.BUTLER_PUBLIC_ANSWERS = "0";
+    }
+  }
   if (role === "worker") {
     Object.assign(output, {
       EMAIL_PROVIDER: "cloudflare",
