@@ -1,4 +1,5 @@
 // C03 client composition: persistent desktop rail and a native compact disclosure.
+import { randomUUID } from "node:crypto";
 import Image from "next/image";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
@@ -74,7 +75,7 @@ export async function JourneyShell({
     </div>
   ) : null;
   return (
-    <PrivatePageGuard locale={locale}>
+    <PrivatePageGuard locale={locale} verification={randomUUID()}>
       <div className="min-h-dvh min-w-0 bg-canvas lg:grid lg:grid-cols-[14rem_minmax(0,1fr)]">
         <SkipLink targetId={journeyMainId}>{a11y("skipToContent")}</SkipLink>
         <aside

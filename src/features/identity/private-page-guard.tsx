@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import { type ReactNode, useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { privatePageRecheckAfterMs } from "@/config/tenant";
 // AT39: a private page restored from the back/forward cache, or hidden for longer than the
 // tenant's threshold, stays concealed until the server confirms the session. A shorter absence
@@ -27,19 +27,23 @@ export function PrivatePageGuard({
   children,
   locale = "bg",
   recheckAfterMs = privatePageRecheckAfterMs,
+  verification,
 }: {
   children: ReactNode;
   locale?: string;
   /** How long a hidden page may stay away before it is concealed until rechecked. */
   recheckAfterMs?: number;
+  /** Fresh value from each authorized server render. */
+  verification: string;
 }) {
   const router = useRouter();
   const copy = privateAccessCopy(locale);
   const restoration = useRef<{ focus: HTMLElement | null; x: number; y: number } | null>(null);
   const hiddenAt = useRef<number | null>(null);
   const content = useRef<HTMLDivElement>(null);
+  const requested = useRef<string | null>(null);
   const [concealed, setConcealed] = useState(false);
-  const [checking, setChecking] = useState(false);
+  const [pending, startTransition] = useTransition();
   const conceal = useCallback(() => {
     if (!restoration.current) {
       const focused = document.activeElement;
@@ -58,22 +62,12 @@ export function PrivatePageGuard({
     }
     setConcealed(true);
   }, []);
-  /**
-   * Concealed: ask the server; reveal on an active session, or go through the server (which
-   * signs the person in again) when it is gone. A failed check keeps the page concealed with a
-   * retry that reloads the page: it always recovers or leads to sign-in.
-   */
-  const revalidate = useCallback(async () => {
+  /** Keep the previous private view concealed until the authorized page is refreshed. */
+  const revalidate = useCallback(() => {
     conceal();
-    setChecking(true);
-    const state = await check();
-    setChecking(false);
-    if (state === "active") {
-      setConcealed(false);
-      // Fresh data for the page the person returns to, in the background.
-      router.refresh();
-    } else if (state === "signed_out") reloadPage();
-  }, [conceal, router]);
+    requested.current = verification;
+    startTransition(() => router.refresh());
+  }, [conceal, router, verification]);
   /** Short absence: keep the page, check in the background, conceal only on a lost session. */
   const recheckInBackground = useCallback(async () => {
     if ((await check()) === "signed_out") {
@@ -83,7 +77,7 @@ export function PrivatePageGuard({
   }, [conceal]);
   useEffect(() => {
     const onPageShow = (event: PageTransitionEvent) => {
-      if (event.persisted) void revalidate();
+      if (event.persisted) revalidate();
     };
     const onVisibility = () => {
       if (document.visibilityState === "hidden") {
@@ -93,7 +87,7 @@ export function PrivatePageGuard({
       if (hiddenAt.current === null) return;
       const away = Date.now() - hiddenAt.current;
       hiddenAt.current = null;
-      if (away >= recheckAfterMs) void revalidate();
+      if (away >= recheckAfterMs) revalidate();
       else void recheckInBackground();
     };
     window.addEventListener("pageshow", onPageShow);
@@ -107,18 +101,32 @@ export function PrivatePageGuard({
     };
   }, [revalidate, recheckInBackground, recheckAfterMs]);
   useEffect(() => {
-    if (concealed || !restoration.current) return;
+    // A completed transition can also mean a failed request. Only a new server render
+    // proves which private view may be shown after a session change.
+    if (
+      !pending &&
+      requested.current !== null &&
+      requested.current !== verification &&
+      document.visibilityState === "visible"
+    ) {
+      requested.current = null;
+      setConcealed(false);
+    }
+  }, [pending, verification]);
+  const hidden = concealed || pending;
+  useEffect(() => {
+    if (hidden || !restoration.current) return;
     const saved = restoration.current;
     restoration.current = null;
     if (saved.focus?.isConnected) saved.focus.focus({ preventScroll: true });
     window.scrollTo(saved.x, saved.y);
-  }, [concealed]);
+  }, [hidden]);
   return (
     <>
-      {concealed ? (
+      {hidden ? (
         <div className="px-gutter py-6 text-text-muted">
           <p role="status">{copy.checking}</p>
-          {!checking ? (
+          {!pending ? (
             <button type="button" className="mt-3 min-h-control underline" onClick={reloadPage}>
               {copy.retry}
             </button>
@@ -128,9 +136,9 @@ export function PrivatePageGuard({
       <div
         ref={content}
         data-private-content=""
-        hidden={concealed}
-        inert={concealed}
-        className={concealed ? undefined : "contents"}
+        hidden={hidden}
+        inert={hidden}
+        className={hidden ? undefined : "contents"}
       >
         {children}
       </div>

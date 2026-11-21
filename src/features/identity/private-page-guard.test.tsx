@@ -37,15 +37,8 @@ async function leaveFor(away: number) {
     document.dispatchEvent(new Event("visibilitychange"));
   });
 }
-function deferred() {
-  let resolve: (value: "active" | "signed_out") => void = () => {};
-  const promise = new Promise<"active" | "signed_out">((done) => {
-    resolve = done;
-  });
-  return { promise, resolve };
-}
-const page = () => (
-  <PrivatePageGuard locale="en" recheckAfterMs={15 * minute}>
+const page = (verification = "initial") => (
+  <PrivatePageGuard locale="en" recheckAfterMs={15 * minute} verification={verification}>
     <h1>Private case</h1>
     <label>
       Draft
@@ -84,58 +77,42 @@ describe("AT39 private page restoration", () => {
     expect(reload).not.toHaveBeenCalled();
   });
 
-  it("conceals a long absence until the server confirms the session, keeping the draft", async () => {
-    const answer = deferred();
-    access.mockReturnValue(answer.promise);
-    render(page());
+  it("conceals a long absence until a fresh authorized render, keeping the draft", async () => {
+    const { rerender } = render(page());
     const draft = screen.getByRole("textbox", { name: "Draft" });
     draft.focus();
     fireEvent.change(draft, { target: { value: "Unsaved note" } });
     await leaveFor(16 * minute);
     expect(screen.getByRole("status")).toHaveTextContent("Checking access…");
     expect(screen.getByText("Private case")).not.toBeVisible();
-    await act(async () => {
-      answer.resolve("active");
-    });
+    expect(refresh).toHaveBeenCalledOnce();
+    expect(access).not.toHaveBeenCalled();
+    rerender(page("fresh-authorized-view"));
     expect(screen.getByText("Private case")).toBeVisible();
     expect(screen.getByRole("textbox", { name: "Draft" })).toBe(draft);
     expect(draft).toHaveValue("Unsaved note");
     expect(draft).toHaveFocus();
-    expect(refresh).toHaveBeenCalledOnce();
   });
 
   it("a back-forward cache restoration also reauthorizes before showing private content", async () => {
-    const answer = deferred();
-    access.mockReturnValue(answer.promise);
-    render(page());
+    const { rerender } = render(page());
     const restored = new Event("pageshow");
     Object.defineProperty(restored, "persisted", { value: true });
     await act(async () => {
       window.dispatchEvent(restored);
     });
-    expect(access).toHaveBeenCalledOnce();
+    expect(refresh).toHaveBeenCalledOnce();
     expect(screen.getByText("Private case")).not.toBeVisible();
-    await act(async () => {
-      answer.resolve("active");
-    });
+    rerender(page("fresh-authorized-view"));
     expect(screen.getByText("Private case")).toBeVisible();
   });
 
-  it("never dead-ends: a failed check stays concealed and its retry reloads the page", async () => {
-    access.mockRejectedValue(new Error("offline"));
+  it("keeps the stale view concealed when the refresh yields no proof and retries by reloading", async () => {
     render(page());
     await leaveFor(16 * minute);
     expect(screen.getByText("Private case")).not.toBeVisible();
     const retry = screen.getByRole("button", { name: "Check access again" });
     fireEvent.click(retry);
-    expect(reload).toHaveBeenCalledOnce();
-  });
-
-  it("a long absence with a lost session goes to sign-in", async () => {
-    access.mockResolvedValue("signed_out");
-    render(page());
-    await leaveFor(16 * minute);
-    expect(screen.getByText("Private case")).not.toBeVisible();
     expect(reload).toHaveBeenCalledOnce();
   });
 });

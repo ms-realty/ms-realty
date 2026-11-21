@@ -66,16 +66,22 @@ async function expectKeptReview(
 /** AT39: a tab away longer than the tenant threshold is concealed until the session is confirmed. */
 async function restorePrivateTab(page: import("@playwright/test").Page) {
   await expect(page.locator('[data-private-ready="true"]')).toHaveCount(1);
-  await page.evaluate(() => {
+  const concealed = await page.evaluate(() => {
     Object.defineProperty(document, "visibilityState", { configurable: true, value: "hidden" });
     document.dispatchEvent(new Event("visibilitychange"));
     // Sixteen minutes pass while the tab is hidden.
-    const real = Date.now.bind(Date);
+    const real = Date.now;
     Date.now = () => real() + 16 * 60_000;
-    Object.defineProperty(document, "visibilityState", { configurable: true, value: "visible" });
-    document.dispatchEvent(new Event("visibilitychange"));
+    try {
+      Object.defineProperty(document, "visibilityState", { configurable: true, value: "visible" });
+      document.dispatchEvent(new Event("visibilitychange"));
+      const priorView = document.querySelector<HTMLElement>("[data-private-content]");
+      return priorView?.hidden && priorView.inert;
+    } finally {
+      Date.now = real;
+    }
   });
-  await expect(page.locator("[data-private-content]")).toBeVisible();
+  expect(concealed).toBe(true);
 }
 
 // A real software-authenticator assertion exercises production verification and session
