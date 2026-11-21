@@ -21,6 +21,19 @@ PRs where they exist.
 - Brand, country, language and currency values come from `src/config/tenant.ts` or from content,
   never from a literal.
 
+## Partner rulebook
+
+For agency workflow changes, name the client outcome and the person who can accept it. Trace
+the same request through the client and agency views. Check the receipt, retry behavior and
+what each person understands. Use the [viewing rehearsal](.wiki/wiki/operations/partner-rulebook.md)
+for a buyer-to-broker example.
+
+## Listing publication
+
+A person makes one recorded, attested publication decision. The application checks the facts
+and records the decision. Follow any stricter requirements for independent review or documents
+set by the brand's tenant policy. See [ADR 0011 §4](docs/adr/0011-platform-direction.md#4-one-decision-per-outcome).
+
 ## Launch boundary
 
 - Five launch checks decide a production launch (ADR 0011 §6): Works, Data safe, Found, Lawful,
@@ -44,7 +57,14 @@ Butler is the AI service (code identifiers use `ai_service`). It works at one of
 task and per brand: Watch, Suggest, Ask me first, Act (ADR 0011 §5).
 
 - A task runs at Act only when it is listed at that level for the brand, has an evaluation set
-  that passes for the build, leaves a receipt, has a manual path and stops at the brand's switch.
+  that passes for the exact build, leaves a receipt, has a manual path and stops at the brand's
+  switch.
+- The owner confirmed Act for visitor answers drawn from approved public content and immediate
+  inquiry acknowledgements in the visitor's language, subject to those safeguards. Viewing
+  reminders, due-step reminders and notices of completed Deal steps are listed as Act defaults.
+  Each requires its own task qualification before it goes live.
+- Use Ask me first for replies to clients with new content, proposed viewing times and public
+  translations. Obtain a person's approval before sending new content or proposed times.
 - Never Butler, whatever the approvals: price, offers, terms and conditions, contracts, money,
   publication and withdrawal, access changes, cancellations, and legal, tax or process
   conclusions. A person owns them.

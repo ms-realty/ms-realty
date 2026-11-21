@@ -1,21 +1,17 @@
 # ADR 0007 — A public Butler chat, under its own policy and gate
 
-Status: accepted by the owner (Opened Questions Q141, with Q142–Q144). Amends architecture §3.3
-("No general public generative chatbot at launch") and the §19.1 F29 row ("no general public
-chatbot"). Everything else in §14 and in the R00 mapping (AGENTS.md) applies unchanged.
-
-The owner allows a public Butler chat for visitors. The architecture and the owner-approved R00
-mapping still say that public assistance only drafts and that no public answer is sent without a
-person. This ADR writes the owner's decision down and keeps that rule: a chat answer reaches a
-visitor with no person in between, so the chat ships only under an accepted policy for such
-answers, with its own evaluation gate and release proof.
+Status: accepted by the owner (Opened Questions Q141, with Q142–Q144). The scope and hand-off
+rules below apply under the task-level policy in [ADR 0011 §5](0011-platform-direction.md#5-butler-acts-within-levels).
+ADR 0011 supersedes the earlier R00 mapping, R10 release requirement and draft-only ceiling.
 
 ## Decision
 
 A public Butler chat may answer visitors on listing, area and guide pages from approved public
 content only. It names its source, says what is unknown, hands off to a broker, and gives no view
-on price, money, legal or tax questions. It sends, books and promises nothing. It ships only behind
-its own evaluation gate and an accepted policy for answers without a person, with release proof.
+on price, money, legal or tax questions. Its role is limited to the in-page answer and hand-off.
+Inquiry acknowledgements are a separate Act task. To enable public chat, the brand needs an
+accepted policy, a passing exact-build evaluation, a receipt, a manual path and a switch that
+stops the task.
 
 - **Sources (Q142 B).** Any approved public listing, area or guide page, in the visitor's language,
   including other homes it may suggest. Never a broker note, a draft, an unpublished fact or a
@@ -35,7 +31,7 @@ its own evaluation gate and an accepted policy for answers without a person, wit
    and who can switch the chat off.
 2. A bounded evaluation set and gate for the chat task in the AI service, separate from the draft
    tasks, with grounding, refusal and hand-off cases in every enabled locale.
-3. Release proof under the R00 successor policy and R10: the evaluation result for the exact
-   release, the kill switch, and the manual path verified with the chat off.
+3. Evidence on the exact build: a passing evaluation, an answer receipt, the brand switch
+   stopping the task, and the manual path verified with the chat off.
 
 Until all three exist the chat stays off and the flows use the form (W02, W21).
