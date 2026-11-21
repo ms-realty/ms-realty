@@ -207,6 +207,89 @@ test("staging can switch off public Butler without permitting a force-on overrid
   input.runtimeVars.BUTLER_PUBLIC_ANSWERS = "1";
   assert.throws(() => stagingConfig(input, artifacts), /override must be off/);
 });
+test("PR 389 preview validates only its isolated worker, routes, database, buckets and inbox", () => {
+  const { input, artifacts } = fixture();
+  const sharedWorker = input.workerName;
+  const sharedInput = structuredClone(input);
+  const workerName = "ms-realty-staging-pr-389";
+  const database = "msr_staging_pr389";
+  const manifest = {
+    ...JSON.parse(artifacts.manifest),
+    status: "ready_partial",
+    scope: "staging_only",
+    productionAllowed: false,
+    exclusions: [],
+  };
+  artifacts.manifest = JSON.stringify(manifest);
+  artifacts.isolation = JSON.stringify({ ...JSON.parse(artifacts.isolation), database });
+  Object.assign(input, {
+    previewSlot: "pr-389",
+    workerName,
+    purpose: "protected_partial_preview",
+    image: input.image.replace(`/${sharedWorker}@`, `/${workerName}@`),
+    origins: {
+      public: "https://staging-pr389.makler-realty.com",
+      client: "https://staging-pr389-my.makler-realty.com",
+      staff: "https://staging-pr389-app.makler-realty.com",
+    },
+    runtimeVars: { FILE_SCAN_MODE: "staging-unverified", R2_JURISDICTION: "default" },
+  });
+  Object.assign(input.database, {
+    stagingName: database,
+    stagingHost: "staging-pr389-db.makler-realty.com",
+    transport: "cloudflared-access-tcp",
+    roles: { web: "msr_pr389_web", worker: "msr_pr389_worker", migrator: "msr_pr389_migrator" },
+    originIsolationSha256: sha256(artifacts.isolation),
+    access: {
+      applicationId: "4".repeat(36),
+      serviceTokenId: "5".repeat(36),
+      audience: "f".repeat(64),
+      serviceClientId: "preview-db.access",
+    },
+  });
+  input.buckets.stagingMedia = "ms-realty-staging-pr-389-media";
+  input.buckets.stagingCache = "ms-realty-staging-pr-389-cache";
+  input.email.testInboxReviewed = true;
+  input.artifacts.routeManifestSha256 = sha256(artifacts.manifest);
+  input.artifacts.exclusionsSha256 = sha256(JSON.stringify(manifest.exclusions));
+
+  const options = { connectivityProbe: true };
+  const config = stagingConfig(input, artifacts, options);
+  assert.equal(config.name, workerName);
+  assert.deepEqual(
+    config.routes.map((route) => route.pattern),
+    Object.values(input.origins).map((origin) => `${new URL(origin).hostname}/*`),
+  );
+  assert.deepEqual(config.triggers.crons, []);
+  assert.equal(config.workers_dev, false);
+  assert.equal(config.preview_urls, false);
+  assert.deepEqual(
+    config.send_email[0].allowed_destination_addresses,
+    input.email.allowedRecipients,
+  );
+  for (const changes of [
+    { previewSlot: "unreviewed" },
+    { workerName: sharedWorker },
+    { image: sharedInput.image },
+    { origins: sharedInput.origins },
+    { purpose: "complete_parity" },
+    { buckets: sharedInput.buckets },
+    { database: sharedInput.database },
+    { email: { ...input.email, testInboxReviewed: false } },
+    { email: { ...input.email, inquiryCoverageNoticeEnabled: true } },
+  ])
+    assert.throws(() => stagingConfig({ ...input, ...changes }, artifacts, options));
+  validateRoutes(input, [
+    ...config.routes.map(({ pattern }) => ({ script: workerName, pattern })),
+    { script: sharedWorker, pattern: "staging.makler-realty.com/*" },
+  ]);
+  assert.throws(() =>
+    validateRoutes(input, [{ script: workerName, pattern: "staging.makler-realty.com/*" }]),
+  );
+  assert.throws(() =>
+    validateRoutes(input, [{ script: sharedWorker, pattern: "staging-pr389.makler-realty.com/*" }]),
+  );
+});
 test("unverified uploads are explicit, quarantined staging only, and cannot qualify complete parity", () => {
   const { input, artifacts } = fixture();
   const manifest = {

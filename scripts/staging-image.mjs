@@ -9,14 +9,14 @@ try {
   const connectivityProbe = process.argv.includes("--connectivity-probe");
   validateStaging(input, artifacts, undefined, { imageRequired: false, connectivityProbe });
   const head = execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
-  if (head !== input.sourceCommit || tag !== `ms-realty-staging:${head}`)
+  if (head !== input.sourceCommit || tag !== `${input.workerName}:${head}`)
     throw new Error("Image tag/source commit mismatch");
   const registryTag = `registry.cloudflare.com/${accountId}/${tag}`;
   const [inspected] = JSON.parse(
     execFileSync("docker", ["image", "inspect", registryTag], { encoding: "utf8" }),
   );
   const image = inspected?.RepoDigests?.find((value) =>
-    value.startsWith(`registry.cloudflare.com/${accountId}/ms-realty-staging@sha256:`),
+    value.startsWith(`registry.cloudflare.com/${accountId}/${input.workerName}@sha256:`),
   );
   if (
     !image ||

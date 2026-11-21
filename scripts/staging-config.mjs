@@ -21,6 +21,25 @@ const knownHosts = [
   "staging-my.makler-realty.com",
   "staging-app.makler-realty.com",
 ];
+const sharedStaging = {
+  worker: "ms-realty-staging",
+  hosts: knownHosts,
+  databaseHost: "staging-db.makler-realty.com",
+};
+const pr389Staging = {
+  worker: "ms-realty-staging-pr-389",
+  hosts: [
+    "staging-pr389.makler-realty.com",
+    "staging-pr389-my.makler-realty.com",
+    "staging-pr389-app.makler-realty.com",
+  ],
+  databaseHost: "staging-pr389-db.makler-realty.com",
+};
+export function stagingSlot(input) {
+  if (input.previewSlot === undefined) return sharedStaging;
+  demand(input.previewSlot === "pr-389", "known isolated preview slot");
+  return pr389Staging;
+}
 export const requiredSecrets = [
   "WEB_DATABASE_URL",
   "WORKER_DATABASE_URL",
@@ -54,24 +73,40 @@ export function validateStaging(
     input.accountId === accountId && /^[a-f0-9]{32}$/.test(input.zoneId ?? ""),
     "Cloudflare account/zone",
   );
-  demand(input.workerName === "ms-realty-staging", "isolated Worker name");
+  const slot = stagingSlot(input);
+  demand(input.workerName === slot.worker, "isolated Worker name");
   demand(
     ["complete_parity", "protected_partial_preview"].includes(input.purpose),
     "explicit staging purpose",
   );
+  if (slot === pr389Staging) {
+    demand(
+      input.purpose === "protected_partial_preview" &&
+        input.database?.transport === "cloudflared-access-tcp" &&
+        input.database.stagingName === "msr_staging_pr389" &&
+        input.database.roles?.web === "msr_pr389_web" &&
+        input.database.roles.worker === "msr_pr389_worker" &&
+        input.database.roles.migrator === "msr_pr389_migrator" &&
+        input.buckets?.stagingMedia === "ms-realty-staging-pr-389-media" &&
+        input.buckets.stagingCache === "ms-realty-staging-pr-389-cache" &&
+        input.email?.testInboxReviewed === true &&
+        input.email.inquiryCoverageNoticeEnabled === false,
+      "PR 389 preview uses separate resources and one reviewed inbox for visitor acknowledgements",
+    );
+  }
   demand(
     input.baseCommit === launchBase && /^[a-f0-9]{40}$/.test(input.sourceCommit ?? ""),
     "exact source/base commits",
   );
-  if (imageRequired)
-    demand(
-      new RegExp(`^registry\\.cloudflare\\.com/${accountId}/[a-z0-9-]+@sha256:[a-f0-9]{64}$`).test(
-        input.image ?? "",
-      ),
-      "digest-pinned image",
+  if (imageRequired) {
+    const imageName = slot === pr389Staging ? slot.worker : "[a-z0-9-]+";
+    const imagePattern = new RegExp(
+      `^registry\\.cloudflare\\.com/${accountId}/${imageName}@sha256:[a-f0-9]{64}$`,
     );
+    demand(imagePattern.test(input.image ?? ""), "digest-pinned image");
+  }
   for (const [i, surface] of ["public", "client", "staff"].entries())
-    demand(input.origins?.[surface] === `https://${knownHosts[i]}`, `${surface} isolated origin`);
+    demand(input.origins?.[surface] === `https://${slot.hosts[i]}`, `${surface} isolated origin`);
   const access = input.access;
   demand(
     id(access?.applicationId) && id(access?.serviceTokenId),
@@ -120,8 +155,8 @@ export function validateStaging(
   );
   if (input.database.transport === "cloudflared-access-tcp")
     demand(
-      input.database.stagingHost === "staging-db.makler-realty.com" &&
-        !knownHosts.includes(input.database.stagingHost) &&
+      input.database.stagingHost === slot.databaseHost &&
+        !slot.hosts.includes(input.database.stagingHost) &&
         id(input.database.access?.applicationId) &&
         pin(input.database.access?.audience) &&
         id(input.database.access?.serviceTokenId) &&
@@ -368,7 +403,7 @@ export function validateStaging(
     input.rollback?.retainDays >= 90 &&
       pin(input.rollback.evidenceSha256) &&
       /^https:\/\//.test(input.rollback.legacyOrigin ?? "") &&
-      !knownHosts.some((h) => input.rollback.legacyOrigin.includes(h)),
+      ![...knownHosts, ...slot.hosts].some((h) => input.rollback.legacyOrigin.includes(h)),
     "untouched WordPress rollback retained for 90 days",
   );
   if (runtime) {
@@ -439,6 +474,7 @@ export function validateStaging(
 
 export function stagingConfig(input, artifacts, { connectivityProbe = false } = {}) {
   validateStaging(input, artifacts, undefined, { connectivityProbe });
+  const slot = stagingSlot(input);
   const imageDigest = input.image.split("@")[1];
   const config = {
     $schema: "../gateway/node_modules/wrangler/config-schema.json",
@@ -449,9 +485,9 @@ export function stagingConfig(input, artifacts, { connectivityProbe = false } = 
     compatibility_flags: ["nodejs_compat"],
     workers_dev: false,
     preview_urls: false,
-    routes: knownHosts.map((host) => ({ pattern: `${host}/*`, zone_id: input.zoneId })),
+    routes: slot.hosts.map((host) => ({ pattern: `${host}/*`, zone_id: input.zoneId })),
     observability: { enabled: true },
-    triggers: { crons: ["*/5 * * * *"] },
+    triggers: { crons: slot === pr389Staging ? [] : ["*/5 * * * *"] },
     containers: ["MsRealtyContainer", "MsRealtyWorkerContainer", "MsRealtyMigratorContainer"].map(
       (class_name) => ({
         class_name,

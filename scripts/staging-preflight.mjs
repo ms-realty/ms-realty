@@ -1,15 +1,10 @@
 import { writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
-import { readStagingInputs, sha256, validateStaging } from "./staging-config.mjs";
+import { readStagingInputs, sha256, stagingSlot, validateStaging } from "./staging-config.mjs";
 
 const demand = (ok, label) => {
   if (!ok) throw new Error(`Staging provider prerequisite failed: ${label}`);
 };
-const hosts = [
-  "staging.makler-realty.com",
-  "staging-my.makler-realty.com",
-  "staging-app.makler-realty.com",
-];
 const oneKey = (value, key) => value && Object.keys(value).length === 1 && key in value;
 
 /** Current Access responses use public destinations; deprecated domains cannot supply coverage. */
@@ -70,6 +65,7 @@ function validateAccessOverlap(apps, applicationId, protectedHosts) {
 
 /** Even a more-specific foreign route or a no-script bypass can divert protected traffic. */
 export function validateRoutes(input, routes) {
+  const { hosts } = stagingSlot(input);
   demand(Array.isArray(routes), "known Worker route inventory");
   for (const route of routes) {
     const match =
@@ -130,6 +126,7 @@ export function validateDatabaseAccess(input, app, policies, otherApps) {
 
 /** Reject broad selectors, bypasses and unreviewed group members. Unknown API shapes fail closed. */
 export function validateAccess(input, app, policies, group, otherApps) {
+  const { hosts } = stagingSlot(input);
   const configured = input.access;
   const domains = applicationDomains(app).sort();
   demand(
@@ -203,6 +200,7 @@ export function validateAccess(input, app, policies, group, otherApps) {
 
 /** Read-only Cloudflare inventory; this function never creates DNS, routes, policies or buckets. */
 export async function providerPreflight(input, api) {
+  const { hosts } = stagingSlot(input);
   const account = `/accounts/${input.accountId}`,
     zone = `/zones/${input.zoneId}`,
     access = `${account}/access`;
