@@ -188,3 +188,21 @@ export const propertyTypes = [
   "other",
 ] as const;
 export type PropertyType = (typeof propertyTypes)[number];
+
+/**
+ * Kinds a visitor treats as alternatives to each other: homes, land, commercial. "Similar
+ * properties" never crosses a group (an office is not offered under an apartment).
+ */
+export const propertyKindGroups = {
+  homes: ["apartment", "house", "development"],
+  land: ["plot"],
+  commercial: ["commercial", "hotel"],
+  other: ["other"],
+} as const satisfies Record<string, readonly PropertyType[]>;
+
+/** Every type in the same kind group as `type`, including itself. */
+export function sameKindTypes(type: PropertyType): readonly PropertyType[] {
+  for (const types of Object.values(propertyKindGroups))
+    if ((types as readonly PropertyType[]).includes(type)) return types;
+  return [type];
+}

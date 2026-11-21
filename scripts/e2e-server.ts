@@ -188,4 +188,7 @@ try {
   const ownFiles = join(tmpdir(), `msr-e2e-files-${database.slice("msr_e2e_".length)}`);
   if (process.env.E2E_FILE_STORAGE_ROOT === ownFiles)
     await rm(ownFiles, { recursive: true, force: true });
+  const ownLegacy = join(tmpdir(), `msr-e2e-legacy-${database.slice("msr_e2e_".length)}`);
+  if (process.env.LEGACY_MEDIA_DIR === ownLegacy)
+    await rm(ownLegacy, { recursive: true, force: true });
 }

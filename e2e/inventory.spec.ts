@@ -111,10 +111,10 @@ test("O12/O16 native decisions retain drafts and operation identity with mobile 
   expect(reference).toMatch(/^MS-\d+$/);
   await expect(page.getByRole("heading", { level: 1, name: /Синтетична обява/ })).toBeVisible();
   // Without JavaScript, leaving the editor is a submit control (UX 03.3); unchanged → goes on.
-  await page
-    .getByRole("navigation", { name: "Listing workspace", exact: true })
-    .getByRole("button", { name: "Review", exact: true })
-    .click();
+  // ADR 0012: the detailed review is a secondary entry under More; Publish is the main path.
+  const workspaceNav = page.getByRole("navigation", { name: "Listing workspace", exact: true });
+  await workspaceNav.getByText("More", { exact: true }).click();
+  await workspaceNav.getByRole("button", { name: "Detailed review", exact: true }).click();
   await expect(page.getByText("No publication has been activated.")).toBeVisible();
   await page.getByRole("button", { name: "Freeze review candidate", exact: true }).click();
   await expect(page.getByText("The action was recorded.")).toBeVisible();

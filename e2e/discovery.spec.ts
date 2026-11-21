@@ -8,6 +8,7 @@ import postgres from "postgres";
 import * as schema from "../src/db/schema";
 import { inquiryCheckCode } from "../src/domain/inquiry-check-code";
 import { inquiryReviewCopy } from "../src/features/discovery/inquiry-review-copy";
+import { hostUrl, origins } from "./hosts";
 
 const url = process.env.E2E_DATABASE_URL;
 if (!url || !/^\/msr_e2e_[a-f0-9]{32}$/.test(new URL(url).pathname))
@@ -146,7 +147,7 @@ test("AT01/AT05/AT27: published search, local save/compare and withdrawal rechec
     path: testInfo.outputPath("synthetic-property-detail.png"),
     fullPage: true,
   });
-  await page.getByRole("button", { name: "Save in this browser", exact: true }).click();
+  await page.getByRole("button", { name: "Save this property", exact: true }).click();
   await page.getByRole("button", { name: "Compare", exact: true }).click();
   await page.goto("/en/saved");
   await expect(
@@ -232,6 +233,7 @@ test("AT01/AT10/AT11: native no-JavaScript validation, single durable inquiry an
   await page.goto("/en/inquire");
   const key = await page.locator('[name="_operationId"]').inputValue();
   const message = `Synthetic inquiry ${randomUUID()}`;
+  const visitor = `synthetic-visitor-${randomUUID()}@example.test`;
   await page.getByLabel("Your inquiry", { exact: true }).fill(message);
   await page.getByLabel("Email", { exact: true }).fill("invalid");
   await page
@@ -241,7 +243,7 @@ test("AT01/AT10/AT11: native no-JavaScript validation, single durable inquiry an
   await expect(page.getByRole("region", { name: "Check your answers" })).toBeVisible();
   await expect(page.getByLabel("Your inquiry", { exact: true })).toHaveValue(message);
   await expect(page.locator('[name="_operationId"]')).toHaveValue(key);
-  await page.getByLabel("Email", { exact: true }).fill("synthetic-visitor@example.test");
+  await page.getByLabel("Email", { exact: true }).fill(visitor);
   await page.getByRole("button", { name: "Review inquiry", exact: true }).click();
   await expect(
     page.getByRole("region", { name: "Review your inquiry", exact: true }),
@@ -256,9 +258,7 @@ test("AT01/AT10/AT11: native no-JavaScript validation, single durable inquiry an
   await expect(page).not.toHaveURL(/synthetic-visitor|Synthetic%20inquiry/);
   await page.getByRole("button", { name: "Edit inquiry", exact: true }).click();
   await expect(page.getByLabel("Your inquiry", { exact: true })).toHaveValue(message);
-  await expect(page.getByLabel("Email", { exact: true })).toHaveValue(
-    "synthetic-visitor@example.test",
-  );
+  await expect(page.getByLabel("Email", { exact: true })).toHaveValue(visitor);
   await expect(page.getByRole("checkbox")).toBeChecked();
   await page.getByRole("button", { name: "Review inquiry", exact: true }).click();
   await page.screenshot({
@@ -281,7 +281,7 @@ test("AT01/AT10/AT11: native no-JavaScript validation, single durable inquiry an
       submissionKey: key,
       purpose: "question",
       locale: "en",
-      contact: { kind: "email", value: "synthetic-visitor@example.test" },
+      contact: { kind: "email", value: visitor },
       message,
       privacyNotice: true,
     },
@@ -295,6 +295,22 @@ test("AT01/AT10/AT11: native no-JavaScript validation, single durable inquiry an
   expect(rows[0]).toMatchObject({ coverageQueue: "intake", message, source: "website" });
   const reference = rows[0]?.reference ?? "";
   expect(reference).toMatch(/^RQ-/);
+  // ADR 0014: the visitor's address gets exactly one acknowledgement, the replay included.
+  const acknowledgements = async () => {
+    const response = await context.request.get(hostUrl("public", "/api/test-outbox"), {
+      headers: { host: new URL(origins.client).host },
+    });
+    const { messages } = (await response.json()) as {
+      messages: { recipient: string; template: string; rendered?: { subject: string } }[];
+    };
+    return messages.filter(
+      (m) => m.template === "inquiry.acknowledgement.v1" && m.recipient === visitor,
+    );
+  };
+  await expect.poll(async () => (await acknowledgements()).length, { timeout: 60_000 }).toBe(1);
+  expect((await acknowledgements())[0]?.rendered?.subject).toBe(
+    `We received your inquiry (${reference})`,
+  );
   await page.screenshot({
     path: testInfo.outputPath("synthetic-native-receipt.png"),
     fullPage: true,

@@ -19,12 +19,32 @@ import { keyedHash, sha256Hex } from "../crypto";
 import type { Executor } from "../db";
 import { AppError } from "../errors";
 import type { JobQueue } from "../jobs/queue";
+import { notifyDealUpdate } from "../notifications/notify";
 import { type FileKind, targetAccess } from "./access";
 import type { FileServices } from "./config";
 import { inspectFile } from "./inspect";
 import { digestOf, MAX_DOCUMENT_BYTES, MAX_IMAGE_BYTES } from "./storage";
 
 const tokenFor = (id: string) => keyedHash(getEnv().authSecret, `file-upload:${id}`);
+
+/** A client's sealed upload against a document request tells the accountable broker. */
+async function notifyRequestedUpload(db: Executor, actor: Actor, versionId: string) {
+  const [request] = await db
+    .select({ id: documentRequests.id, caseId: cases.id, reference: cases.reference })
+    .from(documentVersions)
+    .innerJoin(documentRequests, eq(documentRequests.documentId, documentVersions.documentId))
+    .innerJoin(cases, eq(cases.id, documentRequests.caseId))
+    .where(eq(documentVersions.id, versionId));
+  if (!request) return false;
+  const outcomes = await notifyDealUpdate(db, {
+    caseId: request.caseId,
+    event: "client.document_uploaded",
+    eventKey: `document-version:${versionId}`,
+    subject: { type: "document_request", id: request.id, reference: request.reference },
+    actor,
+  });
+  return outcomes.some((outcome) => outcome.state === "queued");
+}
 /** Case access mutations lock the Case first. Keep a transfer/finalization within that
  * boundary so a revocation either precedes the authorization check or follows the write. */
 async function lockUploadCase(db: Executor, session: Session, uploadId: string) {
@@ -229,12 +249,19 @@ export async function finalizeUpload(
       recordId: target.id,
       payload: { sha256, byteSize: measured.byteSize },
     });
-    if (queue)
+    const noticed =
+      kind === "document" && session.actor.kind === "client"
+        ? await notifyRequestedUpload(tx, session.actor, target.id)
+        : false;
+    if (queue) {
       await queue.send(
         "files.process",
         { kind, id: target.id },
         { db: tx, singletonKey: `${kind}:${target.id}` },
       );
+      if (noticed)
+        await queue.send("deal_notices.dispatch", {}, { db: tx, singletonKey: "deal-notices" });
+    }
     return { kind, id: target.id, sha256 };
   });
 }

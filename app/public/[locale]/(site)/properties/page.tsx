@@ -5,7 +5,7 @@ import { discoveryCopy } from "@/features/discovery/copy";
 import { ListingGrid } from "@/features/discovery/listing-card";
 import { mapCopy } from "@/features/discovery/map-copy";
 import { DiscoveryPage } from "@/features/discovery/page";
-import { listingHref, locality } from "@/features/discovery/presentation";
+import { listingHref, locality, propertyCountText } from "@/features/discovery/presentation";
 import {
   ambiguousFilters,
   filterUrl,
@@ -52,6 +52,13 @@ export default async function PropertiesPage({
   } catch (error) {
     invalid = isAppError(error) && error.code === "validation_failed";
   }
+  // No approved listing in this language: say so and offer the Bulgarian listings as a clearly
+  // labelled switch. Their text is never mixed into this localized page.
+  let sourceCount = 0;
+  if (result && !result.items.length && locale !== "bg")
+    sourceCount = await searchListings(getDb(), searchInput("bg", values, undefined))
+      .then((bg) => bg.count.value)
+      .catch(() => 0);
   return (
     <DiscoveryPage>
       <h1 className="text-title font-semibold">{copy.search}</h1>
@@ -59,8 +66,8 @@ export default async function PropertiesPage({
         <div className="space-y-2">
           <div className="flex flex-wrap items-center justify-between gap-x-5 gap-y-2">
             <h2 id="results-heading" tabIndex={-1} className="text-heading font-semibold">
-              {copy.results}: {result.count.type === "estimated" ? `${copy.atLeast} ` : ""}
-              {formatNumber(locale, result.count.value)}
+              {result.count.type === "estimated" ? `${copy.atLeast} ` : ""}
+              {propertyCountText(locale, copy, result.count.value)}
             </h2>
             <div className="flex flex-wrap gap-x-5 gap-y-2">
               {result.items.length ? (
@@ -81,7 +88,23 @@ export default async function PropertiesPage({
               </a>
             </div>
           </div>
-          {!result.items.length ? <p>{copy.none}</p> : null}
+          {!result.items.length && !sourceCount ? <p>{copy.none}</p> : null}
+          {sourceCount ? (
+            <Notice
+              tone="info"
+              title={copy.noLocaleListings.replace("{count}", formatNumber(locale, sourceCount))}
+              action={
+                <a
+                  className={buttonClass("secondary")}
+                  href={filterUrl("bg", values)}
+                  hrefLang="bg"
+                  data-source-switch
+                >
+                  {copy.showBulgarian}
+                </a>
+              }
+            />
+          ) : null}
           {result.partial || result.stale ? <Notice tone="warning" title={copy.partial} /> : null}
         </div>
       ) : (
@@ -111,14 +134,14 @@ export default async function PropertiesPage({
           />
           {result.items.length ? (
             <section id="property-results" tabIndex={-1} aria-labelledby="results-heading">
-              <ListingGrid items={result.items} locale={locale} copy={copy} />
+              <ListingGrid items={result.items} locale={locale} copy={copy} eager={3} />
             </section>
           ) : (
             <div className="space-y-4">
               <a className="underline" href={`/${locale}/inquire`}>
                 {copy.ask}
               </a>
-              {locale !== "bg" ? (
+              {locale !== "bg" && !sourceCount ? (
                 <p>
                   <a className="underline" href={filterUrl("bg", values)} hrefLang="bg">
                     {copy.source}

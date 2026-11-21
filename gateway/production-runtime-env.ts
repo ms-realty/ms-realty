@@ -188,6 +188,10 @@ export function productionRuntimeEnvironment(
   if (role === "web") {
     requireInput(value(env, "ORIGIN_VERIFY_SECRET").length >= 32);
     output.ORIGIN_VERIFY_SECRET = value(env, "ORIGIN_VERIFY_SECRET");
+    if (env.BUTLER_PUBLIC_ANSWERS !== undefined) {
+      requireInput(env.BUTLER_PUBLIC_ANSWERS === "0");
+      output.BUTLER_PUBLIC_ANSWERS = "0";
+    }
   } else {
     requireInput(
       value(env, "EMAIL_RELAY_SECRET").length >= 32 &&

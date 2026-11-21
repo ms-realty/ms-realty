@@ -9,6 +9,7 @@ import type { Session } from "@/server/auth/sessions";
 import type { FormState } from "@/ui/form/contract";
 import { initialFormState } from "@/ui/form/server";
 import { caseCopy } from "../cases/copy";
+import { dealAgreementCopy } from "../cases/deal-path-copy";
 import { proposalEnhancementField, proposalScope, proposalStatus } from "./contract";
 import { proposalCopy } from "./copy";
 import { counterofferCopy } from "./counteroffer-copy";
@@ -22,6 +23,7 @@ vi.mock("@/server/proposals/queries", () => ({
   listProposals: vi.fn(),
 }));
 vi.mock("./actions", () => ({ proposalAction: async () => {} }));
+vi.mock("@/server/cases/path", () => ({ evidenceOptions: async () => [] }));
 vi.mock("@/server/reauth-drafts/cookies", () => ({ proposalDraftToken: async () => undefined }));
 vi.mock("@/server/reauth-drafts/service", () => ({
   readProposalReauthDraft: async () => ({ status: "absent" }),
@@ -54,6 +56,7 @@ const view = () => ({
     parties: [
       { partyId: "primary-party", name: "Synthetic buyer", role: "buyer" },
       { partyId: "additional-party", name: "Synthetic co-buyer", role: "co_buyer" },
+      { partyId: "seller-party", name: "Synthetic seller", role: "seller" },
     ],
   },
   current: true,
@@ -123,6 +126,36 @@ it.each(["bg", "en", "ru"] as const)(
     expect(document.querySelector(`input[name="${proposalEnhancementField}"]`)).toBeNull();
   },
 );
+
+it.each(["bg", "en", "ru"] as const)(
+  "ADR 0015: leads the staff %s page with the one decision, recording each side's yes",
+  async (locale) => {
+    const copy = dealAgreementCopy(locale).agree;
+    const { container } = render(
+      await ProposalScreen({ locale, session: session("staff"), id: "proposal-one" }),
+    );
+    const section = container.querySelector("[data-proposal-agree]");
+    // The decision comes before every other section on the page.
+    expect(container.querySelector("section")).toBe(section);
+    expect(section?.querySelector("h2")).toHaveTextContent(copy.title);
+    expect(screen.getByRole("button", { name: copy.submit })).toBeVisible();
+    expect(screen.getByRole("combobox", { name: new RegExp(copy.how.buyer) })).toBeVisible();
+    expect(screen.getByRole("combobox", { name: new RegExp(copy.how.seller) })).toBeVisible();
+    // No internal words on the main path.
+    expect(section?.textContent).not.toMatch(/revision|ревизи|policy|gate/i);
+  },
+);
+
+it("does not offer the decision once the terms are agreed", async () => {
+  reads.proposal.mockResolvedValue({
+    ...view(),
+    revision: { ...view().revision, state: "agreed_for_next_step" },
+  });
+  const { container } = render(
+    await ProposalScreen({ locale: "en", session: session("staff"), id: "proposal-one" }),
+  );
+  expect(container.querySelector("[data-proposal-agree]")).toBeNull();
+});
 
 it("renders the native counteroffer hint empty before hydration", async () => {
   const container = document.createElement("div");

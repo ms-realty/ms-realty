@@ -20,6 +20,15 @@ function closeDisclosuresForMenu(origin: HTMLElement | null) {
   return visibleOrigin;
 }
 
+/**
+ * The close event arrives a moment after the dialog closed. Focus goes back to the opener only
+ * if it is still lost; a person who has already moved into a field keeps it.
+ */
+function focusIsLost(dialog: HTMLDialogElement) {
+  const active = document.activeElement;
+  return !active || active === document.body || dialog.contains(active);
+}
+
 /** Native link first; an enhanced opener restores only its own focus after closing. */
 export function AgencyToolsMenu({
   href,
@@ -42,7 +51,7 @@ export function AgencyToolsMenu({
     const dialog = menuDialog(dialogId);
     if (!dialog) return;
     const returnFocus = () => {
-      if (openedHere.current) trigger.current?.focus();
+      if (openedHere.current && focusIsLost(dialog)) trigger.current?.focus();
       openedHere.current = false;
     };
     dialog.addEventListener("close", returnFocus);
@@ -87,7 +96,7 @@ export function AgencyToolsBehavior({ dialogId }: { dialogId: string }) {
     if (!dialog) return;
     let shortcutOrigin: HTMLElement | null = null;
     const returnFocus = () => {
-      shortcutOrigin?.focus();
+      if (focusIsLost(dialog)) shortcutOrigin?.focus();
       shortcutOrigin = null;
     };
     const onKeyDown = (event: KeyboardEvent) => {

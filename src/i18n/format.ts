@@ -50,6 +50,9 @@ export function formatMoney(
       new Intl.NumberFormat(displayLocale(locale), {
         style: "currency",
         currency,
+        // Four-digit amounts keep their separator in every locale: some (bg, es, pl) leave
+        // "9000 €" ungrouped by default next to "25 000 €".
+        useGrouping: "always",
         minimumFractionDigits: whole ? 0 : digits,
         maximumFractionDigits: digits,
       }),

@@ -230,6 +230,23 @@ export async function AppointmentScreen(props: ScreenProps & { id: string }) {
           />
         </WorkflowSection>
       ) : null}
+      {!staff && detail.timeConfirmedByClient ? (
+        <Notice tone="info">{c.timeConfirmed}</Notice>
+      ) : null}
+      {!staff && detail.canConfirmTime ? (
+        <section className="space-y-4 rounded-card border border-border bg-surface p-5">
+          <BoundWorkflowForm
+            {...props}
+            command="appointmentConfirm"
+            id={row.id}
+            revision={row.version}
+            path={path}
+            intro={<p>{c.confirmTimeLead}</p>}
+            fields={[]}
+            submit={c.confirmTime}
+          />
+        </section>
+      ) : null}
       <AppointmentListingContext listing={detail.listing} locale={locale} />
       {staff && detail.needsCoverage ? (
         <Notice tone="warning">

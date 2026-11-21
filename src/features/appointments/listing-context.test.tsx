@@ -48,7 +48,8 @@ it("P14 displays only the supplied approved identity and exact public fact state
   const section = screen.getByRole("region", { name: discoveryCopy("en").reference });
   expect(section).toHaveTextContent(card.reference);
   expect(section).toHaveTextContent(priceText(card.price, "en", discoveryCopy("en")));
-  expect(screen.getAllByText(discoveryCopy("en").not_supplied)).toHaveLength(2);
+  // Facts the record does not hold are absent, never printed as a state.
+  expect(section).not.toHaveTextContent(discoveryCopy("en").not_supplied);
   expect(section.querySelector("img, iframe")).toBeNull();
 });
 

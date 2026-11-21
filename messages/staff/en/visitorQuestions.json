@@ -1,0 +1,15 @@
+{
+  "heading": "What visitors ask",
+  "about": "Questions visitors asked Butler on this listing's page, newest first. The question text is kept for {days} days.",
+  "empty": "No visitor has asked Butler about this listing yet.",
+  "asked": "Asked",
+  "expired": "Question text no longer kept",
+  "outcomes": {
+    "answered": "Answered from the listing",
+    "unknown": "The listing does not say",
+    "refused": "Butler declined",
+    "rejected": "Answer not shown",
+    "limited": "Limit reached"
+  },
+  "hint": "When the listing does not say, consider adding the answer to its text or facts."
+}

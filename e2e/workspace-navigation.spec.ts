@@ -1,4 +1,5 @@
 // O01/X02: one coherent navigation system, with native destinations and real scoped guards.
+import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, type Locator, type Page, test } from "@playwright/test";
@@ -46,6 +47,22 @@ async function openTools(
 async function noHorizontalScroll(page: Page, width: number) {
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
     width,
+  );
+}
+// The consultations row is offered only while a public service scope is published. This spec
+// publishes its own instead of relying on whichever spec ran before it.
+function publishServiceScope() {
+  execFileSync(
+    process.execPath,
+    ["--conditions=react-server", "--import", "tsx", "src/server/service-intake/browser-seed.ts"],
+    {
+      encoding: "utf8",
+      env: {
+        ...process.env,
+        AUTH_SECRET: process.env.E2E_AUTH_SECRET,
+        DATABASE_URL: process.env.E2E_DATABASE_URL,
+      },
+    },
   );
 }
 const expectedWork = [
@@ -127,6 +144,7 @@ for (const javaScriptEnabled of [true, false]) {
       context,
       page,
     }) => {
+      publishServiceScope();
       await enrolledStaff(db, context);
       await page.setViewportSize({ width: 390, height: 844 });
       await page.goto(hostUrl("staff", "/en/tasks?view=mine"));

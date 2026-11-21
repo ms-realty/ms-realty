@@ -9,6 +9,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "butler:eval": "node --conditions=react-server --import tsx scripts/butler-eval.ts",
     "worker": "node --conditions=react-server --import tsx scripts/worker.ts",
     "lint": "biome check .",
     "format": "biome check --write .",
@@ -22,6 +23,7 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx src/db/migrate.ts",
     "import:legacy": "tsx src/db/import/cli.ts",
+    "media:carry-over": "tsx --conditions=react-server scripts/media-carry-over.ts",
     "check": "make check && make e2e",
     "tokens:build": "node scripts/tokens-build.mjs",
     "storybook": "storybook dev -p 6006 --no-open",
@@ -65,6 +67,7 @@
     "sharp": "0.35.5",
     "svix": "2.9.1",
     "tailwind-merge": "3.7.0",
+    "use-intl": "4.14.9",
     "zod": "4.6.7"
   },
   "devDependencies": {

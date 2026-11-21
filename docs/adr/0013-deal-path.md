@@ -1,7 +1,8 @@
 # ADR 0013 — Every Deal has a Path; completing its last step completes the Deal
 
 Status: accepted (owner decision). Implemented on `claude/deal-path` with migration
-`0039_deal_path`. Emails and notifications about the Path are a separate slice.
+`0039_deal_path`. Emails and notifications about the Path are a separate slice. ADR 0015 adds the
+duty steps, the policy for agreeing terms and marking the listing sold or let on completion.
 
 ## Context
 

@@ -200,6 +200,13 @@ function fixture() {
   input.artifacts.routeManifestSha256 = sha256(manifest);
   return { input, artifacts: { routes, media, manifest, connectivity, isolation } };
 }
+test("staging can switch off public Butler without permitting a force-on override", () => {
+  const { input, artifacts } = fixture();
+  input.runtimeVars.BUTLER_PUBLIC_ANSWERS = "0";
+  assert.equal(stagingConfig(input, artifacts).vars.BUTLER_PUBLIC_ANSWERS, "0");
+  input.runtimeVars.BUTLER_PUBLIC_ANSWERS = "1";
+  assert.throws(() => stagingConfig(input, artifacts), /override must be off/);
+});
 test("unverified uploads are explicit, quarantined staging only, and cannot qualify complete parity", () => {
   const { input, artifacts } = fixture();
   const manifest = {
@@ -219,6 +226,7 @@ test("unverified uploads are explicit, quarantined staging only, and cannot qual
   assert.equal(config.vars.STAGING, "true");
   assert.equal(config.vars.FILE_SCAN_MODE, "staging-unverified");
   assert.equal(config.vars.R2_JURISDICTION, "default");
+  assert.equal(config.vars.BUTLER_PUBLIC_ANSWERS, undefined);
   assert.equal(config.vars.CLAMAV_HOST, undefined);
   assert.throws(() =>
     validateStaging(

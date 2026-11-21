@@ -210,6 +210,7 @@ export function privacyFormRoute(area: "privacy" | "preferences" | "operations/p
             timezone: text(form, "timezone"),
             channel: text(form, "channel"),
             contactWindow: text(form, "contactWindow"),
+            dealNotices: checked(form, "dealNotices"),
           });
         else if (area === "preferences" && intent === "subscription")
           result = await changeSubscription(db, session, {

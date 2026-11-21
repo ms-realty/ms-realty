@@ -28,6 +28,7 @@ const runtimeNames = new Set([
   "MAP_RELEASE_ID",
   "GTM_CONTAINER_ID",
   "SITE_GOOGLE_VERIFICATION",
+  "BUTLER_PUBLIC_ANSWERS",
 ]);
 export const productionSecrets = [
   "WEB_DATABASE_URL",
@@ -264,6 +265,10 @@ export function productionConfig(
       runtimeVars.FILE_SCAN_MODE === "clamav" &&
       runtimeVars.CLAMAV_HOST,
     "reviewed runtime variable allowlist and production scanner",
+  );
+  demand(
+    runtimeVars.BUTLER_PUBLIC_ANSWERS === undefined || runtimeVars.BUTLER_PUBLIC_ANSWERS === "0",
+    "public Butler override must be off",
   );
   if (runtimeVars.MAP_RELEASE_ID)
     demand(

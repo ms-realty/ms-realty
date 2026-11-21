@@ -32,6 +32,7 @@ export async function GET(
       "comparisonReferences",
       "contentReference",
       "serviceScope",
+      "question",
     ].some((name) => query.getAll(name).length > 1)
   )
     return new Response(null, { status: 400 });
@@ -70,6 +71,10 @@ export async function GET(
     const value = request.nextUrl.searchParams.get(name);
     if (value && value.length <= 100) target.searchParams.set(name, value);
   }
+  // The question a visitor asked Butler on a listing page, carried to the form as a draft.
+  const question = query.get("question");
+  if (question !== null && question.length <= 300 && query.has("reference"))
+    target.searchParams.set("question", question);
   const existing = request.nextUrl.searchParams.get("submission");
   target.searchParams.set(
     "submission",

@@ -131,7 +131,20 @@ describe("Deal continuity", () => {
     expect(
       await t.db.select().from(approvals).where(eq(approvals.kind, "message_send")),
     ).toHaveLength(1);
-    expect(await t.db.select().from(externalActions)).toHaveLength(0);
+    // The messages themselves are never sent externally; a deal notice (ADR 0014) only says that
+    // one is waiting: to the client (skipped here: no service-email choice) and to the broker.
+    const actions = await t.db.select().from(externalActions);
+    expect(actions.filter((row) => row.subjectType !== "deal_notice")).toHaveLength(0);
+    expect(
+      actions
+        .filter((row) => row.subjectId === f.record.id)
+        .map((row) => [row.state, row.lastErrorCode])
+        .sort(),
+    ).toEqual([
+      ["cancelled", "no_verified_email"],
+      ["queued", null],
+    ]);
+    expect(JSON.stringify(actions)).not.toContain("Please add a preference for a lift");
   });
 
   it("new participants cannot read earlier audience snapshots; revoked participants lose replay and reads", async () => {

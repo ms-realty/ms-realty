@@ -18,8 +18,10 @@ import { getEnv } from "@/server/config/env";
 import { AppError } from "@/server/errors";
 import { formInstant, readTimeFormValues } from "@/server/forms/time";
 import { action } from "@/server/http/next";
+import { kickDealNotices } from "@/server/jobs/web";
 import {
   createProposal,
+  recordAgreement,
   recordProposalDecision,
   reviseProposal,
   transitionProposal,
@@ -30,6 +32,7 @@ import { deleteProposalReauthDraft, saveProposalReauthDraft } from "@/server/rea
 import { type FormState, type FormValues, formFields } from "@/ui/form/contract";
 import { issueFormOperation, readFormEnvelope } from "@/ui/form/server";
 import { caseCopy } from "../cases/copy";
+import { dealAgreementCopy } from "../cases/deal-path-copy";
 import {
   type ProposalCommand,
   proposalEnhancementField,
@@ -62,6 +65,7 @@ export async function proposalAction(
     throw new AppError("not_found");
   const c = caseCopy(locale),
     p = proposalCopy(locale),
+    agreement = dealAgreementCopy(locale),
     scope = proposalScope(command, id);
   const fields = proposalFields[command],
     values = readTimeFormValues<FormValues>(data, fields),
@@ -167,9 +171,27 @@ export async function proposalAction(
           await createProposal(ctx.db, ctx.session, {
             ...base,
             interestId: values.interestId ?? "",
+            sellerPartyId: values.sellerPartyId ?? "",
+            sellerName: values.sellerName ?? "",
             ...terms,
           })
         ).outcome;
+      if (command === "agree") {
+        const side = (channel?: string, on?: string) =>
+          channel || on
+            ? { channel: (channel ?? "") as "in_person", givenOn: on ?? "" }
+            : undefined;
+        return (
+          await recordAgreement(ctx.db, ctx.session, {
+            ...base,
+            revisionId: values.revisionId ?? "",
+            buyerSide: side(values.buyerChannel, values.buyerOn),
+            sellerSide: side(values.sellerChannel, values.sellerOn),
+            note: values.note ?? "",
+            evidenceVersionId: values.evidenceVersionId ?? "",
+          })
+        ).outcome;
+      }
       if (command === "revise")
         return (
           await reviseProposal(ctx.db, ctx.session, {
@@ -214,6 +236,7 @@ export async function proposalAction(
     { requireSession: true },
   );
   if (result.ok) {
+    await kickDealNotices();
     const enhancement = data.getAll(proposalEnhancementField);
     if (
       context === "client" &&
@@ -228,7 +251,7 @@ export async function proposalAction(
       outcome: {
         kind: "confirmed",
         receipt: {
-          title: c.saved,
+          title: command === "agree" ? agreement.agree.done : c.saved,
           reference: result.data.reference,
           recordedAt: {
             dateTime: result.data.recordedAt,
@@ -259,21 +282,36 @@ export async function proposalAction(
     };
   if (error.code === "VALIDATION_FAILED") {
     const key = issueFormOperation(scope);
+    // One side's channel and date arrive as one nested input (`buyerSide`, `sellerSide`).
+    const nested: Record<string, string> = {
+      buyerChannel: "buyerSide",
+      buyerOn: "buyerSide",
+      sellerChannel: "sellerSide",
+      sellerOn: "sellerSide",
+      amount: "amountMinor",
+    };
+    const failed = (field: string) =>
+      error.fieldErrors?.[field] ??
+      (nested[field] ? error.fieldErrors?.[nested[field]] : undefined);
     const fieldErrors = Object.fromEntries(
       fields
-        .filter(
-          (field) =>
-            error.fieldErrors?.[field] || (field === "amount" && error.fieldErrors?.amountMinor),
-        )
+        .filter((field) => failed(field))
         .map((field) => [
           field,
           [
             field === "amount"
               ? moneyCopy(isPublicLocale(locale) ? locale : defaultLocale).invalid
-              : (timeReasonMessage(
-                  isPublicLocale(locale) ? locale : defaultLocale,
-                  error.fieldErrors?.[field]?.[0],
-                ) ?? c.invalid),
+              : /^(buyer|seller)(Channel|On)$/.test(field)
+                ? (timeReasonMessage(
+                    isPublicLocale(locale) ? locale : defaultLocale,
+                    failed(field)?.[0],
+                  ) ?? agreement.errors.missingSide)
+                : field === "sellerName" || field === "sellerPartyId"
+                  ? agreement.errors.sellerMissing
+                  : (timeReasonMessage(
+                      isPublicLocale(locale) ? locale : defaultLocale,
+                      failed(field)?.[0],
+                    ) ?? c.invalid),
           ],
         ]),
     );
@@ -303,9 +341,13 @@ export async function proposalAction(
             : recoveryCopy.localOnly
           : error.fieldErrors?.agreement
             ? p.agreementBlocked
-            : error.code === "APPROVAL_STALE"
-              ? p.changed
-              : c.transition,
+            : error.fieldErrors?.form?.includes("counterparty_must_answer")
+              ? agreement.errors.counterparty_must_answer
+              : error.code === "LISTING_UNAVAILABLE"
+                ? agreement.errors.listing_unavailable
+                : error.code === "APPROVAL_STALE"
+                  ? p.changed
+                  : c.transition,
       recovery:
         error.code === "STEP_UP_REQUIRED"
           ? supportsRecovery

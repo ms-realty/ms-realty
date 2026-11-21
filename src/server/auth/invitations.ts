@@ -1171,6 +1171,18 @@ export async function respondToClientInvitation(
       },
       at,
     });
+    // ADR 0014: taking part in a Deal with a verified sign-in e-mail is the basis for service
+    // notices about it. Recorded as that basis, not as a consent the client did not give.
+    if (decision === "accept")
+      await recordAudit(tx, {
+        action: "deal_notices.basis_recorded",
+        actor: session.actor,
+        recordType: "case",
+        recordId: scope.caseId,
+        ...(options.correlationId ? { correlationId: options.correlationId } : {}),
+        payload: { basis: "deal_participation", participantId: acceptedParticipantId },
+        at,
+      });
     return { caseId: scope.caseId };
   });
 }

@@ -6,6 +6,7 @@ export const proposalTypes = {
   withdraw: "proposal.transition",
   expire: "proposal.transition",
   decide: "proposal.decide",
+  agree: "proposal.record_agreement",
 } as const;
 export type ProposalCommand = keyof typeof proposalTypes;
 /** Advisory navigation hint. Commands still verify the session, scope and expected revision. */
@@ -22,13 +23,24 @@ const terms = [
   "deadline",
 ];
 export const proposalFields: Record<ProposalCommand, readonly string[]> = {
-  create: ["interestId", ...terms],
+  create: ["interestId", "sellerPartyId", "sellerName", ...terms],
   revise: ["revisionId", ...terms, "reason"],
   review: ["revisionId", "reviewed", "reason"],
   submit: ["revisionId", "reviewed", "reason"],
   withdraw: ["revisionId", "reason"],
   expire: ["revisionId"],
   decide: ["revisionId", "state", "reason"],
+  // ADR 0015: "Record that both sides agreed". One side's fields cover every party on that side
+  // who has not accepted in the client area.
+  agree: [
+    "revisionId",
+    "buyerChannel",
+    "buyerOn",
+    "sellerChannel",
+    "sellerOn",
+    "note",
+    "evidenceVersionId",
+  ],
 };
 export const proposalScope = (command: ProposalCommand, id: string) => `proposal.${command}.${id}`;
 export const proposalStatus = (locale: string, command: ProposalCommand, id: string, key: string) =>

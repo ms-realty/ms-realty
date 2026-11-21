@@ -12,7 +12,8 @@ type ButlerSetting =
   | "DAILY_LIMIT_USD_MICROS"
   | "JEV_ENABLED"
   | "JEV_QUALIFIED"
-  | "JEV_POLICY";
+  | "JEV_POLICY"
+  | "PUBLIC_ANSWERS";
 
 /** Old deployments remain readable; an explicit Butler value always takes precedence. */
 export function butlerSetting(

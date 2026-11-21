@@ -1,0 +1,66 @@
+{
+  "agree": {
+    "title": "Record that both sides agreed",
+    "lead": "Did the buyer and the seller both accept exactly the price and conditions below? Record how each side told you. The deal then moves to its next steps.",
+    "tenantLead": "Did the tenant and the landlord both accept exactly the rent and conditions below? Record how each side told you. The deal then moves to its next steps.",
+    "how": {
+      "buyer": "How the buyer said yes",
+      "tenant": "How the tenant said yes",
+      "seller": "How the seller said yes",
+      "landlord": "How the landlord said yes"
+    },
+    "when": {
+      "buyer": "Date the buyer said yes",
+      "tenant": "Date the tenant said yes",
+      "seller": "Date the seller said yes",
+      "landlord": "Date the landlord said yes"
+    },
+    "choose": "Choose how",
+    "channels": {
+      "in_person": "In person",
+      "phone": "By phone",
+      "email": "By e-mail",
+      "message": "By message"
+    },
+    "answeredOnline": "Accepted in the client area",
+    "answeredByBroker": "Recorded by the broker",
+    "ownAnswer": "The seller has to accept in the client area. You can record the buyer's side now.",
+    "note": "Note for the team (optional)",
+    "document": "Signed offer or message (optional)",
+    "noDocument": "No document",
+    "submit": "Record that both sides agreed",
+    "done": "Both sides agreed to these terms.",
+    "changedTerms": "These terms changed after someone accepted them. Each side needs to accept the new terms.",
+    "accepted": "Accepted these terms"
+  },
+  "other": "Other ways to continue",
+  "home": {
+    "title": "Add a home to this deal",
+    "lead": "Pick any home the agency holds, published or not. It goes straight onto the client's shortlist.",
+    "field": "Home",
+    "choose": "Choose a home",
+    "reason": "Why it fits, in one line",
+    "reasonHint": "The client sees this line.",
+    "submit": "Add a home to this deal",
+    "none": "No homes are available for this kind of deal. Add a listing first, then come back."
+  },
+  "proposal": {
+    "make": "Make a proposal",
+    "seller": "Seller",
+    "landlord": "Landlord",
+    "sellerChoice": "Who is selling",
+    "landlordChoice": "Who is letting",
+    "sellerName": "Seller's full name",
+    "landlordName": "Landlord's full name",
+    "nameHint": "Only if they are not in the list above. We keep the name on this property.",
+    "noOwner": "The agency has no seller recorded for this home yet. We keep the name on this property."
+  },
+  "errors": {
+    "identity_checks_first": "Record the identity checks first. Deposits, contracts, the deed and the keys come after them.",
+    "duty_in_scope": "This step is required for this deal, so it cannot be marked as not needed. Mark it done once it has happened.",
+    "counterparty_must_answer": "The seller has to accept in the client area. Ask them to sign in and accept, then record the buyer's side.",
+    "listing_unavailable": "This home is sold, let or withdrawn, so it cannot be added or offered. Choose another home.",
+    "missingSide": "Choose how this side said yes and the date.",
+    "sellerMissing": "Choose who is selling, or type their name."
+  }
+}

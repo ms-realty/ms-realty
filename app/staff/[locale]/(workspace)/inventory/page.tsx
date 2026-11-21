@@ -8,6 +8,7 @@ import { getDb } from "@/db/client";
 import { mediaAssets, mediaRelations } from "@/db/schema";
 import { listingPurposes, propertyTypes } from "@/domain/facts";
 import { inventoryCopy, optionLabel } from "@/features/inventory/copy";
+import { publishCopy } from "@/features/inventory/publish-copy";
 import { rowAction, rowDestination } from "@/features/inventory/row-action";
 import { InventoryThumbnail } from "@/features/inventory/thumbnail";
 import { PermissionState } from "@/features/shell/permission-state";
@@ -20,6 +21,7 @@ import { buttonClass } from "@/ui/button-class";
 import { cx } from "@/ui/cx";
 import { controlClass, labelClass } from "@/ui/field-class";
 import { ChevronDownIcon, ChevronEndIcon, PlusIcon, SearchIcon } from "@/ui/icons";
+import { ReadyToPublish } from "./ready-view";
 
 type Query = { q?: string; view?: string; purpose?: string; type?: string; cursor?: string };
 type RawQuery = Record<string, string | string[] | undefined>;
@@ -52,6 +54,17 @@ export default async function InventoryPage({
   const o10 = copy.o10;
   const workspace = workflowCopy(locale, "listingWorkspace");
   const mayCreate = await can(db, session.actor, "listing.edit");
+  // ADR 0012 bulk carry-over: its own view, with one attestation for a selection.
+  if (query.view === "ready")
+    return (
+      <ReadyToPublish
+        locale={locale}
+        actor={session.actor}
+        language={scalar(raw.language)}
+        query={query.q}
+        cursor={query.cursor}
+      />
+    );
   const view = query.view === "needs" || query.view === "mine" ? query.view : "all";
   const purpose = listingPurposes.find((value) => value === query.purpose);
   const type = propertyTypes.find((value) => value === query.type);
@@ -254,6 +267,7 @@ export default async function InventoryPage({
               ["all", o10.all],
               ["needs", o10.needs],
               ["mine", o10.mine],
+              ["ready", publishCopy(locale).ready.view],
             ] as const
           ).map(([id, label]) => (
             <li key={id} className="flex">

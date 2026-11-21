@@ -8,6 +8,7 @@ import { agencyCopy } from "../agency-obligations/copy";
 import { inventoryCopy } from "./copy";
 import { inventorySections } from "./decision-contract";
 import { LeaveControl } from "./leave-control";
+import { publishCopy } from "./publish-copy";
 
 export function listingSections(locale: string, reference: string) {
   const copy = inventoryCopy(locale);
@@ -25,7 +26,10 @@ export function listingSections(locale: string, reference: string) {
       href: `${path}?tab=review#${inventorySections.locales}`,
       label: labels.translations,
     },
-    { id: "review", href: `${path}?tab=review`, label: labels.review },
+    // ADR 0012: publishing is one decision on its own screen; every separate check and
+    // decision stays one step away as the detailed review.
+    { id: "publish", href: `${path}/publish`, label: publishCopy(locale).publish },
+    { id: "review", href: `${path}?tab=review`, label: publishCopy(locale).detailedReview },
   ];
 }
 
@@ -50,7 +54,7 @@ export function ListingNavigation({
       className="flex flex-wrap items-start border-b border-divider"
     >
       {listingSections(locale, reference)
-        .filter((section) => ["text", "media", "review"].includes(section.id))
+        .filter((section) => ["text", "media", "publish"].includes(section.id))
         .map((section) => (
           <LeaveControl
             key={section.id}
@@ -59,11 +63,7 @@ export function ListingNavigation({
             current={section.id === (current === "facts" ? "text" : current)}
             className={listingSectionClass}
           >
-            {section.id === "text"
-              ? labels.listing
-              : section.id === "review"
-                ? labels.reviewShort
-                : section.label}
+            {section.id === "text" ? labels.listing : section.label}
           </LeaveControl>
         ))}
       <details className="group open:basis-full">
@@ -75,7 +75,9 @@ export function ListingNavigation({
         <ul className="mb-3 flex flex-wrap gap-1 rounded-control bg-subtle p-2">
           {listingSections(locale, reference)
             .filter((section) =>
-              ["documents", "evidence", "translations", "photography"].includes(section.id),
+              ["review", "documents", "evidence", "translations", "photography"].includes(
+                section.id,
+              ),
             )
             .map((section) => (
               <li key={section.id}>

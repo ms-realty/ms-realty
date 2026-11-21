@@ -28,7 +28,7 @@ test("public listing results adapt to the specified compact, medium and wide ran
     [639, 1],
     [640, 2],
     [768, 2],
-    [1024, 2],
+    [1024, 3],
     [1440, 3],
   ] as const) {
     await page.setViewportSize({ width, height: 900 });

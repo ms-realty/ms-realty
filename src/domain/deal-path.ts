@@ -4,7 +4,10 @@
 // a person from the tenant profile's template. The path records and shows what people did: it
 // holds no money, executes no signature and states no legal requirement.
 import {
+  brokerageWithdrawalDays,
+  customerDueDiligenceScope,
   type DealPathActor,
+  type DealPathDuty,
   type DealPathStepTemplate,
   type DealPathTransaction,
   dealPathTemplates,
@@ -73,6 +76,75 @@ export function templateSteps(key: string): readonly DealPathStepTemplate[] | nu
   return null;
 }
 
+/** The template definition of one stored step; undefined for a removed template or key. */
+export function templateStep(template: string, key: string): DealPathStepTemplate | undefined {
+  return templateSteps(template)?.find((step) => step.key === key);
+}
+
+/** The agreed terms a duty's scope depends on: amount, currency and period. */
+export interface AgreedTerms {
+  readonly amountMinor: number;
+  readonly currency: string;
+  readonly period: string;
+}
+
+/**
+ * Whether an agency duty applies to this Deal (ADR 0015). The brokerage contract applies to
+ * every Deal: the Case's client is the agency's own client. Customer due diligence applies to
+ * every sale and to a letting from the profile's monthly rent; an unknown rent, or a rent in
+ * another currency, counts as in scope.
+ */
+export function dutyInScope(
+  duty: DealPathDuty,
+  transaction: DealPathTransaction,
+  terms: AgreedTerms | null,
+): boolean {
+  if (duty === "brokerage_contract") return true;
+  if (transaction === "sale") return customerDueDiligenceScope.sale;
+  if (terms?.period !== "month") return true;
+  const from = customerDueDiligenceScope.monthlyRentFrom;
+  return terms.currency !== from.currency || terms.amountMinor >= from.amountMinor;
+}
+
+/** Why a staff action on a recorded step is refused under the path's duties. */
+export type StepDutyBlock = "duty_in_scope" | "identity_checks_first";
+
+export function stepDutyBlock(input: {
+  readonly step: DealPathStepTemplate | undefined;
+  readonly action: PathStepAction;
+  readonly transaction: DealPathTransaction;
+  readonly terms: AgreedTerms | null;
+  /** State of the Deal's identity checks step; null when the path has none. */
+  readonly identityChecks: RecordedStepState | null;
+}): StepDutyBlock | null {
+  const { step } = input;
+  if (!step) return null;
+  if (
+    input.action === "skip" &&
+    step.duty &&
+    dutyInScope(step.duty, input.transaction, input.terms)
+  )
+    return "duty_in_scope";
+  if (input.action === "done" && step.afterIdentityChecks && input.identityChecks === "pending")
+    return "identity_checks_first";
+  return null;
+}
+
+/** The last day a client may withdraw from a brokerage contract signed online or off-premises. */
+export function withdrawalEndsOn(signedOn: string): string {
+  const date = new Date(`${signedOn}T12:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + brokerageWithdrawalDays);
+  return date.toISOString().slice(0, 10);
+}
+
+/** What is recorded with the brokerage contract step (ADR 0009 §4), as yes/no answers. */
+export interface BrokerageDetails {
+  /** Signed online or away from the agency's office. */
+  readonly away: boolean;
+  /** The client asked in writing for work to start within the withdrawal period. */
+  readonly earlyStart: boolean | null;
+}
+
 /** What the existing records say about the early steps. */
 export interface DerivedFacts {
   readonly requestReceivedAt: Date;
@@ -128,11 +200,11 @@ export function derivedSteps(kind: CaseKind, facts: DerivedFacts): PathStepBase[
   // Sellers and landlords reach terms through the agency's marketing, not a client's search.
   if (owner)
     return [
-      derived("request_received", "owner", facts.requestReceivedAt),
+      derived("request_received", "agency", facts.requestReceivedAt),
       derived("terms_agreed", "client", facts.termsAgreedAt),
     ];
   return [
-    derived("request_received", "client", facts.requestReceivedAt),
+    derived("request_received", "agency", facts.requestReceivedAt),
     derived("needs_agreed", "agency", facts.briefAgreedAt),
     derived("homes_shortlisted", "client", null, facts.shortlisted),
     derived("viewings", "agency", facts.viewingDoneAt, undefined, facts.viewingExpectedAt),
@@ -197,7 +269,9 @@ export function composePath<T extends PathStepBase>(
     }
     return { ...step, status: "upcoming" };
   });
-  return { steps: out, current, next };
+  // A client never reads that a step "has no record": passed early steps are left out for them.
+  const shown = audience === "client" ? out.filter((s) => s.status !== "not_recorded") : out;
+  return { steps: shown, current, next };
 }
 
 /**
@@ -207,10 +281,16 @@ export function composePath<T extends PathStepBase>(
 export function completionReadiness(
   facts: Pick<DerivedFacts, "termsAgreedAt">,
   rows: readonly Pick<RecordedStepInput, "state">[],
-): { ready: boolean; reason: "terms_not_agreed" | "steps_open" | "final_step_open" | null } {
+  /** An in-scope agency duty (brokerage contract, identity checks) is not done. */
+  dutyOpen = false,
+): {
+  ready: boolean;
+  reason: "terms_not_agreed" | "steps_open" | "final_step_open" | "duty_open" | null;
+} {
   if (!facts.termsAgreedAt) return { ready: false, reason: "terms_not_agreed" };
   if (!rows.length || rows.some((row) => row.state === "pending"))
     return { ready: false, reason: "steps_open" };
+  if (dutyOpen) return { ready: false, reason: "duty_open" };
   if (rows.at(-1)?.state !== "done") return { ready: false, reason: "final_step_open" };
   return { ready: true, reason: null };
 }

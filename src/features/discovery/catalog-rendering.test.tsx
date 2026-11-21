@@ -112,15 +112,19 @@ describe.each([...publicLocales])("%s catalogs in current discovery components",
     const area = new Intl.NumberFormat(displayLocale(locale), { maximumFractionDigits: 20 }).format(
       1250.375,
     );
-    expect(container.querySelector(".text-price bdi")?.textContent).toBe(
-      `${price} · ${copy.asking}`,
+    // The price is the first fact and carries no record vocabulary.
+    expect(container.querySelector("[data-price] bdi")?.textContent).toBe(price);
+    const areaItem = container.querySelector('[data-fact="area"]');
+    expect(areaItem?.querySelector("bdi")?.textContent).toBe(`${area}\u00a0m²`);
+    expect(areaItem).toHaveTextContent(copy.built);
+    // A fact the record does not hold is simply absent, never printed as a state.
+    expect(container.querySelector('[data-fact="bedrooms"]')).toBeNull();
+    for (const state of ["not_supplied", "unknown", "not_applicable", "withheld"] as const)
+      expect(container).not.toHaveTextContent(copy[state]);
+    expect(container.querySelector("article")).toHaveAttribute(
+      "data-listing-reference",
+      source.reference,
     );
-    expect(
-      screen.getByText(copy.built, { exact: true }).parentElement?.querySelector("dd")?.textContent,
-    ).toBe(`${area}\u00a0m²`);
-    expect(screen.getByText(copy.not_supplied, { exact: true })).toBeVisible();
-    expect(screen.getByText(copy.built, { exact: true })).toBeVisible();
-    expect(container.querySelector("bdi")).toHaveTextContent(source.reference);
     expect(screen.getByRole("link", { name: source.title ?? "" })).toHaveAttribute(
       "href",
       `/${locale}/properties/${source.reference}/${source.slug}`,
@@ -175,8 +179,11 @@ it.each([
     area: known(areaFact(74.513, basis), { sourceClass: "source_supplied" } as const),
   };
   const before = structuredClone(property);
-  render(<ListingGrid items={[property]} locale="el" copy={discoveryCopy("el")} />);
-  const value = screen.getByText(label, { exact: true }).parentElement?.querySelector("dd");
-  expect(value?.textContent).toBe("74,513\u00a0m²");
+  const { container } = render(
+    <ListingGrid items={[property]} locale="el" copy={discoveryCopy("el")} />,
+  );
+  const item = container.querySelector('[data-fact="area"]');
+  expect(item?.querySelector("bdi")?.textContent).toBe("74,513\u00a0m²");
+  expect(item).toHaveTextContent(label);
   expect(property).toEqual(before);
 });

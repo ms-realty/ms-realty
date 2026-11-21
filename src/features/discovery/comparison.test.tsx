@@ -145,7 +145,12 @@ it("compares the exact three ordered public identities, approved images and fact
     });
   }
   expect(cell("price", values[0].reference)).toHaveTextContent("123,456.78");
-  expect(cell("price", values[0].reference)).toHaveTextContent(copy.asking);
+  // A plain asking price says nothing more; any other recorded basis is one quiet line.
+  expect(cell("price", values[0].reference)).not.toHaveTextContent(copy.asking);
+  expect(cell("price", values[0].reference).querySelector("[data-price-basis]")).toBeNull();
+  expect(cell("price", values[1].reference).querySelector("[data-price-basis]")).toHaveTextContent(
+    copy.negotiable,
+  );
   expect(cell("price", values[0].reference)).toHaveTextContent(labels.total);
   expect(cell("price", values[1].reference)).toHaveTextContent("700.05");
   expect(cell("price", values[1].reference)).toHaveTextContent(copy.perMonth);
@@ -153,12 +158,15 @@ it("compares the exact three ordered public identities, approved images and fact
   expect(cell("area", values[0].reference)).toHaveTextContent("72.123456789 m²");
   expect(cell("area", values[0].reference)).toHaveTextContent(copy.built);
   expect(cell("area", values[1].reference)).toHaveTextContent(copy.living);
-  expect(cell("bedrooms", values[0].reference)).toHaveTextContent(copy.unknown);
+  // Unknown, conflicting and unsupplied facts are blank cells; a price reads "on request".
+  expect(cell("bedrooms", values[0].reference).textContent?.replace(copy.bedrooms, "").trim()).toBe(
+    "",
+  );
   expect(cell("bedrooms", values[1].reference)).toHaveTextContent("0");
-  expect(cell("lift", values[0].reference)).toHaveTextContent(copy.unknown);
+  expect(cell("lift", values[0].reference).textContent?.replace(labels.lift, "").trim()).toBe("");
   expect(cell("lift", values[1].reference)).toHaveTextContent(labels.no);
-  expect(cell("lift", values[2].reference)).toHaveTextContent(copy.conflicting);
-  expect(cell("price", values[2].reference)).toHaveTextContent(copy.not_supplied);
+  expect(cell("lift", values[2].reference).textContent?.replace(labels.lift, "").trim()).toBe("");
+  expect(cell("price", values[2].reference)).toHaveTextContent(copy.priceOnRequest);
   const collective = screen.getByRole("link", { name: labels.collective });
   const query = new URL(collective.getAttribute("href") ?? "", "https://example.test").searchParams;
   expect(query.get("purpose")).toBe("question");
@@ -232,7 +240,8 @@ describe("unavailable comparison entries", () => {
 it("keeps localized labels and unknown values explicit in Hebrew", () => {
   render(<Comparison items={[item(listing(1))]} locale="he" copy={discoveryCopy("he")} />);
   expect(screen.getByRole("table", { name: compareCopy("he").title })).toBeInTheDocument();
-  expect(cell("lift", "MS-00001")).toHaveTextContent(discoveryCopy("he").unknown);
+  // An unknown fact is a blank cell, never the word "unknown".
+  expect(cell("lift", "MS-00001").textContent?.replace(compareCopy("he").lift, "").trim()).toBe("");
   expect(screen.getByRole("link", { name: compareCopy("he").collective })).toHaveAttribute(
     "href",
     expect.stringContaining("/he/inquire?"),

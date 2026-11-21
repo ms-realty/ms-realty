@@ -31,6 +31,8 @@
     "timezone": "Timezone",
     "channel": "Preferred service channel",
     "window": "Preferred contact times",
+    "dealNotices": "Email me when something changes in my deals",
+    "dealNoticesHint": "Viewing times, proposals, document requests and messages. Untick to stop these emails; your client area still shows everything.",
     "save": "Save service preferences",
     "email": "Email",
     "phone": "Phone",

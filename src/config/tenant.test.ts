@@ -5,13 +5,19 @@ import {
   appointmentsConfiguredIn,
   assistantLabel,
   availabilityReviewIntervalDays,
+  brokerageWithdrawalDays,
+  butlerLevels,
   currencyCodes,
+  customerDueDiligenceScope,
+  type DealPathStepTemplate,
   dealPathActors,
   dealPathTemplates,
+  dealPolicy,
   defaultCurrency,
   defaultStaffLocale,
   displayLocales,
   genericDealPath,
+  imageAdmissionRules,
   isJurisdictionCode,
   isRtlLocale,
   jurisdictionCodes,
@@ -20,11 +26,21 @@ import {
   jurisdictionTimeZones,
   legacyCurrency,
   legacyDomains,
+  legacyTitleSuffixes,
+  mediaPolicy,
+  privatePageRecheckAfterMs,
+  publicationPolicy,
   publicLocales,
   referencePrefixes,
   rtlLocales,
+  scanFirstMediaPolicy,
+  serviceNotificationEnabled,
+  serviceNotificationEvents,
+  serviceNotifications,
   sourceLocale,
   staffLocales,
+  strictDealPolicy,
+  strictPublicationPolicy,
 } from "./tenant";
 
 // The profile holds the values the agency shipped with. Each pin below is also a database
@@ -93,45 +109,58 @@ describe("tenant profile", () => {
     expect(referencePrefixes.listing).toBe("MS");
   });
 
-  it("keeps the shipped Deal path templates (ADR 0013)", () => {
+  it("keeps the shipped Deal path templates (ADR 0013, ADR 0015)", () => {
     // `case_path_steps_actor` CHECKs this list; recorded steps keep their template's keys.
     expect(dealPathActors).toEqual(["client", "agency", "owner", "notary", "lawyer"]);
-    const shape = (steps: readonly { key: string; actor: string; evidence: boolean }[] = []) =>
-      steps.map((step) => `${step.key}:${step.actor}${step.evidence ? ":evidence" : ""}`);
+    // key:actor[:evidence][:duty][:after_identity]
+    const shape = (steps: readonly DealPathStepTemplate[] = []) =>
+      steps.map((step) =>
+        [
+          step.key,
+          step.actor,
+          ...(step.evidence ? ["evidence"] : []),
+          ...(step.duty ? [step.duty] : []),
+          ...(step.afterIdentityChecks ? ["after_identity"] : []),
+        ].join(":"),
+      );
+    const duties = [
+      "brokerage_agreement:agency:evidence:brokerage_contract",
+      "identity_checks:agency:evidence:customer_due_diligence",
+    ];
     expect(Object.keys(dealPathTemplates)).toEqual(["BG.sale", "BG.long_term_rent", "GR.sale"]);
     expect(shape(dealPathTemplates["BG.sale"])).toEqual([
-      "identity_checks:agency:evidence",
-      "deposit_preliminary_contract:client:evidence",
+      ...duties,
+      "deposit_preliminary_contract:client:evidence:after_identity",
       "property_checks:agency:evidence",
       "funds_ready:client",
-      "notary_deed:notary:evidence",
-      "registration:notary:evidence",
-      "keys_handed_over:owner",
+      "notary_deed:notary:evidence:after_identity",
+      "registration:notary:evidence:after_identity",
+      "keys_handed_over:owner:after_identity",
     ]);
     expect(shape(dealPathTemplates["BG.long_term_rent"])).toEqual([
-      "identity_checks:agency:evidence",
-      "lease_signed:client:evidence",
-      "deposit_first_rent:client",
-      "keys_handed_over:owner",
+      ...duties,
+      "lease_signed:client:evidence:after_identity",
+      "deposit_first_rent:client:after_identity",
+      "keys_handed_over:owner:after_identity",
     ]);
     expect(shape(dealPathTemplates["GR.sale"])).toEqual([
-      "identity_checks:agency:evidence",
+      ...duties,
       "tax_number:client:evidence",
       "lawyer_property_checks:lawyer:evidence",
-      "deposit_preliminary_contract:client:evidence",
-      "notary_deed:notary:evidence",
-      "registration:lawyer:evidence",
-      "keys_handed_over:owner",
+      "deposit_preliminary_contract:client:evidence:after_identity",
+      "notary_deed:notary:evidence:after_identity",
+      "registration:lawyer:evidence:after_identity",
+      "keys_handed_over:owner:after_identity",
     ]);
     expect(shape(genericDealPath.sale)).toEqual([
-      "identity_checks:agency:evidence",
-      "contract_signed:client:evidence",
-      "keys_handed_over:owner",
+      ...duties,
+      "contract_signed:client:evidence:after_identity",
+      "keys_handed_over:owner:after_identity",
     ]);
     expect(shape(genericDealPath.long_term_rent)).toEqual([
-      "identity_checks:agency:evidence",
-      "lease_signed:client:evidence",
-      "keys_handed_over:owner",
+      ...duties,
+      "lease_signed:client:evidence:after_identity",
+      "keys_handed_over:owner:after_identity",
     ]);
     for (const steps of [...Object.values(dealPathTemplates), ...Object.values(genericDealPath)]) {
       const keys = (steps ?? []).map((step) => step.key);
@@ -145,6 +174,29 @@ describe("tenant profile", () => {
     }
   });
 
+  it("keeps the duty scope the ADRs name (ADR 0008 §1, ADR 0009 §4)", () => {
+    expect(customerDueDiligenceScope).toEqual({
+      sale: true,
+      monthlyRentFrom: { amountMinor: 1_000_000, currency: "EUR" },
+    });
+    expect(brokerageWithdrawalDays).toBe(14);
+  });
+
+  it("pins this brand's deal policy and keeps the strict one available (ADR 0015)", () => {
+    expect(dealPolicy).toEqual({
+      agreementBasis: "staff_attestation",
+      counterpartyAccountRequired: false,
+      shortlistNeedsStructuredBrief: false,
+      proposalsNeedPublishedListing: false,
+    });
+    expect(strictDealPolicy).toEqual({
+      agreementBasis: "reviewed_process",
+      counterpartyAccountRequired: true,
+      shortlistNeedsStructuredBrief: true,
+      proposalsNeedPublishedListing: true,
+    });
+  });
+
   it("keeps the recorded legacy domains and the public identity", () => {
     expect(legacyDomains).toEqual(["makler-realty.com", "makler-realty.ru"]);
     expect(agency.name).toBe("MS Realty");
@@ -152,5 +204,74 @@ describe("tenant profile", () => {
     expect(agency.phone.e164).toBe("+359879696870");
     expect(agency.phone.display.replaceAll(" ", "")).toBe(agency.phone.e164);
     expect(assistantLabel).toBe("MS Realty Butler");
+  });
+
+  it("publishes by one recorded staff decision, with the strict path still defined", () => {
+    expect(publicationPolicy).toEqual({
+      sellerEvidence: "staff_attestation",
+      independentReview: false,
+      photosRequired: false,
+      signIn: "active_session",
+      attestationOutlivesAuthor: true,
+      publisherApprovesLanguages: true,
+    });
+    expect(strictPublicationPolicy).toEqual({
+      sellerEvidence: "reviewed_documents",
+      independentReview: true,
+      photosRequired: true,
+      signIn: "recent",
+      attestationOutlivesAuthor: false,
+      publisherApprovesLanguages: false,
+    });
+  });
+
+  it("sends every service notification for this brand", () => {
+    expect(serviceNotifications.enabled).toBe(true);
+    expect(serviceNotificationEvents).toEqual([
+      "viewing.proposed",
+      "viewing.confirmed",
+      "viewing.moved",
+      "viewing.cancelled",
+      "proposal.ready",
+      "proposal.withdrawn",
+      "proposal.expired",
+      "proposal.agreed",
+      "document.requested",
+      "message.from_broker",
+      "deal.step_done",
+      "deal.completed",
+      "client.viewing_confirmed",
+      "client.viewing_cancelled",
+      "client.viewing_new_time",
+      "client.proposal_accepted",
+      "client.proposal_declined",
+      "client.proposal_countered",
+      "client.document_uploaded",
+      "client.message",
+      "inquiry.acknowledged",
+    ]);
+    expect(Object.keys(serviceNotifications.events).sort()).toEqual(
+      [...serviceNotificationEvents].sort(),
+    );
+    for (const event of serviceNotificationEvents) {
+      expect(serviceNotifications.events[event]).toBe(true);
+      expect(serviceNotificationEnabled(event)).toBe(true);
+    }
+  });
+
+  it("admits this brand's images by re-encoding them, and keeps the scanner-first rule", () => {
+    expect(imageAdmissionRules).toEqual(["reencode", "virus_scan"]);
+    expect(mediaPolicy).toEqual({ imageAdmission: "reencode" });
+    expect(scanFirstMediaPolicy).toEqual({ imageAdmission: "virus_scan" });
+  });
+
+  it("names the old site's title endings for every public locale and the private-page threshold", () => {
+    for (const locale of publicLocales)
+      expect(legacyTitleSuffixes[locale]?.length).toBeGreaterThan(0);
+    expect(privatePageRecheckAfterMs).toBe(15 * 60_000);
+  });
+
+  it("lets Butler answer visitors on listing pages for this brand (ADR 0011 §5, ADR 0017)", () => {
+    expect(butlerLevels).toEqual({ publicAnswers: "act" });
   });
 });

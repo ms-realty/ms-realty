@@ -28,7 +28,7 @@ import { createProposal, transitionProposal } from "./service";
 import { deadlineInput, partySnapshotSchema } from "./terms";
 
 /** Synthetic reviewed file metadata. This is a gate fixture, never provider/scan evidence. */
-async function evidence(db: Executor, caseId: string, reviewerId: string, purpose: string) {
+export async function evidence(db: Executor, caseId: string, reviewerId: string, purpose: string) {
   const [doc] = await db
     .insert(documents)
     .values({

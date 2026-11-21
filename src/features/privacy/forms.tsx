@@ -56,14 +56,23 @@ export function Check({
   name,
   children,
   required = true,
+  defaultChecked,
 }: {
   name: string;
   children: ReactNode;
   required?: boolean;
+  defaultChecked?: boolean;
 }) {
   return (
     <label className="flex items-start gap-2">
-      <input type="checkbox" name={name} value="yes" required={required} className="mt-1 size-5" />
+      <input
+        type="checkbox"
+        name={name}
+        value="yes"
+        required={required}
+        defaultChecked={defaultChecked}
+        className="mt-1 size-5"
+      />
       <span>{children}</span>
     </label>
   );

@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { and, eq } from "drizzle-orm";
-import { afterAll, beforeAll, expect, it } from "vitest";
+import { afterAll, beforeAll, expect, it, vi } from "vitest";
 import { caseParticipants, proposalRevisions } from "@/db/schema";
 import { createTestDatabase, type TestDatabase } from "@/db/test-utils";
 import { createSession } from "../auth/sessions";
@@ -9,6 +9,14 @@ import { readProposal } from "./queries";
 import { recordProposalDecision, reviseProposal, transitionProposal } from "./service";
 import { partySnapshotsSchema } from "./terms";
 import { prepareProposalAgreement, proposalCounterparty, proposalFixture } from "./testing";
+
+// These tests pin the strict deal policy a brand may choose (ADR 0015): the reviewed process
+// gate, a published listing with a seller instruction, the counterparty's own answer and the
+// structured Brief match review.
+vi.mock("@/config/tenant", async (importOriginal) => {
+  const tenant = await importOriginal<typeof import("@/config/tenant")>();
+  return { ...tenant, dealPolicy: tenant.strictDealPolicy };
+});
 
 let t: TestDatabase;
 beforeAll(async () => {

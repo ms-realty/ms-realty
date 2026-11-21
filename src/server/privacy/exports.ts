@@ -115,6 +115,7 @@ function ownPreferences(value: unknown) {
       timezone: z.string().optional(),
       channel: z.string().optional(),
       contactWindow: z.string().optional(),
+      dealNotices: z.boolean().optional(),
     })
     .safeParse(value);
   return parsed.success ? parsed.data : {};

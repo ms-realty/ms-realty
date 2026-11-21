@@ -2,6 +2,7 @@ import "server-only";
 import { randomUUID } from "node:crypto";
 import { and, desc, eq, sql } from "drizzle-orm";
 import { z } from "zod";
+import { dealPolicy } from "@/config/tenant";
 import {
   approvals,
   briefRevisions,
@@ -27,7 +28,9 @@ import { assertCan, assertCanRead } from "../authz";
 import { hashRequest } from "../crypto";
 import type { Executor } from "../db";
 import { AppError } from "../errors";
+import { notifyDealUpdate } from "../notifications/notify";
 import { runOperation } from "../operations";
+import { heldListingClosed } from "../proposals/shared";
 import { loadPublishedListings, presentationOf } from "../publication/presentation";
 import { nextReference } from "../references";
 import { caseMatchCriteriaInput, offeredStates } from "../search/search";
@@ -415,29 +418,67 @@ export async function addInterest(
         id: listing.id,
         propertyId: listing.propertyId,
       });
+      const [existing] = await ctx.tx
+        .select()
+        .from(interests)
+        .where(and(eq(interests.caseId, row.id), eq(interests.listingId, listing.id)));
+      const repeat = (interest: typeof interests.$inferSelect) => ({
+        id: row.id,
+        reference: row.reference,
+        interestId: interest.id,
+        version: row.version,
+        recordedAt: interest.createdAt.toISOString(),
+      });
+      const purpose =
+        row.kind === "buyer" ? "sale" : row.kind === "tenant" ? "long_term_rent" : null;
+      // Broker's pick (ADR 0015): any home the agency holds, published or not, with a one-line
+      // reason. No Brief criteria or match review; the existing matching flow stays available.
+      if (purpose && !input.matchReview && !dealPolicy.shortlistNeedsStructuredBrief) {
+        if (existing) return repeat(existing);
+        if (heldListingClosed(listing.commercialState)) throw new AppError("listing_unavailable");
+        if (listing.purpose !== purpose)
+          throw new AppError("validation_failed", {
+            fieldErrors: { reference: ["case_kind_mismatch"] },
+          });
+        if (input.alternativeDecision)
+          throw new AppError("validation_failed", {
+            fieldErrors: { alternativeDecision: ["no_hard_mismatch"] },
+          });
+        const [published] = await loadPublishedListings(ctx.tx, { ids: [listing.id] }, "bg");
+        const [interest] = await ctx.tx
+          .insert(interests)
+          .values({
+            caseId: row.id,
+            listingId: listing.id,
+            // The broker puts the home on the shortlist; the client can still decline it.
+            state: "shortlisted",
+            listingRevisionId: published?.listingRevisionId ?? listing.approvedRevisionId,
+            fitExplanation: [input.explanation],
+          })
+          .returning();
+        if (!interest) throw new Error("Interest insert failed");
+        await bumpCase(ctx.tx, row.id, row.version);
+        await caseEvent(
+          ctx,
+          "case",
+          row.id,
+          "case.interest_added",
+          "interest.manage",
+          { interestId: interest.id, basis: "broker_pick", published: Boolean(published) },
+          "participants",
+        );
+        return { ...repeat(interest), version: row.version + 1 };
+      }
       const [published] = await loadPublishedListings(
         ctx.tx,
         { references: [listing.reference] },
         "bg",
       );
       if (!published) throw new AppError("listing_unavailable");
-      const [existing] = await ctx.tx
-        .select()
-        .from(interests)
-        .where(and(eq(interests.caseId, row.id), eq(interests.listingId, listing.id)));
-      if (existing)
-        return {
-          id: row.id,
-          reference: row.reference,
-          interestId: existing.id,
-          version: row.version,
-          recordedAt: existing.createdAt.toISOString(),
-        };
+      if (existing) return repeat(existing);
       const now = new Date();
       const availability = presentationOf(published, now).availability;
       if (!offeredStates.includes(availability)) throw new AppError("listing_unavailable");
-      const purpose =
-        row.kind === "buyer" ? "sale" : row.kind === "tenant" ? "long_term_rent" : null;
       if (purpose && published.purpose !== purpose)
         throw new AppError("validation_failed", {
           fieldErrors: { reference: ["case_kind_mismatch"] },
@@ -740,6 +781,15 @@ export async function postCaseMessage(
         input.audience === "internal" ? "case.note_recorded" : "case.message_posted",
         capability,
       );
+      // A notice that a message is waiting; the message itself stays in the private area.
+      if (input.audience === "case_participants")
+        await notifyDealUpdate(ctx.tx, {
+          caseId: row.id,
+          event: staff ? "message.from_broker" : "client.message",
+          eventKey: `message:${id}`,
+          subject: { type: "case", id: row.id, reference: row.reference },
+          actor: live.actor,
+        });
       return {
         id: row.id,
         reference: row.reference,

@@ -29,6 +29,19 @@ if (result.state !== "clean") process.exitCode = 1;
 
 The worker consumes `files.process`. The explicit loopback test-outbox environment also starts workers in the web process. Normal environments need the separate worker command.
 
+## Image admission by re-encode (ADR 0016)
+
+The tenant profile's `mediaPolicy.imageAdmission` decides how an image is admitted. Under
+`reencode` (this brand) the worker admits a sealed JPEG, PNG or WebP by decoding it and writing
+fresh WebP renditions, without a scanner; `media_assets.admission = 'reencode'` names that check
+and the scan evidence columns record its outcome for the exact digest. Documents and anything
+that is not a decodable raster image always go to the scanner. Under `virus_scan` everything is
+scanned as described below. `fileServices()` passes the tenant policy; `FileServices` built
+without one scan first.
+
+The old website's photos are brought in once by `npm run media:carry-over` (see
+`docs/adr/0016-photo-carry-over.md` for the source settings and options).
+
 ## Protected staging without a scanner
 
 `STAGING=true FILE_SCAN_MODE=staging-unverified` explicitly receives and seals uploads without

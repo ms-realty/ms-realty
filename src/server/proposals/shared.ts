@@ -1,6 +1,7 @@
 import "server-only";
-import { and, eq, inArray, isNull } from "drizzle-orm";
+import { and, asc, eq, gt, inArray, isNull, or } from "drizzle-orm";
 import { z } from "zod";
+import { dealPolicy } from "@/config/tenant";
 import {
   approvals,
   caseParticipants,
@@ -136,6 +137,8 @@ export async function offerContext(
   interestId: string,
   clientPartyId?: string,
   additionalPartyIds: readonly string[] = [],
+  /** The seller or landlord to name; without it, the first the agency knows. */
+  sellerPartyId?: string,
 ) {
   const [interest] = await db
     .select()
@@ -153,30 +156,71 @@ export async function offerContext(
     .where(eq(listings.id, interest.listingId))
     .for("share");
   if (!listing) throw new AppError("not_found");
+  const strict = dealPolicy.proposalsNeedPublishedListing;
   const [published] = await loadPublishedListings(db, { ids: [listing.id] }, "bg");
-  if (!published || !["available", "negotiating"].includes(listing.commercialState))
+  if (strict) {
+    if (!published || !["available", "negotiating"].includes(listing.commercialState))
+      throw new AppError("listing_unavailable");
+  } else if (heldListingClosed(listing.commercialState)) {
+    // ADR 0015: any listing the agency holds, published or not, unless it is history.
     throw new AppError("listing_unavailable");
+  }
+  /** The listing revision the terms were made against; null for a listing never reviewed. */
+  const sourceRevisionId = published?.listingRevisionId ?? listing.approvedRevisionId ?? null;
+  const role = listing.purpose === "sale" ? "seller" : "landlord";
   const [instruction] = await db
     .select({ terms: sellerInstructions.commercialTerms })
     .from(sellerInstructions)
     .where(and(eq(sellerInstructions.listingId, listing.id), currentSellerEvidence()));
-  const seller = z
+  const instructed = z
     .object({ sellerPartyId: z.uuid(), authorityRelationshipId: z.uuid() })
     .safeParse(instruction?.terms);
-  if (!seller.success) throw new AppError("transition_denied");
-  const [authority] = await db
-    .select({ role: propertyRelationships.role })
-    .from(propertyRelationships)
-    .where(eq(propertyRelationships.id, seller.data.authorityRelationshipId));
-  // A reviewed representative is not silently renamed as the legal seller/landlord.
-  // Such an offer needs a separately recorded represented principal before this path can use it.
-  if (authority?.role !== (listing.purpose === "sale" ? "seller" : "landlord"))
-    throw new AppError("transition_denied");
-  const [owner] = await db
-    .select({ id: parties.id, name: parties.displayName })
-    .from(parties)
-    .where(and(eq(parties.id, seller.data.sellerPartyId), isNull(parties.mergedIntoPartyId)));
-  if (!owner) throw new AppError("transition_denied");
+  let instructedOwner: { id: string; name: string } | undefined;
+  if (instructed.success) {
+    const [authority] = await db
+      .select({ role: propertyRelationships.role })
+      .from(propertyRelationships)
+      .where(eq(propertyRelationships.id, instructed.data.authorityRelationshipId));
+    // A reviewed representative is not silently renamed as the legal seller/landlord.
+    // Such an offer needs a separately recorded represented principal before this path can use it.
+    if (authority?.role === role)
+      [instructedOwner] = await db
+        .select({ id: parties.id, name: parties.displayName })
+        .from(parties)
+        .where(
+          and(eq(parties.id, instructed.data.sellerPartyId), isNull(parties.mergedIntoPartyId)),
+        );
+  }
+  if (strict && !instructedOwner) throw new AppError("transition_denied");
+  // Without the strict policy the other side may also be a seller or landlord the agency knows
+  // from the property's recorded relationships (including one the broker entered).
+  const now = new Date();
+  const related = strict
+    ? []
+    : await db
+        .select({ id: parties.id, name: parties.displayName })
+        .from(propertyRelationships)
+        .innerJoin(parties, eq(parties.id, propertyRelationships.partyId))
+        .where(
+          and(
+            eq(propertyRelationships.propertyId, listing.propertyId),
+            eq(propertyRelationships.role, role),
+            isNull(propertyRelationships.revokedAt),
+            or(isNull(propertyRelationships.expiresAt), gt(propertyRelationships.expiresAt, now)),
+            isNull(parties.mergedIntoPartyId),
+          ),
+        )
+        .orderBy(asc(propertyRelationships.createdAt), asc(propertyRelationships.id));
+  const sellerOptions = [...(instructedOwner ? [instructedOwner] : []), ...related].filter(
+    (option, index, all) => all.findIndex((o) => o.id === option.id) === index,
+  );
+  if (sellerPartyId && !sellerOptions.some((o) => o.id === sellerPartyId))
+    throw new AppError("validation_failed", { fieldErrors: { sellerPartyId: ["invalid"] } });
+  const owner = sellerPartyId
+    ? sellerOptions.find((o) => o.id === sellerPartyId)
+    : sellerOptions[0];
+  if (!owner && clientPartyId)
+    throw new AppError("validation_failed", { fieldErrors: { sellerName: ["required"] } });
   const buyers = await db
     .select({ partyId: parties.id, name: parties.displayName, role: caseParticipants.role })
     .from(caseParticipants)
@@ -194,7 +238,7 @@ export async function offerContext(
     )
     .for("share");
   const buyer = buyers.find((p) => p.partyId === clientPartyId);
-  if (clientPartyId && (!buyer || buyer.partyId === owner.id))
+  if (clientPartyId && (!buyer || buyer.partyId === owner?.id))
     throw new AppError("validation_failed", {
       fieldErrors: { clientPartyId: ["current_principal_party_required"] },
     });
@@ -204,32 +248,55 @@ export async function offerContext(
   if (
     selectedIds.length > 19 ||
     new Set(selectedIds).size !== selectedIds.length ||
-    selectedIds.some((id) => id === owner.id || !buyers.some((p) => p.partyId === id))
+    selectedIds.some((id) => id === owner?.id || !buyers.some((p) => p.partyId === id))
   )
     throw new AppError("validation_failed", {
       fieldErrors: { additionalPartyIds: ["current_principal_party_required"] },
     });
-  const snapshot: ProposalParty[] = buyer
-    ? [
-        ...selectedIds.map((partyId) => {
-          const party = buyers.find((p) => p.partyId === partyId);
-          if (!party) throw new AppError("validation_failed");
-          return {
-            partyId,
-            name: party.name,
-            role: party.role as "buyer" | "co_buyer" | "tenant",
-            required: true as const,
-          };
-        }),
-        {
-          partyId: owner.id,
-          name: owner.name,
-          role: listing.purpose === "sale" ? "seller" : "landlord",
-          required: true,
-        },
-      ]
-    : [];
-  return { interest, listing, published, buyers, seller: owner, snapshot };
+  const snapshot: ProposalParty[] =
+    buyer && owner
+      ? [
+          ...selectedIds.map((partyId) => {
+            const party = buyers.find((p) => p.partyId === partyId);
+            if (!party) throw new AppError("validation_failed");
+            return {
+              partyId,
+              name: party.name,
+              role: party.role as "buyer" | "co_buyer" | "tenant",
+              required: true as const,
+            };
+          }),
+          {
+            partyId: owner.id,
+            name: owner.name,
+            role: listing.purpose === "sale" ? "seller" : "landlord",
+            required: true,
+          },
+        ]
+      : [];
+  return {
+    interest,
+    listing,
+    published: published ?? null,
+    sourceRevisionId,
+    buyers,
+    seller: owner ?? null,
+    sellerOptions,
+    snapshot,
+  };
+}
+
+/** Sold, let and withdrawn listings are history: no new offer, pick or agreement on them. */
+export function heldListingClosed(state: string): boolean {
+  return ["sold", "let", "withdrawn"].includes(state);
+}
+
+/** The seller or landlord a revision's parties name. */
+export function snapshotSeller(parties: unknown): string | undefined {
+  const snapshot = partySnapshotsSchema.safeParse(parties);
+  return snapshot.success
+    ? snapshot.data.find((p) => p.role === "seller" || p.role === "landlord")?.partyId
+    : undefined;
 }
 
 export async function validProposalApproval(db: Executor, revision: Revision) {
@@ -272,10 +339,11 @@ export async function validProposalSource(
     proposal.interestId,
     buyer.partyId,
     additional,
+    snapshotSeller(revision.parties),
   );
   if (
     context.listing.id !== proposal.listingId ||
-    context.published.listingRevisionId !== revision.sourceListingRevisionId ||
+    context.sourceRevisionId !== revision.sourceListingRevisionId ||
     hashRequest(context.snapshot) !== hashRequest(revision.parties)
   )
     throw new AppError("approval_stale");

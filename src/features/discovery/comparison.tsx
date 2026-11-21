@@ -6,7 +6,7 @@ import { buttonClass } from "@/ui/button-class";
 import { ApprovedMedia } from "./approved-media";
 import { compareCopy } from "./compare-copy";
 import type { DiscoveryCopy } from "./copy";
-import { Availability } from "./listing-card";
+import { Availability, PriceBasis } from "./listing-card";
 import { RemoveComparison } from "./local-selection";
 import { listingHref, locality, priceText, scalarFact } from "./presentation";
 
@@ -105,6 +105,11 @@ export function Comparison({
             {listing.price.state === "known" && listing.price.value.period === "total" ? (
               <span className="block font-normal text-text-muted">{labels.total}</span>
             ) : null}
+            <PriceBasis
+              price={listing.price}
+              copy={copy}
+              className="block font-normal text-caption"
+            />
           </>
         ),
       },
@@ -126,9 +131,7 @@ export function Comparison({
                 {copy[listing.area.value.basis]}
               </span>
             </>
-          ) : (
-            copy[listing.area.state]
-          ),
+          ) : null,
       },
       {
         key: "bedrooms",
@@ -141,15 +144,14 @@ export function Comparison({
         label: labels.lift,
         value: (listing) => {
           const fact = listing.facts.find((item) => item.key === "feature.lift")?.fact;
-          return !fact
-            ? copy.unknown
-            : fact.state !== "known"
-              ? copy[fact.state]
-              : fact.value === true
-                ? labels.yes
-                : fact.value === false
-                  ? labels.no
-                  : copy.unknown;
+          // An unknown fact is left blank, never printed as "unknown" (public surfaces).
+          return fact?.state !== "known"
+            ? null
+            : fact.value === true
+              ? labels.yes
+              : fact.value === false
+                ? labels.no
+                : null;
         },
       },
       {

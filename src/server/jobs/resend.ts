@@ -7,6 +7,8 @@ import { formatDateTime } from "@/i18n/format";
 import { caseEmailConfig, renderCaseEmail } from "../cases/email-contract";
 import type { HostOrigins } from "../config/hosts";
 import { renderInquiryCoverageNotice } from "../inquiries/notifications";
+import { renderInquiryAcknowledgement } from "../notifications/inquiry";
+import { renderDealNotice } from "../notifications/template";
 import { renderSearchAlert } from "../subscriptions/template";
 import type { MessageProvider, OutboundMessage, ProviderResult } from "./provider";
 
@@ -100,16 +102,31 @@ function authEmail(message: OutboundMessage, hosts: HostOrigins, now: Date) {
   };
 }
 
-/** Shared reviewed content boundary; each transport keeps its own delivery semantics. */
+/**
+ * Shared reviewed content boundary; each transport keeps its own delivery semantics. A
+ * plain-text transport receives deal notices without HTML, and with the calendar as a link.
+ */
 export function renderReviewedEmail(
   message: OutboundMessage,
   config: { from: string; hosts: HostOrigins },
   now = new Date(),
+  transport: { plainText?: boolean } = {},
 ) {
   return (
     authEmail(message, config.hosts, now) ??
     renderSearchAlert(message, config.hosts) ??
     renderInquiryCoverageNotice(message, config.hosts) ??
+    renderInquiryAcknowledgement(message, { hosts: config.hosts, html: !transport.plainText }) ??
+    renderDealNotice(
+      message,
+      {
+        hosts: config.hosts,
+        from: config.from,
+        attachments: !transport.plainText,
+        html: !transport.plainText,
+      },
+      now,
+    ) ??
     renderCaseEmail(message, caseEmailConfig()?.from === config.from ? caseEmailConfig() : null)
   );
 }

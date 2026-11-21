@@ -65,6 +65,17 @@ const sampleValues = {
   direction: "down",
   photo: "Photo 1",
   position: 2,
+  // Butler answers (ADR 0017).
+  price: "€95,000",
+  items: "furniture",
+  basis: "living area",
+  area: "68 m²",
+  floor: 2,
+  place: "Sandanski",
+  action: "Request a viewing",
+  agency: "MS Realty",
+  max: 300,
+  days: 30,
 };
 
 /** What a reader sees: no ICU syntax, placeholders or names that every locale shares. */

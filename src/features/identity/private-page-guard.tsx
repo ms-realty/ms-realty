@@ -2,24 +2,44 @@
 
 import { useRouter } from "next/navigation";
 import { type ReactNode, useCallback, useEffect, useRef, useState, useTransition } from "react";
-// AT39: restored/hidden private pages stay concealed during a server reauthorization. The
-// subtree remains mounted so permitted client drafts survive a successful refresh.
+import { privatePageRecheckAfterMs } from "@/config/tenant";
+// AT39: a private page restored from the back/forward cache, or hidden for longer than the
+// tenant's threshold, stays concealed until the server confirms the session. A shorter absence
+// (a broker checking a messenger) is rechecked in the background without concealing; the page is
+// concealed only if that check says the session is gone. The subtree stays mounted so permitted
+// client drafts survive.
 import { privateAccessCopy } from "@/i18n/private-access-copy";
+import { privateAccessState } from "./private-access-action";
+import { reloadPage } from "./reload";
+
+type Check = "active" | "signed_out" | "error";
+
+async function check(): Promise<Check> {
+  try {
+    return await privateAccessState();
+  } catch {
+    // A failed request proves nothing about the session either way.
+    return "error";
+  }
+}
 
 export function PrivatePageGuard({
   children,
   locale = "bg",
+  recheckAfterMs = privatePageRecheckAfterMs,
   verification,
 }: {
   children: ReactNode;
   locale?: string;
-  /** A fresh value from each authorized server render, never a client-generated value. */
+  /** How long a hidden page may stay away before it is concealed until rechecked. */
+  recheckAfterMs?: number;
+  /** Fresh value from each authorized server render. */
   verification: string;
 }) {
   const router = useRouter();
   const copy = privateAccessCopy(locale);
   const restoration = useRef<{ focus: HTMLElement | null; x: number; y: number } | null>(null);
-  const wasHidden = useRef(false);
+  const hiddenAt = useRef<number | null>(null);
   const content = useRef<HTMLDivElement>(null);
   const requested = useRef<string | null>(null);
   const [concealed, setConcealed] = useState(false);
@@ -42,23 +62,33 @@ export function PrivatePageGuard({
     }
     setConcealed(true);
   }, []);
+  /** Keep the previous private view concealed until the authorized page is refreshed. */
   const revalidate = useCallback(() => {
     conceal();
     requested.current = verification;
     startTransition(() => router.refresh());
   }, [conceal, router, verification]);
+  /** Short absence: keep the page, check in the background, conceal only on a lost session. */
+  const recheckInBackground = useCallback(async () => {
+    if ((await check()) === "signed_out") {
+      conceal();
+      reloadPage();
+    }
+  }, [conceal]);
   useEffect(() => {
     const onPageShow = (event: PageTransitionEvent) => {
       if (event.persisted) revalidate();
     };
     const onVisibility = () => {
       if (document.visibilityState === "hidden") {
-        wasHidden.current = true;
-        conceal();
-      } else if (wasHidden.current) {
-        wasHidden.current = false;
-        revalidate();
+        hiddenAt.current = Date.now();
+        return;
       }
+      if (hiddenAt.current === null) return;
+      const away = Date.now() - hiddenAt.current;
+      hiddenAt.current = null;
+      if (away >= recheckAfterMs) revalidate();
+      else void recheckInBackground();
     };
     window.addEventListener("pageshow", onPageShow);
     document.addEventListener("visibilitychange", onVisibility);
@@ -69,10 +99,10 @@ export function PrivatePageGuard({
       window.removeEventListener("pageshow", onPageShow);
       document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, [conceal, revalidate]);
+  }, [revalidate, recheckInBackground, recheckAfterMs]);
   useEffect(() => {
-    // A failed refresh also ends a transition. Only a new, authorized server render
-    // may reveal the mounted subtree; network failures must leave it concealed.
+    // A completed transition can also mean a failed request. Only a new server render
+    // proves which private view may be shown after a session change.
     if (
       !pending &&
       requested.current !== null &&
@@ -97,7 +127,7 @@ export function PrivatePageGuard({
         <div className="px-gutter py-6 text-text-muted">
           <p role="status">{copy.checking}</p>
           {!pending ? (
-            <button type="button" className="mt-3 min-h-control underline" onClick={revalidate}>
+            <button type="button" className="mt-3 min-h-control underline" onClick={reloadPage}>
               {copy.retry}
             </button>
           ) : null}

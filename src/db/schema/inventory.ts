@@ -38,6 +38,7 @@ import {
   localeStateEnum,
   locationPrecisionEnum,
   materialChangeEnum,
+  mediaAdmissionEnum,
   mediaAudienceEnum,
   mediaKindEnum,
   mediaModificationEnum,
@@ -349,6 +350,11 @@ export const mediaAssets = pgTable(
     byteSize: bigint("byte_size", { mode: "number" }),
     width: integer("width"),
     height: integer("height"),
+    /**
+     * The check whose outcome `scan` and the scan evidence record (ADR 0016): the malware
+     * scanner, or a decode and fresh re-encode of an image under the brand's media policy.
+     */
+    admission: mediaAdmissionEnum("admission").notNull().default("virus_scan"),
     scan: scanStateEnum("scan").notNull().default("pending"),
     scannedAt: instant("scanned_at"),
     scannerVersion: text("scanner_version"),

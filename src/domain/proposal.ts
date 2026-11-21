@@ -8,6 +8,10 @@ import type { CurrencyCode } from "./ids";
 import { allowed, type Decision, defineMachine, denied, firstDenial, need } from "./state-machine";
 import type { TransitionSpec } from "./transition";
 
+/** How a party told the broker they accept the exact terms (ADR 0015). */
+export const acceptanceChannels = ["in_person", "phone", "email", "message"] as const;
+export type AcceptanceChannel = (typeof acceptanceChannels)[number];
+
 export const proposalStates = [
   "draft",
   "reviewed",

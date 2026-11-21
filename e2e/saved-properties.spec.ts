@@ -99,11 +99,11 @@ test("P08: save four, choose second and fourth, compare exactly those and recove
   const refs = publishedReferences();
   for (const item of data.published) {
     await page.goto(`/en/properties/${item.reference}/${item.reference.toLowerCase()}`);
-    await page.getByRole("button", { name: "Save in this browser", exact: true }).click();
-    await expect(page.getByRole("button", { name: "Remove", exact: true })).toHaveAttribute(
-      "aria-pressed",
-      "true",
-    );
+    // Save is a small icon toggle with a constant name; its pressed state says it is saved.
+    await page.getByRole("button", { name: "Save this property", exact: true }).click();
+    await expect(
+      page.getByRole("button", { name: "Save this property", exact: true }),
+    ).toHaveAttribute("aria-pressed", "true");
   }
   await page.goto("/en/saved");
   await loaded(page);

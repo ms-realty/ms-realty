@@ -9,12 +9,15 @@ import {
   dealTransaction,
   derivedStepKeys,
   derivedSteps,
+  dutyInScope,
   isCalendarDate,
   nextRecordedState,
   previewSteps,
   recordedSteps,
   resolveTemplate,
+  stepDutyBlock,
   templateSteps,
+  withdrawalEndsOn,
 } from "./deal-path";
 
 const at = (iso: string) => new Date(iso);
@@ -61,6 +64,9 @@ describe("Deal path templates", () => {
       expect(copy?.about.split(/[.!?](\s|$)/).filter((s) => s.trim()).length, key).toBe(1);
     }
     expect(Object.keys(bg.steps).sort()).toEqual([...keys].sort());
+    // Client-perspective sentences only exist for real steps.
+    for (const [side, sentences] of Object.entries(bg.you))
+      for (const key of Object.keys(sentences)) expect(keys.has(key), `${side}.${key}`).toBe(true);
   });
 });
 
@@ -83,7 +89,7 @@ describe("Deal path derivation", () => {
 
   it("gives an owner-side Deal only the steps its records can show", () => {
     expect(derivedSteps("landlord", none).map((s) => [s.key, s.actor])).toEqual([
-      ["request_received", "owner"],
+      ["request_received", "agency"],
       ["terms_agreed", "client"],
     ]);
   });
@@ -91,13 +97,13 @@ describe("Deal path derivation", () => {
   it("marks done, where the Deal stands, what is next and what was passed without a record", () => {
     const template = dealPathTemplates["BG.sale"] ?? [];
     const rows = previewSteps(template).map((row, index) =>
-      index === 0 ? { ...row, state: "done" as const, doneOn: "2026-02-01" } : row,
+      index <= 1 ? { ...row, state: "done" as const, doneOn: "2026-02-01" } : row,
     );
     const steps = [
       ...derivedSteps("buyer", { ...none, termsAgreedAt: at("2026-01-20T10:00:00Z") }),
       ...recordedSteps(rows),
     ];
-    const path = composePath(steps, "client");
+    const path = composePath(steps, "staff");
     const status = Object.fromEntries(path.steps.map((s) => [s.key, s.status]));
     expect(status).toMatchObject({
       request_received: "done",
@@ -113,6 +119,15 @@ describe("Deal path derivation", () => {
     expect(path.current).toBe("deposit_preliminary_contract");
     expect(path.next).toBe("property_checks");
     expect(path.steps.find((s) => s.key === "identity_checks")?.doneAt).toBe("2026-02-01");
+    // A client never reads "no record": passed early steps are left out of their path.
+    const client = composePath(steps, "client");
+    expect(client.steps.map((s) => s.key)).toEqual([
+      "request_received",
+      "terms_agreed",
+      ...template.map((s) => s.key),
+    ]);
+    expect(client.steps.some((s) => s.status === "not_recorded")).toBe(false);
+    expect(client.current).toBe("deposit_preliminary_contract");
   });
 
   it("drops hidden steps before choosing where a client is", () => {
@@ -154,6 +169,63 @@ describe("Deal path recording and completion", () => {
     expect(completionReadiness(agreed, [done, pending, done]).reason).toBe("steps_open");
     expect(completionReadiness(agreed, [done, skipped]).reason).toBe("final_step_open");
     expect(completionReadiness(agreed, [skipped, done])).toEqual({ ready: true, reason: null });
+  });
+
+  it("ADR 0015: an open in-scope duty keeps a Deal from completing", () => {
+    const agreed = { termsAgreedAt: at("2026-01-20T10:00:00Z") };
+    const done = { state: "done" as const };
+    expect(completionReadiness(agreed, [done, done], true).reason).toBe("duty_open");
+    expect(completionReadiness(agreed, [done, done], false).ready).toBe(true);
+  });
+
+  it("ADR 0015: identity checks are in scope for every sale and for lettings from the threshold", () => {
+    const rent = (amountMinor: number, currency = "EUR") => ({
+      amountMinor,
+      currency,
+      period: "month",
+    });
+    expect(dutyInScope("brokerage_contract", "long_term_rent", rent(50_000))).toBe(true);
+    expect(dutyInScope("customer_due_diligence", "sale", null)).toBe(true);
+    expect(dutyInScope("customer_due_diligence", "long_term_rent", rent(50_000))).toBe(false);
+    expect(dutyInScope("customer_due_diligence", "long_term_rent", rent(1_000_000))).toBe(true);
+    // An unknown rent or another currency is treated as in scope: no rate is assumed.
+    expect(dutyInScope("customer_due_diligence", "long_term_rent", null)).toBe(true);
+    expect(dutyInScope("customer_due_diligence", "long_term_rent", rent(50_000, "GBP"))).toBe(true);
+  });
+
+  it("ADR 0015: refuses skipping a duty in scope and handing over before identity checks", () => {
+    const sale = dealPathTemplates["BG.sale"] ?? [];
+    const step = (key: string) => sale.find((s) => s.key === key);
+    const base = { transaction: "sale" as const, terms: null, identityChecks: "pending" as const };
+    expect(stepDutyBlock({ ...base, step: step("identity_checks"), action: "skip" })).toBe(
+      "duty_in_scope",
+    );
+    expect(stepDutyBlock({ ...base, step: step("brokerage_agreement"), action: "skip" })).toBe(
+      "duty_in_scope",
+    );
+    expect(stepDutyBlock({ ...base, step: step("notary_deed"), action: "done" })).toBe(
+      "identity_checks_first",
+    );
+    expect(stepDutyBlock({ ...base, step: step("property_checks"), action: "done" })).toBeNull();
+    expect(stepDutyBlock({ ...base, step: step("notary_deed"), action: "skip" })).toBeNull();
+    expect(
+      stepDutyBlock({ ...base, identityChecks: "done", step: step("notary_deed"), action: "done" }),
+    ).toBeNull();
+    // A small letting may record identity checks as not needed, and then nothing waits.
+    const letting = {
+      transaction: "long_term_rent" as const,
+      terms: { amountMinor: 80_000, currency: "EUR", period: "month" },
+      identityChecks: "skipped" as const,
+    };
+    expect(stepDutyBlock({ ...letting, step: step("identity_checks"), action: "skip" })).toBeNull();
+    expect(
+      stepDutyBlock({ ...letting, step: step("keys_handed_over"), action: "done" }),
+    ).toBeNull();
+  });
+
+  it("counts the withdrawal period in calendar days from signing", () => {
+    expect(withdrawalEndsOn("2026-01-20")).toBe("2026-02-03");
+    expect(withdrawalEndsOn("2026-12-25")).toBe("2027-01-08");
   });
 
   it("reads calendar dates in the agency's zone and rejects impossible ones", () => {

@@ -192,6 +192,15 @@ function fixture() {
     productionConfig(f.bytes, artifacts, evidence, trusted, { now, ...options });
   return f;
 }
+test("production can switch off public Butler without permitting a force-on override", () => {
+  const f = fixture();
+  f.input.runtimeVars.BUTLER_PUBLIC_ANSWERS = "0";
+  f.refresh();
+  assert.equal(f.config().vars.BUTLER_PUBLIC_ANSWERS, "0");
+  f.input.runtimeVars.BUTLER_PUBLIC_ANSWERS = "1";
+  f.refresh();
+  assert.throws(() => f.config(), /override must be off/);
+});
 test("prepares only authenticated staff controls and three copies of the accepted digest", () => {
   const f = fixture(),
     config = f.config();

@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { count, eq } from "drizzle-orm";
+import { count, eq, isNull, ne, or } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import {
   activityEvents,
@@ -38,6 +38,18 @@ import {
 
 // P11/P12 inquiry intake and receipt (architecture §6.1; AT10–AT12).
 let t: TestDatabase;
+
+/** External effects other than the visitor's acknowledgement (ADR 0014), which every e-mail inquiry owes. */
+const otherEffects = () =>
+  t.db
+    .select()
+    .from(externalActions)
+    .where(
+      or(
+        isNull(externalActions.subjectType),
+        ne(externalActions.subjectType, "inquiry_acknowledgement"),
+      ),
+    );
 let live: ListingFixture;
 let unpublished: ListingFixture;
 let publisher: Awaited<ReturnType<typeof createStaff>>;
@@ -132,7 +144,7 @@ describe("submitInquiry", () => {
     for (const projection of [receipt, accepted.receipt, outbox, audit, activity]) {
       expect(JSON.stringify(projection)).not.toContain(viewingPreferences.accessNeeds);
     }
-    expect(await t.db.select().from(externalActions)).toEqual([]);
+    expect(await otherEffects()).toEqual([]);
 
     const late = new Date(`${future}-04-03T12:00:00Z`);
     const replay = await submitInquiry(t.db, input, {
@@ -394,7 +406,7 @@ describe("submitInquiry", () => {
       },
     ]);
     expect(JSON.stringify(events)).not.toContain("example.test");
-    expect(await t.db.select().from(externalActions)).toEqual([]);
+    expect(await otherEffects()).toEqual([]);
   });
 
   it("accepts a request only about a listing public in the page's locale", async () => {
@@ -674,7 +686,7 @@ describe("P07 collective inquiry", () => {
     expect(JSON.stringify(accepted.receipt)).not.toMatch(
       /example.test|Test Visitor|lift|description/,
     );
-    expect(await t.db.select().from(externalActions)).toEqual([]);
+    expect(await otherEffects()).toEqual([]);
     const reordered = await rejection(
       submitInquiry(
         t.db,

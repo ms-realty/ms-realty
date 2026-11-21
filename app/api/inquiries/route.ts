@@ -33,6 +33,7 @@ import {
   submitInquiry,
   validReceiptSession,
 } from "@/server/inquiries/intake";
+import { kickDealNotices } from "@/server/jobs/web";
 
 const maxBodyBytes = 16_384;
 
@@ -166,6 +167,8 @@ export async function POST(request: Request): Promise<Response> {
       receiptSession: session.token,
       correlationId,
     });
+    // The acknowledgement is committed with the inquiry; ask the worker to send it now.
+    if (!result.replayed) await kickDealNotices();
     const headers = responseHeaders(correlationId, session);
     if (isForm) {
       const { locale, receiptId } = result.receipt;

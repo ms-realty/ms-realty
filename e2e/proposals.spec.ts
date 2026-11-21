@@ -71,6 +71,10 @@ test("reviewed exact revision needs both named parties; client document access r
     await client.goto(hostUrl("client", `/en/proposals/${f.proposalId}`));
     await expect(client.getByRole("heading", { name: "Exact terms", exact: true })).toHaveCount(0);
     await page.goto(hostUrl("staff", `/en/proposals/${f.proposalId}`));
+    // ADR 0015: showing the proposal to the parties is the other way to continue, folded
+    // behind the one decision ("Record that both sides agreed").
+    const otherWays = () => page.getByText("Other ways to continue", { exact: true }).click();
+    await otherWays();
     await page
       .getByLabel(
         "I reviewed these exact people and companies, terms, source and deadline. This is a coordination record, not legal approval.",
@@ -79,6 +83,7 @@ test("reviewed exact revision needs both named parties; client document access r
       .check();
     await page.getByRole("button", { name: "Record exact-terms review", exact: true }).click();
     await recorded(page);
+    await otherWays();
     await page
       .getByLabel(
         "I reviewed the exact revision and its audience. Show it to these people in their client workspace.",
@@ -100,7 +105,7 @@ test("reviewed exact revision needs both named parties; client document access r
     await recorded(client);
     await expect(
       client.getByText(
-        "Your response is recorded. Overall agreement still waits for the other people whose agreement is required and for the required checks for this deal.",
+        "Your response is recorded. The terms are agreed once everyone named on the proposal accepts them.",
         { exact: true },
       ),
     ).toBeVisible();

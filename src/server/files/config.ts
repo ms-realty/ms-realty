@@ -1,6 +1,7 @@
 import "server-only";
 import { isAbsolute } from "node:path";
 import { z } from "zod";
+import { type MediaPolicy, mediaPolicy } from "@/config/tenant";
 import { getEnv, isLoopbackOrigin, type ServerEnv } from "../config/env";
 import { AppError } from "../errors";
 import { ClamAvScanner, type MalwareScanner } from "./scan";
@@ -10,6 +11,11 @@ export interface FileServices {
   storage: FileStorage;
   /** Null is an explicitly unverified staging profile, never a successful scanner. */
   scanner: MalwareScanner | null;
+  /**
+   * The brand's image admission rule (ADR 0016). Absent means scanner-first, so services built
+   * by hand never skip a scan by omission; `fileServices` passes the tenant profile.
+   */
+  mediaPolicy?: MediaPolicy;
 }
 const schema = z.object({
   FILE_STORAGE: z.enum(["local", "r2"]).optional(),
@@ -54,6 +60,7 @@ export function fileServices(
   }
   return {
     storage,
+    mediaPolicy,
     scanner:
       config.FILE_SCAN_MODE === "staging-unverified"
         ? null

@@ -1,0 +1,100 @@
+{
+  "heading": "Vraag naar deze woning",
+  "intro": "Butler, de assistent van het kantoor, antwoordt op basis van deze advertentie.",
+  "label": "Uw vraag",
+  "hint": "Prijs, grootte, kamers, verdieping, ligging of bezichtiging.",
+  "submit": "Vragen",
+  "pending": "De advertentie wordt bekeken",
+  "suggestions": "Veelgestelde vragen",
+  "suggest": {
+    "price": "Wat kost het?",
+    "area": "Hoe groot is het?",
+    "bedrooms": "Hoeveel slaapkamers heeft het?",
+    "floor": "Op welke verdieping ligt het?",
+    "place": "Waar ligt het?",
+    "viewing": "Hoe plan ik een bezichtiging?"
+  },
+  "answerLabel": "Butler",
+  "asked": "Uw vraag",
+  "sources": {
+    "listing": "Butler, uit advertentie {reference}",
+    "description": "Butler, uit de beschrijving in de advertentie",
+    "area": "Butler, uit de gebiedsgids {title}",
+    "agency": "Butler, uit de gegevens van het kantoor"
+  },
+  "handoff": "Vraag het een makelaar",
+  "handoffNote": "Het aanvraagformulier opent met uw vraag. U verstuurt het zelf.",
+  "limited": "U hebt in korte tijd veel vragen gesteld. Probeer het over een paar minuten opnieuw of vraag het een makelaar.",
+  "budget": "Butler kan vandaag geen vragen meer beantwoorden. Een makelaar wel.",
+  "failed": "Butler kon nu niet antwoorden. Een makelaar wel.",
+  "empty": "Typ een vraag of kies een van de veelgestelde vragen.",
+  "tooLong": "Maak uw vraag korter: hoogstens {max} tekens.",
+  "unknown": "De advertentie zegt het niet. Een makelaar kan het u vertellen.",
+  "brokerCan": "Een makelaar kan het u vertellen.",
+  "answers": {
+    "priceSale": "De prijs is {price}.",
+    "priceRent": "De huur is {price} per maand.",
+    "includes": "Volgens de advertentie is inbegrepen: {items}.",
+    "area": "De {basis} is {area}.",
+    "areaBasis": {
+      "living": "woonoppervlakte",
+      "usable": "bruikbare oppervlakte",
+      "built": "bebouwde oppervlakte",
+      "gross_floor": "bruto vloeroppervlakte",
+      "total": "totale oppervlakte",
+      "land": "perceeloppervlakte"
+    },
+    "bedrooms": "{count, plural, one {Het heeft # slaapkamer.} other {Het heeft # slaapkamers.}}",
+    "rooms": "{count, plural, one {Het heeft in totaal # kamer.} other {Het heeft in totaal # kamers.}}",
+    "type": {
+      "apartment": "Het is een appartement.",
+      "house": "Het is een huis.",
+      "plot": "Het is een stuk grond.",
+      "commercial": "Het is een bedrijfspand.",
+      "hotel": "Het is een hotel.",
+      "development": "Het is een nieuwbouwproject.",
+      "other": "De advertentie geeft het type als overig."
+    },
+    "purpose": {
+      "sale": "Het staat te koop.",
+      "long_term_rent": "Het is te huur voor lange termijn."
+    },
+    "floor": "Het ligt op verdieping {floor}.",
+    "floorOf": "Het ligt op verdieping {floor} van {total}.",
+    "place": "Het ligt in {place}. De advertentie toont de ligging alleen tot dit niveau.",
+    "availability": {
+      "available": "Het is beschikbaar.",
+      "confirmation_required": "Het kantoor moet bevestigen dat het nog beschikbaar is.",
+      "negotiating": "Er worden voorwaarden besproken met een geïnteresseerde.",
+      "reserved_with_recorded_basis": "Het is gereserveerd.",
+      "sold": "Het is verkocht.",
+      "let": "Het is verhuurd.",
+      "withdrawn": "Het wordt niet meer aangeboden."
+    },
+    "confirmedAt": "Het kantoor heeft dit het laatst bevestigd op {date}.",
+    "reference": "Het advertentienummer is {reference}.",
+    "viewing": "Kies „{action}” op deze pagina en stel een paar tijden voor. Een makelaar bevestigt het tijdstip met u.",
+    "viewingAsk": "Stuur een vraag via „{action}” op deze pagina. Een makelaar laat u weten wanneer een bezichtiging kan.",
+    "viewingClosed": "Voor deze woning zijn nu geen bezichtigingen mogelijk.",
+    "contact": "{agency} behandelt deze woning. Bel {phone} of stuur een vraag met het aanvraagformulier.",
+    "unknown": {
+      "price": "De advertentie noemt geen prijs.",
+      "area": "De advertentie noemt geen grootte.",
+      "bedrooms": "De advertentie noemt het aantal slaapkamers niet.",
+      "floor": "De advertentie zegt niet op welke verdieping het ligt.",
+      "place": "De advertentie noemt geen ligging.",
+      "inclusions": "De advertentie zegt niet wat inbegrepen is."
+    }
+  },
+  "refusals": {
+    "negotiation": "Butler bespreekt geen biedingen of kortingen. Een makelaar praat er graag met u over.",
+    "legal": "Butler beantwoordt geen juridische vragen. Een makelaar vertelt u wie kan helpen.",
+    "tax": "Butler beantwoordt geen belastingvragen. Een makelaar vertelt u wie kan helpen.",
+    "money": "Butler adviseert niet over hypotheken, borg of betalingen. Een makelaar legt uit hoe het hier gaat.",
+    "value": "Butler geeft geen mening over waarde of rendement. Een makelaar vertelt u wat hij weet.",
+    "people": "Butler deelt niets over andere mensen. Een makelaar helpt u met wat u wilt weten.",
+    "action": "Butler kan niets boeken, reserveren of vasthouden. Een makelaar wel.",
+    "injection": "Butler beantwoordt alleen vragen over deze woning. Met al het andere helpt een makelaar."
+  },
+  "contactDetails": "Typ hier geen telefoonnummer of e-mailadres. Butler gebruikt en bewaart ze niet. Vul ze in het aanvraagformulier in, waar een makelaar kan antwoorden."
+}

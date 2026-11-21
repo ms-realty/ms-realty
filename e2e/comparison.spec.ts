@@ -220,11 +220,9 @@ for (const width of [320, 390, 1440]) {
       }));
       expect(height.rendered).toBeLessThanOrEqual(height.line * 1.1);
     }
-    await expect(table.locator('td[headers^="compare-lift"]')).toContainText([
-      "Unknown",
-      "Unknown",
-      "Unknown",
-    ]);
+    // An unknown fact is a blank cell, never the word "Unknown".
+    for (const cell of await table.locator('td[headers^="compare-lift"]').all())
+      await expect(cell).not.toContainText("Unknown");
     for (const item of data.published) {
       await expect(page.getByRole("link", { name: item.title, exact: true })).toBeVisible();
       const photo = column(page, item.reference).locator('img[src*="/api/media/"]');
