@@ -417,6 +417,163 @@ describe("accountable Case lifecycle", () => {
       }),
     ).rejects.toMatchObject({ code: "transition_denied" });
   });
+  it("AT35 completes only with configured exact evidence and individually resolved obligations", async () => {
+    const { listings } = await import("@/db/schema");
+    const {
+      prepareProposalAgreement,
+      proposalCounterparty,
+      proposalFixture,
+      publishProposalForTest,
+    } = await import("../proposals/testing");
+    const { recordProposalDecision } = await import("../proposals/service");
+    const f = await proposalFixture(t.db);
+    const seller = await proposalCounterparty(t.db, f);
+    await publishProposalForTest(t.db, f);
+    await prepareProposalAgreement(t.db, f);
+    for (const [index, session] of [f.client.session, seller.session].entries()) {
+      await recordProposalDecision(t.db, session, {
+        id: f.proposal.id,
+        revisionId: f.revision.id,
+        operationId: randomUUID(),
+        expectedVersion: 3 + index,
+        state: "agreed_for_next_step",
+        reason: "Synthetic exact-revision agreement; no legal conclusion",
+      });
+    }
+    // Prior workflow stages are fixture context; coordination and completion use native commands.
+    await t.db.update(cases).set({ stage: "proposal_active" }).where(eq(cases.id, f.record.id));
+    const current = async () => {
+      const [row] = await t.db.select().from(cases).where(eq(cases.id, f.record.id));
+      if (!row) throw new Error("Missing case");
+      return row;
+    };
+    await transitionCaseStage(t.db, f.staff.session, {
+      ...command(f.record.id, (await current()).version),
+      ...stage,
+      stage: "coordination",
+    });
+    await t.db
+      .update(listings)
+      .set({ commercialState: "sold" })
+      .where(eq(listings.id, f.listing.listingId));
+    const [document] = await t.db
+      .insert(documents)
+      .values({
+        reference: await nextReference(t.db, "document"),
+        caseId: f.record.id,
+        purpose: "case_completion",
+        classification: "contract",
+        currentVersionNumber: 1,
+      })
+      .returning();
+    if (!document) throw new Error("Missing completion document");
+    const digest = "c".repeat(64);
+    const [file] = await t.db
+      .insert(documentVersions)
+      .values({
+        documentId: document.id,
+        versionNumber: 1,
+        state: "reviewed",
+        fileName: "synthetic-completion.pdf",
+        contentType: "application/pdf",
+        byteSize: 5,
+        sealedKey: `synthetic/${randomUUID()}`,
+        sha256: digest,
+        scan: "clean",
+        scannedAt: new Date(Date.now() - 1000),
+        scannerVersion: "fixture-only",
+        scannedSha256: digest,
+        reviewType: "accepted_for_purpose",
+        reviewedAt: new Date(Date.now() - 500),
+        reviewedById: f.staff.id,
+        uploadedByKind: "staff",
+        uploadedById: f.staff.id,
+      })
+      .returning();
+    if (!file) throw new Error("Missing completion version");
+    expect(
+      (await lifecycleView(t.db, f.staff.session, f.record.id)).completionEvidence.map(
+        (item) => item.id,
+      ),
+    ).toContain(file.id);
+    const before = await current();
+    const input = {
+      ...command(f.record.id, before.version),
+      ...stage,
+      stage: "completed",
+      completionEvidenceId: file.id,
+      outcome: "Synthetic recorded agency outcome, not a legal determination",
+      retention: "Synthetic configured retention decision",
+      handover: "Synthetic materials handed over under the recorded scope",
+      aftercare: "Each existing commitment resolved; no remaining agency obligations",
+    };
+    const commitments = (await caseWorkSnapshot(t.db, f.record.id)).commitments;
+    expect(commitments.length).toBeGreaterThan(0);
+    await expect(transitionCaseStage(t.db, f.staff.session, input)).rejects.toMatchObject({
+      code: "transition_denied",
+      fieldErrors: { reason: ["Resolve each open task, appointment and proposal before closing."] },
+    });
+    for (const task of commitments) {
+      await changeTask(t.db, f.staff.session, {
+        ...command(task.id, task.version),
+        state: "cancelled",
+        note: "Synthetic explicit disposition: intake commitment no longer required after recorded outcome",
+      });
+    }
+    await t.db
+      .update(documentVersions)
+      .set({ scannedSha256: "d".repeat(64) })
+      .where(eq(documentVersions.id, file.id));
+    await expect(
+      transitionCaseStage(t.db, f.staff.session, { ...input, operationId: randomUUID() }),
+    ).rejects.toMatchObject({ code: "transition_denied" });
+    expect((await current()).stage).toBe("coordination");
+    expect(
+      await t.db.select().from(caseStageHistory).where(eq(caseStageHistory.caseId, f.record.id)),
+    ).not.toEqual(expect.arrayContaining([expect.objectContaining({ toStage: "completed" })]));
+    await t.db
+      .update(documentVersions)
+      .set({ scannedSha256: digest })
+      .where(eq(documentVersions.id, file.id));
+    const accepted = { ...input, operationId: randomUUID() };
+    const result = await transitionCaseStage(t.db, f.staff.session, accepted);
+    expect(result.outcome.stage).toBe("completed");
+    expect((await transitionCaseStage(t.db, f.staff.session, accepted)).outcome).toEqual(
+      result.outcome,
+    );
+    expect(await current()).toMatchObject({
+      stage: "completed",
+      version: before.version + 1,
+      ownerId: f.staff.id,
+    });
+    const history = await t.db
+      .select()
+      .from(caseStageHistory)
+      .where(eq(caseStageHistory.caseId, f.record.id));
+    const completed = history.filter((item) => item.toStage === "completed");
+    expect(completed).toHaveLength(1);
+    expect(completed[0]).toMatchObject({
+      actorKind: "staff",
+      actorId: f.staff.id,
+      evidence: {
+        agreedProposalRevisionId: f.revision.id,
+        completionEvidenceIds: [file.id],
+        remainingObligations: [],
+        outcomeNote: input.outcome,
+        retention: input.retention,
+        aftercare: input.aftercare,
+        handover: input.handover,
+      },
+    });
+    expect((await caseWorkSnapshot(t.db, f.record.id)).commitments).toEqual([]);
+    const resolved = await t.db.select().from(tasks).where(eq(tasks.caseId, f.record.id));
+    for (const task of commitments)
+      expect(resolved.find((item) => item.id === task.id)).toMatchObject({
+        state: "cancelled",
+        ownerId: f.staff.id,
+        cancelReason: expect.stringContaining("Synthetic explicit disposition"),
+      });
+  }, 30_000);
 });
 
 it("offers only accessible current, clean, purpose-reviewed completion versions", async () => {

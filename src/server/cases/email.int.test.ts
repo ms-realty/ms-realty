@@ -614,6 +614,183 @@ async function calendarQueued(
   );
   return { item, approved };
 }
+it("AT32 commits a replacement before suppressing old reviewed ICS and dispatching one newly reviewed sequence", async () => {
+  const { appointmentResources, appointments, cases, listings, servicePolicies } = await import(
+    "@/db/schema"
+  );
+  const { addInterest, respondToInterest } = await import("./commands");
+  const { reviewedCandidateFixture } = await import("./testing");
+  const { arrangeAppointment, requestAppointment, respondToAppointment } = await import(
+    "../appointments/service"
+  );
+  const { createListingFixture, publishForTest } = await import("../publication/testing");
+  const { renderCaseEmail } = await import("./email-contract");
+  const f = await fixture();
+  const listing = await createListingFixture(t.db, { reviewerId: f.staff.id });
+  await publishForTest(t.db, f.staff.actor, listing);
+  await t.db
+    .update(listings)
+    .set({
+      freshnessState: "current_under_policy",
+      reviewDueAt: new Date(Date.now() + 86400000),
+    })
+    .where(eq(listings.id, listing.listingId));
+  await t.db.insert(servicePolicies).values({
+    effectiveFrom: new Date(Date.now() - 1000),
+    timezone: "Europe/Sofia",
+    serviceHours: Object.fromEntries(
+      ["mon", "tue", "wed", "thu", "fri", "sat", "sun"].map((day) => [day, ["09:00", "18:00"]]),
+    ),
+    coverage: {},
+    responsePolicy: {},
+    approvedById: f.staff.id,
+  });
+  const [record] = await t.db.select().from(cases).where(eq(cases.id, f.record.id));
+  if (!record) throw new Error("Missing current case");
+  const interest = await addInterest(t.db, f.staff.session, {
+    id: f.record.id,
+    operationId: randomUUID(),
+    expectedVersion: record.version,
+    reference: listing.reference,
+    explanation: "Synthetic reviewed viewing option",
+    matchReview: await reviewedCandidateFixture(t.db, f, listing.reference),
+  });
+  await respondToInterest(t.db, f.client.session, {
+    id: interest.outcome.interestId,
+    operationId: randomUUID(),
+    expectedVersion: 1,
+    state: "shortlisted",
+    reason: "Synthetic client viewing selection",
+  });
+  const requested = await requestAppointment(t.db, f.client.session, {
+    id: f.record.id,
+    operationId: randomUUID(),
+    expectedVersion: interest.outcome.version,
+    interestId: interest.outcome.interestId,
+    preferredWindow: "Synthetic weekday morning",
+  });
+  const year = new Date().getUTCFullYear() + 1;
+  const slot = {
+    id: requested.outcome.id,
+    operationId: randomUUID(),
+    expectedVersion: 1,
+    action: "confirm" as const,
+    startsAt: `${year}-01-15T10:00+02:00`,
+    endsAt: `${year}-01-15T11:00+02:00`,
+    bufferMinutes: 30,
+    propertyAccessConfirmed: true,
+    externalBusyChecked: true,
+    accessNotes: "Synthetic private access notes",
+  };
+  await arrangeAppointment(t.db, f.staff.session, slot);
+  const read = async () => {
+    const [row] = await t.db
+      .select()
+      .from(appointments)
+      .where(eq(appointments.id, requested.outcome.id));
+    if (!row) throw new Error("Missing appointment");
+    return row;
+  };
+  const active = () =>
+    t.db
+      .select()
+      .from(appointmentResources)
+      .where(
+        and(
+          eq(appointmentResources.appointmentId, requested.outcome.id),
+          eq(appointmentResources.active, true),
+        ),
+      );
+  const confirmed = await read();
+  const resources = await active();
+  expect(resources).toHaveLength(2);
+  const old = await calendarQueued({ ...f, appointment: confirmed });
+  await respondToAppointment(t.db, f.client.session, {
+    id: confirmed.id,
+    operationId: randomUUID(),
+    expectedVersion: confirmed.version,
+    state: "reschedule_requested",
+    reason: "Synthetic explicit afternoon request",
+  });
+  await arrangeAppointment(t.db, f.staff.session, {
+    ...slot,
+    operationId: randomUUID(),
+    expectedVersion: confirmed.version + 1,
+    action: "propose",
+    startsAt: `${year}-01-15T14:00+02:00`,
+    endsAt: `${year}-01-15T15:00+02:00`,
+  });
+  expect(await read()).toMatchObject({
+    confirmedStartsAt: confirmed.confirmedStartsAt,
+    confirmedEndsAt: confirmed.confirmedEndsAt,
+    icsUid: confirmed.icsUid,
+    icsSequence: 1,
+    proposedStartsAt: new Date(`${year}-01-15T12:00:00Z`),
+  });
+  expect(await active()).toEqual(resources);
+  await arrangeAppointment(t.db, f.staff.session, {
+    ...slot,
+    operationId: randomUUID(),
+    expectedVersion: confirmed.version + 2,
+    startsAt: `${year}-01-15T14:00+02:00`,
+    endsAt: `${year}-01-15T15:00+02:00`,
+  });
+  const replacement = await read();
+  expect(replacement).toMatchObject({
+    confirmedStartsAt: new Date(`${year}-01-15T12:00:00Z`),
+    confirmedEndsAt: new Date(`${year}-01-15T13:00:00Z`),
+    icsUid: confirmed.icsUid,
+    icsSequence: 2,
+  });
+  const intervals = await t.db
+    .select({
+      start: sql<string>`lower(${appointmentResources.during})::text`,
+      end: sql<string>`upper(${appointmentResources.during})::text`,
+    })
+    .from(appointmentResources)
+    .where(
+      and(
+        eq(appointmentResources.appointmentId, confirmed.id),
+        eq(appointmentResources.active, true),
+      ),
+    );
+  expect(intervals).toHaveLength(2);
+  for (const interval of intervals) {
+    expect(Date.parse(interval.start)).toBe(Date.parse(`${year}-01-15T11:30:00Z`));
+    expect(Date.parse(interval.end)).toBe(Date.parse(`${year}-01-15T13:30:00Z`));
+  }
+  const p = provider();
+  expect(await dispatchCaseEmail(t.db, p, old.approved.outcome.actionId, { config })).toBe(
+    "cancelled",
+  );
+  expect(p.send).not.toHaveBeenCalled();
+  const current = await calendarQueued({ ...f, appointment: replacement });
+  expect(current.item.content?.calendar).toMatchObject({
+    uid: confirmed.icsUid,
+    sequence: 2,
+    appointmentVersion: replacement.version,
+  });
+  expect(await dispatchCaseEmail(t.db, p, current.approved.outcome.actionId, { config })).toBe(
+    "acknowledged",
+  );
+  const sent = p.send.mock.calls[0]?.[0];
+  if (!sent) throw new Error("Missing synthetic provider call");
+  const attachment = renderCaseEmail(sent, config)?.attachments?.[0];
+  expect(attachment?.content_type).toBe("text/calendar; charset=utf-8; method=REQUEST");
+  const ics = Buffer.from(attachment?.content ?? "", "base64").toString("utf8");
+  for (const line of [
+    `UID:${confirmed.icsUid}`,
+    "SEQUENCE:2",
+    `DTSTART:${year}0115T120000Z`,
+    `DTEND:${year}0115T130000Z`,
+  ])
+    expect(ics.split("\r\n")).toContain(line);
+  expect(ics).not.toContain(`DTSTART:${year}0115T080000Z`);
+  expect(ics).not.toContain(slot.accessNotes);
+  await dispatchCaseEmail(t.db, p, current.approved.outcome.actionId, { config });
+  await dispatchCaseEmail(t.db, p, old.approved.outcome.actionId, { config });
+  expect(p.send).toHaveBeenCalledTimes(1);
+}, 30_000);
 it("reviews and sends only the committed calendar snapshot for an appointment participant", async () => {
   const { renderCaseEmail } = await import("./email-contract");
   const f = await calendarFixture(),
